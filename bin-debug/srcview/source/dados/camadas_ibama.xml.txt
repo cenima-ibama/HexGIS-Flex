@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<camadas>	
+	<camada>
+		<name>Unidades de Conservação</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wms</url>
+		<type>wms</type>
+		<layers>HEX:unidade_conservacao</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Municípios</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wms</url>
+		<type>wms</type>
+		<layers>HEX:municipios_base</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Cameras</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wms</url>
+		<type>wms</type>
+		<layers>HEX:Cameras</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<!--<camada>
+		<name>Unidades da Federação</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wms</url>
+		<layers>HEX:unidade_federacao</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>-->
+	
+	<camada>
+		<name>Terras Indígenas</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wfs</url>
+		<type>wfs</type>
+		<layers>HEX:terra_indigena</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>2.0.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Áreas de Propriedade Particular</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wms</url>
+		<type>wms</type>
+		<layers>HEX:area_de_propriedade_particular</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Unidades de Proteção Integral</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wms</url>
+		<type>wms</type>
+		<layers>HEX:unidade_protecao_integral</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Unidades de Uso Sustentável</name>
+		<url>http://projetos.hexgis.com/geoserver/HEX/wms</url>
+		<type>wms</type>
+		<layers>HEX:unidades_uso_sustentavel</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Grade Landsat</name>
+		<url>http://siscom.ibama.gov.br/geoserver/csr/wms</url>
+		<type>wms</type>
+		<layers>csr:grade_landsat_etm</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Unidades da Federação</name>
+		<url>http://siscom.ibama.gov.br/geoserver/csr/wms</url>
+		<type>wms</type>
+		<layers>csr:unidades_federacao</layers>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.0</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<!-- CAMADAS DE PONTO/LINHAS e POLIGONO  -->
+ 	<!-- <camada>
+		<name>Pontos (tmp_gpx_pon)</name>
+		<url>http://projetos.hexgis.com/geo-srv/HEX/wms</url>
+		<layers>HEX:tmp_gpx_pon</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Polígonos (tmp_gpx_pol)</name>"C:/Users/HEX/Documents/OS Sources/openscales 2.1.1/openscales-core/src/main/flex/org/openscales/core/measure/IMeasure.as"
+		<url>http://projetos.hexgis.com/geo-srv/HEX/wms</url>
+		<layers>HEX:tmp_gpx_pol</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Linhas (tmp_gpx_lin)</name>
+		<url>http://projetos.hexgis.com/geo-srv/HEX/wms</url>
+		<layers>HEX:tmp_gpx_lin</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>-->
+	
+</camadas>
+

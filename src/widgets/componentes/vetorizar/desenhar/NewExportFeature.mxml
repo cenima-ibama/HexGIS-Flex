@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns="org.openscales.fx.control.layer.*"
+		 xmlns:os="org.openscales.fx.control.*">
+	
+	
+	<os:IconButton icon="{_btnExport}" 
+				   toolTip="{this.tooltipExport}"
+				   click="{this.exportFeature(event)}"
+				   width="20" height="26" alpha="{_alpha}"/>
+	
+	<!--rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"-->
+	
+	<fx:Script>
+		<![CDATA[
+			import widgets.componentes.vetorizar.desenhar.exportar.NewExportFeatureForm;
+			import mx.collections.ArrayCollection;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.effects.easing.Exponential;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			
+			import solutions.CloseWindowTemplate;
+			
+			import spark.components.TitleWindow;
+			import spark.layouts.VerticalLayout;
+			
+			
+			[Bindable]
+			private var _alpha:Number = 0.5;
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/black/10.png")]
+			private var _btnExport:Class;
+			
+			[Bindable]
+			private var tooltipExport:String = "Exportar";
+			
+			/**
+			 * The valide import text
+			 */
+			[Bindable]
+			public var exportLabel:String = "Formato";
+			
+			/**
+			 * The title window (that display the form)
+			 */
+			public var myWindow:CloseWindowTemplate;
+			
+			/**
+			 * The VectorLayer linked to this export button
+			 */
+			private var _layer:VectorLayer = null;
+			
+			[Bindable]
+			private var _map:Map = null;
+			
+			private var _drawingMode:String;
+			
+			/**
+			 * Indicates for Drawing mode
+			 * multiple : tools are in the LayerSwitcher
+			 * unique : tools are in the DrawingToolbar
+			 */
+			[Bindable]
+			public function get drawingMode():String
+			{
+				
+				return _drawingMode;
+			}
+			
+			public function set drawingMode(value:String):void
+			{
+				_drawingMode = value;
+			}
+			
+			/**
+			 * Change the text values on Map Language changed
+			 * @param event The I18N event received
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				this.tooltipExport = "Exportar";
+			}
+			
+			/**
+			 * Close the PopUp window
+			 */
+			public function closePopUp(event:MouseEvent = null):void
+			{
+				// close the pop up file
+				PopUpManager.removePopUp(myWindow);
+			}
+			
+			public function exportFeature(event:MouseEvent):void
+			{
+				if(this._layer == null)
+					return;
+				
+				//_alpha = 1;
+				
+				// Set the TitleWindow container properties.
+				myWindow = new CloseWindowTemplate();
+				myWindow.title = "Exportar";
+				var vertical:VerticalLayout = new VerticalLayout();
+				vertical.paddingBottom = 0;
+				vertical.paddingTop = 0;
+				vertical.paddingLeft = 0;
+				vertical.paddingRight = 0;
+				vertical.verticalAlign = "middle";
+				vertical.horizontalAlign = "left";
+				vertical.gap = 0;
+				myWindow.layout = vertical;
+				
+				myWindow.addEventListener(FlexEvent.CREATION_COMPLETE, this.onPopUpCreationComplete);
+				
+				myWindow.width = 250;
+				myWindow.height = 120;
+				// Call the method to add the Button control to the 
+				// TitleWindow container.
+				populateWindow();
+				
+				// place at the center
+				/* myWindow.x = (this.layer.map.width/2)-(this.width/2);
+				myWindow.y = (this.layer.map.height/2)-(this.height/2); */
+				
+				// Use the PopUpManager to display the TitleWindow container.
+				PopUpManager.addPopUp(myWindow as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(myWindow as IFlexDisplayObject);
+			}
+			
+			private function itemRollOver(event:MouseEvent):void
+			{
+				_alpha = 1.0;
+			}
+			
+			private function itemRollOut(event:MouseEvent):void
+			{				
+				_alpha = 0.5;
+			}
+			
+			private function onChangeActiveLayer(event:DrawingEvent):void
+			{
+				if(this.drawingMode == 'unique')
+				{
+					this.layer = event.layer;
+				}
+			}
+			
+			public function set map(value:Map):void
+			{
+				this._map = value;
+				this._map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, this.onChangeActiveLayer);
+				this._map.addEventListener(I18NEvent.LOCALE_CHANGED, this.onMapLanguageChange);
+				
+			}
+			public function get map():Map{
+				return this._map;
+			}
+			
+			private function onPopUpCreationComplete(e:Event):void
+			{
+				//myWindow.closeButton.addEventListener(MouseEvent.CLICK, this.closePopUp);
+			}
+			
+			/**
+			 * Function that fill the popUp
+			 */
+			private function populateWindow():void 
+			{	
+				var form:NewExportFeatureForm = new NewExportFeatureForm();
+				form.exportFeature = this;
+				myWindow.addElement(form); 
+			}
+			
+			/**
+			 * Layer the features will be drawn on
+			 */
+			public function get layer():VectorLayer
+			{
+				return _layer;
+			}
+			public function set layer(value:VectorLayer):void
+			{
+				_layer = value;
+				if(_layer)
+				{
+					_layer.map.addEventListener(I18NEvent.LOCALE_CHANGED, this.onMapLanguageChange);
+				}
+			}
+		]]>
+	</fx:Script>
+	
+</s:Group>

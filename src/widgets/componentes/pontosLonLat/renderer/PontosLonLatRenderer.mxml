@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				width="100%" minHeight="35"
+				autoDrawBackground="false" dataChange="dataChangeHandler(event);"
+				rollOver="lblRollOver(event)" rollOut="lblRollOut(event)">
+		
+	<fx:Script>
+		<![CDATA[		
+			import mx.controls.Alert;
+			import mx.effects.Zoom;
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.events.ZoomBoxEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.LabelFeature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.utils.Util;
+			import org.openscales.geometry.LabelPoint;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			import org.openscales.proj4as.ProjProjection;
+			
+			import solutions.utils.StringUtils;
+			
+			import widgets.PontosLonLatWidget;
+			import widgets.componentes.pontosLonLat.PontoLonLatObject;
+			
+			
+			private var _map:Map;
+			
+			private var _layer:VectorLayer;
+			
+			private var _widget:PontosLonLatWidget;
+			
+			private var _featCoord:Feature = null;
+			
+			private var _featName:Feature = null;
+			
+			[Bindable]
+			private var imgNameVisible:Boolean;
+			
+			
+			public function get map():Map
+			{
+				return this._map;
+			}
+			
+			public function set map(value:Map):void
+			{
+				if (value)
+				{
+					this._map = value;
+					this.map.addEventListener(MapEvent.RELOAD , removeLabels);
+				}
+			}
+			
+			public function get widget():PontosLonLatWidget
+			{
+				return this._widget;
+			}
+			
+			public function set widget(value:PontosLonLatWidget):void
+			{
+				if (value)
+				{
+					this._widget = value;
+				}
+			}
+			
+			public function get layer():VectorLayer
+			{
+				return this._layer;
+			}
+			
+			public function set layer(value:VectorLayer):void
+			{
+				if (value)
+				{
+					this._layer = value;
+				}
+			}
+			
+			
+			protected function dataChangeHandler(evt:Event):void 
+			{				
+				if (data)
+				{
+					var nomePonto:String;
+					
+					nomePonto = (data as PontoLonLatObject)._point.name;
+					
+					if (nomePonto.indexOf(".renomeado.") > -1)
+					{
+						imgNameVisible = true;
+					}
+					else
+					{
+						imgNameVisible = false;
+					}
+				}
+			} 
+			
+			
+			private function onClick(evt:Event):void 
+			{
+				var long:Number;
+				var lati:Number;
+				var localPonto:Location;
+				var lonLat:Array;
+				var i:int;
+				var numZoom:int = 5;
+				
+				if (map)
+				{
+					removeLabels();
+					
+					long = ((data as PontoLonLatObject).point as PointFeature).point.x;
+					lati = ((data as PontoLonLatObject).point as PointFeature).point.y;
+					
+					localPonto = new Location(long, lati, map.projection);
+					
+					map.center = localPonto;
+					
+					for (i=0; i<numZoom; i++)
+					{
+						map.zoomIn(map.getMapPxFromLocation(localPonto));
+					} 
+				}
+			}
+			
+			private function removeLabels(event:MapEvent=null):void
+			{
+				this.layer.removeFeature(_featCoord);
+				_featCoord = null;
+				
+				this.layer.removeFeature(_featName);
+				_featName = null; 
+			}
+			
+			private function lblRollOver(event:MouseEvent):void
+			{
+				pontoLonLat.styleName = "estiloPontoLonLatListOver";
+				options.includeInLayout = true;
+				options.visible = true;
+				pointLabel.setStyle("paddingLeft", options.width);
+			}
+			
+			protected function lblRollOut(event:MouseEvent):void
+			{
+				options.visible = false;
+				options.includeInLayout = false;
+				pontoLonLat.styleName = "estiloPontoLonLatList";
+				pointLabel.setStyle("paddingLeft", 0);
+			}
+			
+			protected function deletePoint(event:MouseEvent):void
+			{
+				if (this.widget)
+				{
+					this.widget.removePointFromCamadaPontos(this.data as PontoLonLatObject);
+				}
+				
+				if (_featCoord)
+				{
+					this.layer.removeFeature(_featCoord);
+					_featCoord = null;
+				}
+				
+				if (_featName)
+				{
+					this.layer.removeFeature(_featName);
+					_featName = null;
+				}
+			}
+			
+			protected function showCoord(event:MouseEvent):void
+			{
+				var middleLoc:Location = new Location(((data as PontoLonLatObject).point as PointFeature).point.x, 
+					((data as PontoLonLatObject).point as PointFeature).point.y, 
+					map.projection);
+				
+				var pt:LabelPoint = new LabelPoint(null, middleLoc.lon, middleLoc.lat);
+				pt.projection = this.map.projection;
+				
+				if (_featCoord == null)
+				{
+					_featCoord = new LabelFeature(pt);
+					var tf:TextFormat = new TextFormat();
+					tf.size = 13;
+					tf.bold = true;
+					(_featCoord as LabelFeature).labelPoint.label.setTextFormat(tf);
+					(_featCoord as LabelFeature).labelPoint.label.text = (data as PontoLonLatObject).coord;
+					(_featCoord as LabelFeature).labelPoint.label.background = true;
+					(_featCoord as LabelFeature).labelPoint.label.backgroundColor = 0xFFFFFF;
+					
+					var middlePixel:Pixel = map.getMapPxFromLocation(middleLoc);
+					var rightPixel:Pixel = new Pixel();
+					rightPixel.x = middlePixel.x + (_featCoord as LabelFeature).labelPoint.label.width/2;
+					rightPixel.y = middlePixel.y - (_featCoord as LabelFeature).labelPoint.label.height;
+					
+					var rightLoc:Location = map.getLocationFromMapPx(rightPixel, map.resolution);
+					(_featCoord as LabelFeature).labelPoint.x = rightLoc.x;
+					(_featCoord as LabelFeature).labelPoint.y = rightLoc.y;
+					_featCoord.name = "label."+this.layer.idLabel.toString();
+					
+					this.layer.idLabel++;
+					this.layer.addFeature(_featCoord); 
+					_featCoord.draw();
+					
+					imgCoord.toolTip = "Esconder coordenadas do ponto";
+				}
+				else
+				{
+					this.layer.removeFeature(_featCoord);
+					_featCoord = null;
+					
+					imgCoord.toolTip = "Exibir coordenadas do ponto";
+				}
+			}
+			
+			
+			protected function showName(event:MouseEvent):void
+			{
+				var middleLoc:Location = new Location(((data as PontoLonLatObject).point as PointFeature).point.x, 
+					((data as PontoLonLatObject).point as PointFeature).point.y, 
+					map.projection);
+				
+				var pt:LabelPoint = new LabelPoint(null, middleLoc.lon, middleLoc.lat);
+				pt.projection = this.map.projection;
+				
+				var nomePonto:String;
+				var auxArray:Array;
+				
+				nomePonto = (data as PontoLonLatObject)._point.name;
+				
+				auxArray = nomePonto.split(".renomeado.");
+				
+				nomePonto = auxArray[0];
+				
+				if (_featName == null)
+				{
+					_featName = new LabelFeature(pt);
+					var tf:TextFormat = new TextFormat();
+					tf.size = 13;
+					tf.bold = true;
+					(_featName as LabelFeature).labelPoint.label.setTextFormat(tf);
+					(_featName as LabelFeature).labelPoint.label.text = nomePonto;
+					(_featName as LabelFeature).labelPoint.label.background = true;
+					(_featName as LabelFeature).labelPoint.label.backgroundColor = 0xFFFFFF;
+					
+					var middlePixel:Pixel = map.getMapPxFromLocation(middleLoc);
+					var rightPixel:Pixel = new Pixel();
+					rightPixel.x = middlePixel.x + (_featName as LabelFeature).labelPoint.label.width/2;
+					rightPixel.y = middlePixel.y + (_featName as LabelFeature).labelPoint.label.height;
+					
+					var rightLoc:Location = map.getLocationFromMapPx(rightPixel, map.resolution);
+					(_featName as LabelFeature).labelPoint.x = rightLoc.x;
+					(_featName as LabelFeature).labelPoint.y = rightLoc.y;
+					_featName.name = "label."+this.layer.idLabel.toString();
+					
+					this.layer.idLabel++;
+					this.layer.addFeature(_featName); 
+					_featName.draw();
+					
+					imgName.toolTip = "Esconder nome do ponto";
+				}
+				else
+				{
+					this.layer.removeFeature(_featName);
+					_featName = null;
+					
+					imgName.toolTip = "Exibir nome do ponto";
+				}
+			}
+			
+			
+			private function imgBtnRollOver(event:MouseEvent):void
+			{
+				(event.currentTarget as Image).alpha = 1.0;
+			}
+			
+			private function imgBtnRollOut(event:MouseEvent):void
+			{
+				(event.currentTarget as Image).alpha = 0.5;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer styleName="estiloInvisibleContainer" width="100%" minHeight="35">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"
+								gap="0" paddingBottom="10" paddingLeft="0" paddingRight="5" paddingTop="0"/>
+		</s:layout>
+		
+		<s:BorderContainer id="pontoLonLat" styleName="estiloPontoLonLatList" 
+						   dropShadowVisible="true" width="100%" minHeight="25">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" 
+									paddingLeft="7" paddingRight="7" paddingBottom="5" paddingTop="5"/>
+			</s:layout>
+			<s:Label id="pointLabel" 
+					 text="{data.coord}" width="100%"
+					 textAlign="center" click="onClick(event)" 
+					 toolTip="Clique para aproximar-se sobre o ponto lançado"/>
+			
+			<s:HGroup id="options" visible="false" includeInLayout="false" 
+					  gap="7" horizontalAlign="center" verticalAlign="middle">
+				
+				<mx:Image  id="imgName" 
+						   includeInLayout="{imgNameVisible}" visible="{imgNameVisible}"
+						   source="assets/images/icons/namePoint_icon20.png" 
+						   click="showName(event)" alpha="0.5" toolTip="Exibir nome do ponto" 
+						   rollOver="imgBtnRollOver(event)" rollOut="imgBtnRollOut(event)" />
+				
+				<mx:Image  id="imgCoord"
+						   source="assets/images/icons/coordPoint_icon20.png" 
+						   click="showCoord(event)" alpha="0.5" toolTip="Exibir coordenadas do ponto" 
+						   rollOver="imgBtnRollOver(event)" rollOut="imgBtnRollOut(event)" />
+				
+				<mx:Image id="imgClose"
+						  source="assets/images/icons/deletePoint_icon15.png" 
+						  click="deletePoint(event)" alpha="0.5" toolTip="Excluir ponto" 
+						  rollOver="imgBtnRollOver(event)" rollOut="imgBtnRollOut(event)"/>
+			</s:HGroup>
+			
+			<!--<s:Label id="delLabel" text="X" click="deletePoint(event)" toolTip="Excluir ponto"
+			textAlign="right" visible="false" includeInLayout="false" paddingRight="5"/>-->
+		</s:BorderContainer>
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

@@ -1,0 +1,67 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>DocumentsWidget.mxml</title>
+<link rel="stylesheet" type="text/css" href="../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="MXMLComponent_Tag">&lt;solutions:BaseWidget</span><span class="MXMLDefault_Text"> xmlns:fx="</span><span class="MXMLString">http://ns.adobe.com/mxml/2009</span><span class="MXMLDefault_Text">" 
+                      xmlns:s="</span><span class="MXMLString">library://ns.adobe.com/flex/spark</span><span class="MXMLDefault_Text">" 
+                      xmlns:mx="</span><span class="MXMLString">library://ns.adobe.com/flex/mx</span><span class="MXMLDefault_Text">"
+                      xmlns:os="</span><span class="MXMLString">http://openscales.org</span><span class="MXMLDefault_Text">"
+                      xmlns:solutions="</span><span class="MXMLString">solutions.*</span><span class="MXMLDefault_Text">" initialize="</span><span class="ActionScriptDefault_Text">init</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span><span class="MXMLDefault_Text">"</span><span class="MXMLComponent_Tag">&gt;</span>
+    
+    <span class="MXMLSpecial_Tag">&lt;fx:Style</span><span class="MXMLDefault_Text"> source="</span><span class="MXMLString">assets/styles/estilo1.css</span><span class="MXMLDefault_Text">"</span><span class="MXMLSpecial_Tag">/&gt;</span>
+    
+    <span class="MXMLSpecial_Tag">&lt;fx:Declarations&gt;</span>
+        
+        <span class="MXMLSpecial_Tag">&lt;fx:XML</span><span class="MXMLDefault_Text"> id="</span><span class="MXMLString">xml</span><span class="MXMLDefault_Text">" source="</span><span class="MXMLString">dados/documentos.xml</span><span class="MXMLDefault_Text">" </span><span class="MXMLSpecial_Tag">/&gt;</span>
+        
+        <span class="MXMLComponent_Tag">&lt;s:XMLListCollection</span><span class="MXMLDefault_Text"> id="</span><span class="MXMLString">xmlListColl</span><span class="MXMLDefault_Text">" source="</span><span class="MXMLString">{</span><span class="ActionScriptDefault_Text">xml</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">doc</span><span class="MXMLString">}</span><span class="MXMLDefault_Text">" </span><span class="MXMLComponent_Tag">/&gt;</span>
+        
+    <span class="MXMLSpecial_Tag">&lt;/fx:Declarations&gt;</span>
+    
+    
+    <span class="MXMLSpecial_Tag">&lt;fx:Script&gt;</span>
+        &lt;![CDATA[
+            
+            <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">assets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">skins</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">NewVerticalScrollBarSkin</span>;
+            
+            <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">init</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">super</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">init</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptDefault_Text">scroller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">verticalScrollBar</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"skinClass"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">NewVerticalScrollBarSkin</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">scroller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">verticalScrollBar</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"chromeColor"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptString">"#728188"</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+        <span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">&gt;</span>
+    <span class="MXMLSpecial_Tag">&lt;/fx:Script&gt;</span>
+    
+    
+    <span class="MXMLComponent_Tag">&lt;s:BorderContainer</span><span class="MXMLDefault_Text"> id="</span><span class="MXMLString">container</span><span class="MXMLDefault_Text">" styleName="</span><span class="MXMLString">widgetContentContainer</span><span class="MXMLDefault_Text">" minWidth="</span><span class="MXMLString">770</span><span class="MXMLDefault_Text">" height="</span><span class="MXMLString">400</span><span class="MXMLDefault_Text">"</span><span class="MXMLComponent_Tag">&gt;</span>
+        <span class="MXMLComponent_Tag">&lt;s:layout&gt;</span>
+            <span class="MXMLComponent_Tag">&lt;s:VerticalLayout</span><span class="MXMLDefault_Text"> verticalAlign="</span><span class="MXMLString">middle</span><span class="MXMLDefault_Text">" horizontalAlign="</span><span class="MXMLString">left</span><span class="MXMLDefault_Text">" 
+                              paddingLeft="</span><span class="MXMLString">5</span><span class="MXMLDefault_Text">" paddingTop="</span><span class="MXMLString">5</span><span class="MXMLDefault_Text">" paddingBottom="</span><span class="MXMLString">5</span><span class="MXMLDefault_Text">" paddingRight="</span><span class="MXMLString">5</span><span class="MXMLDefault_Text">"</span><span class="MXMLComponent_Tag">/&gt;</span>
+        <span class="MXMLComponent_Tag">&lt;/s:layout&gt;</span>
+        
+        <span class="MXMLComponent_Tag">&lt;s:Scroller</span><span class="MXMLDefault_Text"> id="</span><span class="MXMLString">scroller</span><span class="MXMLDefault_Text">" left="</span><span class="MXMLString">0</span><span class="MXMLDefault_Text">" top="</span><span class="MXMLString">0</span><span class="MXMLDefault_Text">" right="</span><span class="MXMLString">0</span><span class="MXMLDefault_Text">" bottom="</span><span class="MXMLString">0</span><span class="MXMLDefault_Text">" chromeColor="</span><span class="MXMLString">#99adb7</span><span class="MXMLDefault_Text">"
+                    focusEnabled="</span><span class="MXMLString">false</span><span class="MXMLDefault_Text">" minViewportInset="</span><span class="MXMLString">1</span><span class="MXMLDefault_Text">" verticalScrollPolicy="</span><span class="MXMLString">auto</span><span class="MXMLDefault_Text">"</span><span class="MXMLComponent_Tag">&gt;</span>
+            
+            <span class="MXMLComponent_Tag">&lt;s:DataGroup</span><span class="MXMLDefault_Text"> id="</span><span class="MXMLString">docs</span><span class="MXMLDefault_Text">"
+                         dataProvider="</span><span class="MXMLString">{</span><span class="ActionScriptDefault_Text">xmlListColl</span><span class="MXMLString">}</span><span class="MXMLDefault_Text">"
+                         itemRenderer="</span><span class="MXMLString">widgets.componentes.documentos.renderer.DocItemRenderer</span><span class="MXMLDefault_Text">"</span><span class="MXMLComponent_Tag">&gt;</span>
+                <span class="MXMLComponent_Tag">&lt;s:layout&gt;</span>
+                    <span class="MXMLComponent_Tag">&lt;s:TileLayout</span><span class="MXMLDefault_Text"> horizontalGap="</span><span class="MXMLString">30</span><span class="MXMLDefault_Text">" verticalGap="</span><span class="MXMLString">30</span><span class="MXMLDefault_Text">" columnWidth="</span><span class="MXMLString">233</span><span class="MXMLDefault_Text">"
+                                  horizontalAlign="</span><span class="MXMLString">center</span><span class="MXMLDefault_Text">" verticalAlign="</span><span class="MXMLString">middle</span><span class="MXMLDefault_Text">"
+                                  paddingBottom="</span><span class="MXMLString">10</span><span class="MXMLDefault_Text">" paddingLeft="</span><span class="MXMLString">10</span><span class="MXMLDefault_Text">" paddingRight="</span><span class="MXMLString">10</span><span class="MXMLDefault_Text">" paddingTop="</span><span class="MXMLString">10</span><span class="MXMLDefault_Text">"
+                                  requestedColumnCount="</span><span class="MXMLString">3</span><span class="MXMLDefault_Text">" requestedRowCount="</span><span class="MXMLString">3</span><span class="MXMLDefault_Text">"</span><span class="MXMLComponent_Tag">/&gt;</span> 
+                <span class="MXMLComponent_Tag">&lt;/s:layout&gt;</span>
+            <span class="MXMLComponent_Tag">&lt;/s:DataGroup&gt;</span>
+        <span class="MXMLComponent_Tag">&lt;/s:Scroller&gt;</span>
+        
+    <span class="MXMLComponent_Tag">&lt;/s:BorderContainer&gt;</span>
+<span class="MXMLComponent_Tag">&lt;/solutions:BaseWidget&gt;</span></pre></body>
+</html>

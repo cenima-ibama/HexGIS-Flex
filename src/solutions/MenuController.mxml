@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:flash = "flash.filters.*"
+		 width="100%" height="120" 
+		 creationComplete="init()">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import solutions.event.AppEvent;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import org.openscales.core.Map;
+			
+			import solutions.utils.StringUtils;
+			
+			import spark.components.Button;
+			
+			import widgets.componentes.seguranca.LoginButton;
+			
+			[Bindable]
+			public var map:Map;
+			
+			private var configData:ConfigData;
+			
+			/**
+			 * menuCollection is the array collection of controller menu items to be listed in the menu.
+			 */
+			[Bindable]
+			private var _menuCollection:ArrayCollection;
+			
+			[Bindable]
+			private var menuItensGrpX:Number;
+			
+			private var addAboutButton:Boolean = false;
+			
+			private var addLoginButton:Boolean = false;
+			
+			private var about:IModuleInfo;
+			
+			private const BUTTON_WIDTH:Number = 140;
+			
+			[Bindable]
+			private var _paddingTopLogo:int;
+			
+			[Bindable]
+			private var _moveYTo:int;
+			
+			
+			private function init():void
+			{
+				SiteContainer.addEventListener(AppEvent.CONFIG_LOADED, config);
+				/* SiteContainer.addEventListener(AppEvent.MAP_LOADED, initMap);
+				SiteContainer.addEventListener(AppEvent.SET_STATUS, setStatus); */
+			}
+			
+			private function config(event:AppEvent):void
+			{          	
+				mainBar.visible = true;
+				
+				currentState = "maximized";
+				
+				configData = event.data as ConfigData;
+				configuraLogo();
+				configuraMenus(); 
+			}
+			
+			
+			private function set menuCollection(array:Array):void
+			{
+				this._menuCollection = new ArrayCollection(array);
+			}
+			
+			
+			private function configuraLogo():void
+			{
+				for (var i:int = 0; i < configData.configUI.length; i++)
+				{
+					var id:String = configData.configUI[i].id;
+					var value:String =  configData.configUI[i].value;
+					
+					switch (id)
+					{	
+						case "title":
+						{
+							titulo.text = value;
+							break;
+						}
+							
+						case "subtitle":
+						{
+							subtitulo.text = value;
+							break;
+						}  
+							
+						case "logo":
+						{
+							if (value != "")
+							{
+								logo.source = value;
+							}	        			
+							break;
+						}
+							
+						/* case "about":
+						{
+							if (value == "true")
+							{
+								addAboutButton = true;
+							}
+							else
+							{
+								addAboutButton = false;
+							}
+							break;
+						} */
+						case "login":
+						{
+							if (value == "true")
+							{
+								addLoginButton = true;
+							}
+							else
+							{
+								addLoginButton = false;
+							}
+							break;
+						}
+					}
+				}
+			}
+			
+			private function configuraMenus():void
+			{
+				var menuButton:Button;
+				
+				var menuId:String;
+				var menuLabel:String;
+				
+				for (var i:int = 0; i < configData.configMenus.length; i++)
+				{
+					menuId = configData.configMenus[i].id;
+					menuLabel = configData.configMenus[i].label;
+					
+					menuButton = new Button();
+					menuButton.id = menuId;
+					menuButton.label = menuLabel;
+					menuButton.width = BUTTON_WIDTH;
+					menuButton.styleName = "estiloMenuButton";
+					menuButton.useHandCursor = true;
+					menuButton.buttonMode = true;
+					menuButton.addEventListener(MouseEvent.ROLL_OVER, mouseOverMenuButton);
+					
+					if (menuLabel == "Downloads")
+					{
+						if (this.configData.userData) 
+						{
+							grupoMenuBtn.addElement(menuButton);
+						}
+					}
+					else
+					{
+						grupoMenuBtn.addElement(menuButton);
+					}
+				}
+				
+				if (addLoginButton)
+				{
+					if (this.configData.userData)
+					{
+						var array:Array = this.configData.userData.nome.split(" ");
+						var primeiroNome:String = array[0];
+	
+						primeiroNome = StringUtils.capitalizeString(primeiroNome);
+	
+						menuButton = new Button();
+						menuButton.id = "userInfoButton";
+						menuButton.label = "Olá, " + primeiroNome;
+						menuButton.width = BUTTON_WIDTH;
+						menuButton.useHandCursor = true;
+						menuButton.buttonMode = true;
+						menuButton.styleName = "estiloMenuButton";
+						menuButton.addEventListener(MouseEvent.ROLL_OVER, mouseOverUserInfoButton);					
+					}
+					else
+					{
+						menuButton = new LoginButton();
+						menuButton.id = "loginButton";
+						menuButton.label = "Entrar";
+						menuButton.width = BUTTON_WIDTH;
+						menuButton.useHandCursor = true;
+						menuButton.buttonMode = true;
+						menuButton.styleName = "estiloMenuButton";
+						menuButton.addEventListener(MouseEvent.ROLL_OVER, mouseOverAboutButton);
+					}
+				}
+				
+				grupoMenuBtn.addElement(menuButton);
+				
+				/* if (addAboutButton)
+				{
+					menuButton = new Button();
+					menuButton.id = "aboutButton";
+					menuButton.label = "Sobre";
+					menuButton.width = BUTTON_WIDTH;
+					menuButton.useHandCursor = true;
+					menuButton.buttonMode = true;
+					menuButton.styleName = "estiloMenuButton";
+					menuButton.addEventListener(MouseEvent.ROLL_OVER, mouseOverAboutButton);
+					menuButton.addEventListener(MouseEvent.CLICK, mouseClickAboutButton);
+					
+					grupoMenuBtn.addElement(menuButton);
+				} */
+				
+			}
+			
+			private function mouseOverAboutButton(event:MouseEvent):void
+			{
+				if (seqOpen.isPlaying)
+				{
+					seqOpen.end();
+				}
+				mouseOutMenuGroup(event);				
+			}
+			
+			private function mouseClickAboutButton(event:MouseEvent):void
+			{
+				var url:String = "widgets/AboutWindowWidget.swf";
+				
+				about = ModuleManager.getModule(url);
+				about.addEventListener(ModuleEvent.READY, aboutWindowReadyHandler);           
+				about.load();
+			}
+			
+			private function aboutWindowReadyHandler(event:ModuleEvent):void
+			{
+				var about:IModuleInfo = event.module;
+				var widget:CloseWindowBase = about.factory.create() as CloseWindowBase;
+				
+				widget.setTitle("Sobre");
+				
+				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(widget as IFlexDisplayObject);
+				
+			}
+			
+			
+			private function mouseOverUserInfoButton(event:MouseEvent):void
+			{
+				var menuItensX:Number = 0;
+				
+				if (seqOpen.isPlaying)
+				{
+					seqOpen.end();
+				}
+								
+				menuItensGroup.visible = false;
+				menuItens.visible = false;
+								
+				var menuItem:Object = 
+				{
+					id: "logout",
+					label: "Sair",
+					icon: "",
+					value: "",
+					action: "logout"
+				}
+					
+				menuCollection = [menuItem];
+									
+				menuItensGrpX = 100;				
+				
+				callLater(setMenuItensX);
+			}
+			
+			
+			private function mouseOverMenuButton(event:MouseEvent):void
+			{
+				var menuId:String;
+				var i:int = 0;
+				var achou:Boolean = false;
+				var qtdMenus:Number;
+				var menuItensX:Number = 0;
+				
+				if (seqOpen.isPlaying)
+				{
+					seqOpen.end();
+				}
+				
+				do 
+				{
+					menuId = configData.configMenus[i].id;
+					if (menuId == event.target.id)
+					{
+						menuItensGroup.visible = false;
+						//menuItensGroup.includeInLayout = false;
+						menuItens.visible = false;
+						
+						menuCollection = configData.configMenus[i].items;
+						
+						//menuItensGroup.includeInLayout = true;
+						qtdMenus = configData.configMenus.length - i;
+												
+						if (addAboutButton)
+						{
+							qtdMenus++;
+						}
+						
+						if (addLoginButton)
+						{
+							qtdMenus++;
+						}
+						
+						if ((addLoginButton) && (!this.configData.userData))
+						{
+							qtdMenus--;
+						}
+						
+						if (qtdMenus >= 1) 
+						{
+							menuItensX = 100;
+							
+							if (qtdMenus > 1) 
+							{
+								qtdMenus--;
+								menuItensX += (qtdMenus*BUTTON_WIDTH)+(qtdMenus*5);
+							}
+						}
+						
+						achou = true;
+					}
+					i++;
+					
+				} while ((!achou) || (i < configData.configMenus.length));
+				
+				menuItensGrpX = menuItensX;				
+				
+				callLater(setMenuItensX);
+			}
+			
+			private function setMenuItensX():void
+			{
+				menuItensGrpX = this.width-((menuItensBox.width/2) + menuItensGrpX);
+				
+				callLater(setMenuItensVisible);
+			}  
+			
+			private function setMenuItensVisible():void
+			{								
+				menuItensGroup.visible = true;
+			}  
+			
+			private function mouseOutMenuGroup(event:MouseEvent):void
+			{
+				menuItensGroup.visible = false;
+				menuItens.visible = false;
+			} 
+			
+			
+			protected function logoClickHandler(event:MouseEvent):void
+			{				
+				if (currentState == "maximized")
+				{
+					if (!seq2.isPlaying)
+					{
+						currentState = "minimized";
+					}
+				}
+				else 
+				{
+					if (!seq1.isPlaying)
+					{
+						currentState = "maximized";
+					}
+				}
+			}
+			
+			protected function logo_completeHandler(event:Event):void
+			{				
+				var aux:Number;
+				var aux2:Number;
+
+				if (bar.height > logo.contentHeight)
+				{
+					aux2 = (bar.height - logo.contentHeight)/2;
+					_paddingTopLogo = aux2;
+					aux = - bar.height/2;
+					_moveYTo = aux;
+					logoBoxLayout.paddingTop = _moveYTo;
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		
+		<s:Sequence id="seqOpen">
+			<mx:Resize id="resize" target="{menuItensBox}" duration="400" heightFrom="0" heightTo="{menuItensBox.height}"/>
+			<s:SetAction target="{menuItens}" property="visible" value="true"/>
+		</s:Sequence>
+		
+		<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="500" />
+		
+		<s:Sequence id="seqShow">
+			<s:Fade alphaFrom="0.0" alphaTo="0.4" duration="900" />
+			<s:Fade alphaFrom="0.4" alphaTo="1.0" duration="250" />
+		</s:Sequence>
+		
+		<s:Fade id="fadeOut" alphaFrom="1.0" alphaTo="0.0" duration="500" />
+		
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="maximized"/>
+		<s:State name="minimized"/>
+		<s:State name="opened"/>
+	</s:states>
+	
+	<s:transitions>
+		<s:Transition id="transMinimize" fromState="maximized" toState="minimized">
+			<s:Sequence id="seq1">
+				<s:Sequence>
+					<s:SetAction target="{grupoMenuBtn}" property="visible" value="false"/>
+					<s:SetAction target="{titleBox}" property="visible" value="false"/>
+				</s:Sequence>
+				<mx:Resize target="{bar}" duration="700" widthTo="{logo.width + 10}" />
+				<mx:Resize target="{bar}" duration="200" widthTo="0" heightTo="0"/>
+				<s:SetAction target="{bar}" property="styleName" value="estiloBarraMinimized"/>
+				<mx:Move target="{logo}" duration="500" yTo="{logo.y - _moveYTo + _paddingTopLogo}" />
+				<!--<s:SetAction target="{logoBoxLayout}" property="paddingTop" value="{_paddingTopLogo}"/>-->
+			</s:Sequence>
+		</s:Transition>
+		
+		<s:Transition id="transMaximize" fromState="*" toState="maximized">
+			<s:Sequence id="seq2">
+				<mx:Move target="{logo}" duration="500" yTo="{logo.y + _moveYTo - _paddingTopLogo}"/>
+				<s:SetAction target="{bar}" property="styleName" value="estiloBarra"/>
+				<s:SetAction target="{logoBoxLayout}" property="paddingTop" value="{_moveYTo}"/>
+				<mx:Resize target="{bar}" duration="200" widthTo="3" heightTo="60"/>
+				<mx:Resize target="{bar}" duration="700" widthTo="{this.width - 30}"/>
+				<s:SetAction target="{bar}" property="percentWidth" value="100"/>
+				<s:Sequence>
+					<s:SetAction target="{grupoMenuBtn}" property="visible" value="true"/>
+					<s:SetAction target="{titleBox}" property="visible" value="true"/>
+				</s:Sequence>
+			</s:Sequence>
+		</s:Transition>
+	</s:transitions>
+	
+	
+	<s:Group id="mainBar" width="100%" height="100%" visible="false">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" paddingLeft="15" paddingRight="15"/>
+		</s:layout>
+		
+		<s:BorderContainer id="bar" width="100%" height="60" styleName="estiloBarra">
+			<s:layout>
+				<s:HorizontalLayout gap="0" paddingLeft="0" paddingRight="0" 
+									horizontalAlign="center" verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:Group id="logoGroup" width="40%" height="100%">
+				<s:layout>
+					<s:HorizontalLayout id="logoGroupLayout" horizontalAlign="center" verticalAlign="middle" />
+				</s:layout>
+				
+				<s:BorderContainer id="logoBox" height="100%" styleName="estiloInvisibleContainer"
+								   click="logoClickHandler(event)">
+					<s:layout>
+						<s:VerticalLayout id="logoBoxLayout" horizontalAlign="center" verticalAlign="top"/>
+					</s:layout>
+					
+					<mx:Image id="logo" complete="logo_completeHandler(event)"
+							  useHandCursor="true" buttonMode="true">
+						<mx:filters>
+							<flash:GlowFilter id="logoGlow" color="#ffffff" alpha="1.0" blurX="5" blurY="5"/>
+						</mx:filters>
+					</mx:Image>
+					
+				</s:BorderContainer>
+				
+				<s:BorderContainer id="titleBox" styleName="estiloInvisibleContainer"
+								   height="100%" showEffect="{fadeIn}" hideEffect="{fadeOut}">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left" verticalAlign="middle"/>
+					</s:layout>
+					<s:Label id="titulo" styleName="estiloTitle"/>
+					<s:Label id="subtitulo" styleName="estiloSubtitle"/>
+				</s:BorderContainer>
+			</s:Group>
+			
+			<s:Group id="grupoMenuBtn" visible="true" 
+					 width="60%" height="100%" showEffect="{fadeIn}" hideEffect="{fadeOut}">
+				<s:layout>
+					<s:HorizontalLayout gap="5" horizontalAlign="right" verticalAlign="middle" paddingRight="15"/>
+				</s:layout>
+			</s:Group>
+		</s:BorderContainer>
+	</s:Group>
+	
+	
+	<s:Group id="menuItensGroup" showEffect="{seqOpen}"
+			 visible="false" includeInLayout="true" rollOut="mouseOutMenuGroup(event)"
+			 x="{menuItensGrpX}" y="{bar.y + bar.height + 20}">
+		
+		<s:layout>
+			<s:VerticalLayout id="menuBtnLayout" gap="0" verticalAlign="bottom" horizontalAlign="center"/>
+		</s:layout>
+		
+		<s:BorderContainer id="menuItensBox" visible="true" includeInLayout="true"
+						   width="{(menuItens.width+20)}" height="{(menuItens.height+4)}" styleName="estiloMenuItensContainer">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" paddingBottom="5"/>
+			</s:layout>
+			<s:DataGroup id="menuItens"
+						 itemRenderer="solutions.renderer.menuItemRenderer"
+						 dataProvider="{this._menuCollection}" minWidth="160"
+						 visible="false" includeInLayout="true" 
+						 verticalCenter="0" horizontalCenter="0">
+				<s:layout>
+					<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="0"/>
+				</s:layout>
+			</s:DataGroup>
+			
+		</s:BorderContainer>
+		
+	</s:Group>
+	
+</s:Group>

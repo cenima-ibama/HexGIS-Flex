@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- LayerManager Flex control, used to change layer order or visbility -->
+<solutions:BaseWidget  xmlns="*"
+			 xmlns:solutions="solutions.*"
+			 xmlns:fx="http://ns.adobe.com/mxml/2009"
+			 xmlns:mx="library://ns.adobe.com/flex/mx"
+			 xmlns:s="library://ns.adobe.com/flex/spark"
+			 xmlns:camadas="widgets.componentes.camadas.*"
+			 xmlns:drawing="org.openscales.fx.control.drawing.*" 
+			 xmlns:os="http://openscales.org"
+			 xmlns:gerenciador="widgets.componentes.gerenciador.*"
+			 xmlns:layer="widgets.componentes.gerenciador.layer.*"
+			 creationComplete="configure()" >
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Script>
+		<![CDATA[	
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.IFactory;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.DrawingsLayer;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.fx.control.layer.MapSyncSort;
+			
+			import solutions.SiteContainer;
+			
+			import spark.components.Group;
+			
+			import widgets.componentes.gerenciador.renderer.LayerManagerItemRenderer;
+			import widgets.componentes.informacoes.click.event.ClickActivatedEvent;
+			import widgets.componentes.informacoes.drag.event.DragActivatedEvent;
+			import widgets.componentes.layerGroup.LayerGroup;
+			import widgets.componentes.mapa.HexMap;
+			import widgets.componentes.zoomBox.ZoomBoxActivatedEvent;
+			
+			
+			/**
+			 * The dataProvider use for the list.
+			 */
+			protected var _layers:ArrayCollection = new ArrayCollection();
+			
+			/**
+			 * @private
+			 * Options for the LayerManager renderer (for additionnal controls to display like Metadatas, legend...)
+			 * @default null
+			 */
+			[Bindable]
+			private var _rendererOptions:Object = null;
+			
+			/**
+			 * @private
+			 * The itemRenderer class for display item of the LayerMananger list
+			 * @default DefaultLayerRenderer
+			 */
+			private var _itemRenderer:Class = LayerManagerItemRenderer;
+			
+			[Bindable]
+			protected var _displayDrawing:Boolean = false;
+			
+			private const WIDGET_HEIGHT:int = 400;
+			
+			private const WIDGET_WIDTH:int = 350;
+						
+			//protected var _active:Boolean = false;
+			
+			/* [Bindable]
+			protected var _isReduced:Boolean = false;  */
+			
+			
+			/**
+			 * Configure the object
+			 */
+			override protected function configure():void
+			{								
+				super.configure();
+	
+				var factory:ClassFactory = new ClassFactory(this._itemRenderer) 
+				
+				// only define params for itemRenderer taht are or inherit from DefaultLayerManagerItemRenderer
+				var instance:Object = new this._itemRenderer();
+				
+				if(instance is LayerManagerItemRenderer)
+				{
+					factory.properties = {
+						rendererOptions: this._rendererOptions,
+						layerManager: this
+					}
+					
+					if(this._rendererOptions && this._rendererOptions['displayDrawing'])
+						this._displayDrawing = true;
+					else
+						this._displayDrawing = false;
+				}
+				
+				layerList.itemRenderer = factory;
+			}
+
+			/**
+			 * Set the map
+			 * @param value
+			 */	 
+			override public function setMap(value:Map):void 
+			{
+				active = false;
+								
+				map = value;
+				
+				if(map != null) 
+				{
+					this.refresh();
+					
+					active = true;
+				}
+
+			}
+			
+			
+			/**
+			 * indicates if the control is currently active or not
+			 */
+			/* public function get active():Boolean {
+				return this._active;
+			} */
+			
+			/**
+			 * @private
+			 */
+			/* public function set active(value:Boolean):void {
+				
+				if(value)
+					this.activate();
+				else
+					this.desactivate();
+			} */
+			
+			/**
+			 * @inherit
+			 */
+			override public function activate():void 
+			{
+				super.activate();
+				if(map)
+				{
+					//Listening of layer event
+					map.addEventListener(LayerEvent.LAYER_ADDED,onLayerAdded);
+					map.addEventListener(LayerEvent.LAYER_CHANGED,this.refresh);
+					map.addEventListener(LayerEvent.LAYER_REMOVED,onLayerRemoved);
+					map.addEventListener(LayerEvent.LAYER_CHANGED_ORDER,this.refresh);
+					map.addEventListener(LayerEvent.LAYER_DISPLAY_IN_LAYERMANAGER_CHANGED,onLayerDisplayInLayerManagerChange);
+				}
+			}
+			
+			/**
+			 * @inherit
+			 */
+			override public function desactivate():void 
+			{					
+				super.desactivate();
+				if(map)
+				{
+					map.removeEventListener(LayerEvent.LAYER_ADDED,onLayerAdded);
+					map.removeEventListener(LayerEvent.LAYER_CHANGED,this.refresh);
+					map.removeEventListener(LayerEvent.LAYER_REMOVED,onLayerRemoved);
+					map.removeEventListener(LayerEvent.LAYER_CHANGED_ORDER,this.refresh);
+					map.removeEventListener(LayerEvent.LAYER_DISPLAY_IN_LAYERMANAGER_CHANGED,onLayerDisplayInLayerManagerChange);
+				}
+			}
+			
+			/**
+			 * Refresh the LayerSwitcher when a layer is add, delete or update
+			 * @param event Layer event
+			 */
+			public function refresh(event:Event = null):void
+			{	
+				if (this.map)
+				{
+					//var overlayArray:Vector.<Layer> = (this.map as HexMap).getNonGroupLayers();
+					var overlayArray:Vector.<Layer> = (this.map as HexMap).layers;
+					var ac:ArrayCollection = new ArrayCollection();
+					var i:int = overlayArray.length;
+					
+					var l:Layer;
+					
+					var estaNumGrupo:Boolean;
+					
+					var auxGrp:LayerGroup;
+					var grupos:Vector.<LayerGroup> = (this.map as HexMap).getLayerGroups();
+					
+					var gruposCollection:ArrayCollection = new ArrayCollection();
+					
+					for each (var g:LayerGroup in grupos)
+					{
+						gruposCollection.addItem(g);
+					}
+					
+					for (i; i>0; --i)
+					{
+						l = overlayArray[i-1];
+						
+						if (l.displayInLayerManager)
+						{	
+							var j:int = 0; 
+							estaNumGrupo = false;
+							
+							while ((j < gruposCollection.length) && !estaNumGrupo)
+							{
+								auxGrp = gruposCollection.getItemAt(j) as LayerGroup;
+								
+								if (auxGrp.layers.indexOf(l) != -1)
+								{
+									ac.addItem(auxGrp);
+									
+									gruposCollection.removeItemAt(j);
+									
+									j--;
+									
+									i = i - auxGrp.layers.length + 1;
+									
+									estaNumGrupo = true;
+								}
+								j++;
+							}
+								
+							if (!estaNumGrupo)
+							{
+								ac.addItem(l);
+							}
+						}
+					}
+					
+					_layers.filterFunction = null;
+					_layers.sort = null;
+					_layers.refresh();
+					
+					this.layers = ac;
+					
+					_layers.sort = new MapSyncSort(map);
+					//_layers.filterFunction = shallDisplayLayer;
+					//_layers.refresh();
+				}
+			}
+			
+			override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
+			{
+				super.updateDisplayList(unscaledWidth,unscaledHeight);
+				this.refresh();
+				// Redraws all the layers
+				/*if(this.layerList){
+				var rendererBackup:IFactory = this.layerList.itemRenderer;
+				this.layerList.itemRenderer = null;
+				this.layerList.itemRenderer = rendererBackup;
+				}*/
+			}
+			
+			protected function onLayerAdded(event:LayerEvent):void
+			{				
+				/* var layer:Layer = event.layer as Layer;*/
+				//_layers.filterFunction = null;
+				_layers.sort = null;
+				_layers.refresh();
+				
+				_layers.addItemAt(event.layer, 0); 
+				
+				_layers.sort = new MapSyncSort(map);
+				//_layers.filterFunction = shallDisplayLayer;
+
+				this.refresh();
+
+			}
+			
+			protected function onLayerRemoved(event:LayerEvent):void
+			{
+				var layer:Layer = event.layer as Layer;
+				
+				/* _layers.filterFunction = null;*/
+				_layers.sort = null;
+				_layers.refresh(); 
+				
+				var index:int = _layers.getItemIndex(layer);
+				
+				if(index != -1)
+				{
+					_layers.removeItemAt(index);
+				}
+				//_layers.filterFunction = shallDisplayLayer;
+				_layers.sort = new MapSyncSort(map);
+
+				this.refresh();
+			}
+			
+			protected function onLayerDisplayInLayerManagerChange(event:LayerEvent):void
+			{
+				//this.layers.refresh();
+				this.refresh();
+			}
+			
+			/**
+			 * Checks if the layer shall be displayed in the LayerManager
+			 */
+			public function shallDisplayLayer(layer:Layer):Boolean
+			{
+				return layer.displayInLayerManager;
+			}
+			
+			/**
+			 * Moves given layer closer to the user, 
+			 * unless it is already on top of all the other layers 
+			 */
+			public function moveLayerForward(layer:Layer):void
+			{
+				var index:uint = _layers.getItemIndex(layer);
+				
+				var nextLayerPositionInMap:int;
+
+				if(index > 0)
+				{	
+					var next:Object = _layers.getItemAt(index-1);
+					
+					if (next is Layer)
+					{
+						var nextLayer:Layer = next as Layer;
+						nextLayerPositionInMap = map.layers.indexOf(nextLayer);
+						map.changeLayerIndex(layer,nextLayerPositionInMap);
+					}
+					else if(next is LayerGroup)
+					{
+						var nextLayerGroup:LayerGroup = next as LayerGroup;
+						
+						var l:Layer = nextLayerGroup.layers[nextLayerGroup.layers.length - 1] as Layer;
+						/* for each (var l:Layer in nextLayerGroup.layers)
+						{ */
+							nextLayerPositionInMap = map.layers.indexOf(l);
+							map.changeLayerIndex(layer, nextLayerPositionInMap);
+						//}
+					}
+					this.refresh();
+				}
+			}
+			
+			/**
+			 * Moves back the layer,
+			 * unless it is already behing all the other layers 
+			 */
+			public function moveLayerBack(layer:Layer):void
+			{
+				var index:uint = _layers.getItemIndex(layer);
+
+				if(index < _layers.length - 1)
+				{
+					var next:Object = _layers.getItemAt(index+1);
+					
+					if (next is Layer)
+					{
+						var nextLayer:Layer = next as Layer;
+						var nextLayerPositionInMap:int = map.layers.indexOf(nextLayer);
+						
+						map.changeLayerIndex(layer,nextLayerPositionInMap);
+					}
+					else if (next is LayerGroup)
+					{
+						var nextLayerGroup:LayerGroup = next as LayerGroup;
+						
+						var l:Layer = nextLayerGroup.layers[0];
+						/* for each (var l:Layer in nextLayerGroup.layers.reverse())
+						{ */
+							nextLayerPositionInMap = map.layers.indexOf(l);
+							map.changeLayerIndex(layer, nextLayerPositionInMap);
+						//}
+					}
+					this.refresh();
+				}
+			}
+			
+			
+			public function moveLayerGroupForward(lg:LayerGroup, nlg:LayerGroup):void
+			{
+				var l:Layer = nlg.layers[nlg.layers.length - 1];
+				var nextLayerPositionInMap:int = map.layers.indexOf(l);
+				
+				for (var i:int = 0; i < (lg.layers.length - 1); i++)
+				{					
+					map.changeLayerIndex(lg.layers[i], nextLayerPositionInMap);
+				}
+				this.refresh();
+			}
+			
+			public function moveLayerGroupBack(lg:LayerGroup, nlg:LayerGroup):void
+			{
+				var l:Layer = nlg.layers[0];
+				var nextLayerPositionInMap:int = map.layers.indexOf(l);
+				
+				for (var i:int = (lg.layers.length - 1); i > -1; i--)
+				{					
+					map.changeLayerIndex(lg.layers[i], nextLayerPositionInMap);
+				}
+				this.refresh();
+			}
+			
+			/**
+			 * Moves layer at given index
+			 */
+			public function moveLayerAtIndex(layer:Layer,index:uint):void
+			{
+				if( index < 0 && index > _layers.length-1 )
+				{
+					return;
+				}
+				
+				var layerAtIndex:Layer = _layers.getItemAt(index) as Layer;
+				var mapIndex:int = map.layers.indexOf(layerAtIndex);
+				map.changeLayerIndex(layer,mapIndex);
+			}
+			
+			/**
+			 * Update layers order when a user change it
+			 * @param event Drag event
+			 */
+			public function changeLayerOrder(event:DragEvent):void
+			{
+				var layer:Layer = layerList.selectedItem as Layer;
+				this.map.changeLayerIndex(layer,layerList.selectedIndex);
+			}
+			
+			// getter / setter
+			/**
+			 * The list of layers displayed in the LayerSwitcher
+			 */
+			[Bindable]
+			public function get layers():ArrayCollection
+			{
+				return this._layers;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set layers(value:ArrayCollection):void
+			{
+				this._layers=value;
+			}
+			
+			/**
+			 * Options for the LayerManager renderer (for additionnal controls to display like Metadatas, legend...)
+			 */
+			public function get rendererOptions():Object
+			{
+				return this._rendererOptions;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set rendererOptions(value:Object):void
+			{
+				this._rendererOptions=value;
+			}
+			
+			/**
+			 * The itemRenderer for the list contains by the LayerSwitcher
+			 */
+			public function get itemRenderer():Class
+			{
+				return this._itemRenderer;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set itemRenderer(value:Class):void
+			{
+				this._itemRenderer=value;
+				this.configure();
+			}
+
+			protected function layerList_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				layerList.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				layerList.scroller.verticalScrollBar.setStyle("chromeColor", this.getStyle("backgroundColor"));
+			}
+			
+		]]>
+	</fx:Script>
+
+	
+	<s:Group id="layerPanel" minWidth="{WIDGET_WIDTH}" height="{WIDGET_HEIGHT-20}">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center"/>
+		</s:layout>
+		
+		<!--skinClass="assets.skins.list.LayersListSkin"-->
+		<s:List id="layerList"
+				dataProvider="{this.layers}"
+				creationComplete="layerList_creationCompleteHandler(event)"
+				dropEnabled="false" dragEnabled="false" dragMoveEnabled="false"
+				width="100%" height="100%" minWidth="{WIDGET_WIDTH}"
+				styleName="estiloListaLayerManager">
+			<s:layout>
+				<s:VerticalLayout gap="0"/>
+			</s:layout>
+		</s:List>
+		
+	</s:Group>
+
+	<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left" >
+			  
+		<!--<layer:NewAddVectorLayer map="{map}"/>
+	
+		<layer:NewImportFeature map="{map}"/>-->
+		
+		<s:Label text="{this.layers.length + ' item(s)'}" styleName="estiloLabel" verticalAlign="bottom"/>
+		
+	</s:HGroup>
+		
+</solutions:BaseWidget>

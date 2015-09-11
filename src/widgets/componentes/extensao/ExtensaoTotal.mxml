@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<os:IconButton xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:os="org.openscales.fx.control.*"
+		 icon="{_btnPath}" width="24" height="24">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import org.openscales.core.Map;
+			import org.openscales.geometry.basetypes.Location;
+						
+			[Bindable]
+			[Embed(source="/assets/images/icons/earth_icon25.png")]
+			private var _btnPath:Class;
+			
+			private var _map:Map;
+			
+			
+			public function set map(value:Map):void
+			{
+				if (value != null) 
+				{
+					this._map = value;
+					this.addEventListener(MouseEvent.CLICK, earthClickHandler);
+				}
+			}
+						
+			protected function earthClickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				/* _model.map.center = _model.initialmapcentre;
+				_model.map.resolution = _model.zoom; */
+				if (this._map)
+				{
+					this._map.center = new Location(-53.88266,-15.79325);
+					this._map.resolution = this._map.maxResolution;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+</os:IconButton>

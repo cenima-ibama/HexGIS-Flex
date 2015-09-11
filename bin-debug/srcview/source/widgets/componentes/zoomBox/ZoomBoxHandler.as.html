@@ -1,0 +1,255 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ZoomBoxHandler.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">zoomBox</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">display</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Sprite</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MouseEvent</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">containers</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Box</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">controls</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Alert</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">managers</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">PopUpManager</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Map</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MapEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ZoomBoxEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Handler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouse</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DragHandler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Bounds</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Location</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Pixel</span>;
+
+    
+    <span class="ActionScriptASDoc">/**
+     * This handler allows user to zoom the map by drawing a rectangle with the mouse
+     * 
+     * The handler has to mode: 
+     * &lt;ul&gt;
+     *     &lt;li&gt;Shift key need to be pressed and hold in order to draw the rectangle&lt;/li&gt;
+     *     &lt;li&gt;No keys are required&lt;/li&gt;
+     * &lt;/ul&gt;
+     */</span> 
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ZoomBoxHandler</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">Handler</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+                
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * boolean saying if the map is currently dragged
+         */</span> 
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_dragging</span>:<span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * 
+         * Coordinates of the top left corner (of the drawing rectangle)
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_startCoordinates</span>:<span class="ActionScriptDefault_Text">Location</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_fillColor</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xFF0000;
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * 
+         * Is the rectangle is drawn
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_drawing</span>:<span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_drawContainer</span>:<span class="ActionScriptDefault_Text">Sprite</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Sprite</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fade</span>:<span class="ActionScriptDefault_Text">BlurScreen</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">BlurScreen</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        
+        <span class="ActionScriptASDoc">/**
+         * Constructor
+         * 
+         * @param shiftMode Boolean specifying whether to active shift mode or not
+         * @param map The Map that will be concerned by event handling
+         * @param active Boolean defining if the handler is active or not (default=true)
+         */</span> 
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ZoomBoxHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map</span>:<span class="ActionScriptDefault_Text">Map</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">active</span>:<span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">false</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">active</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span> 
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">registerListeners</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOUSE_DOWN</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">startBox</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">registerMouseUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MapEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DRAG_START</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">dragStart</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MapEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DRAG_END</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">dragEnd</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">registerMouseUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOUSE_UP</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">endBox</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @inheritDoc
+         */</span> 
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unregisterListeners</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOUSE_DOWN</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">startBox</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOUSE_UP</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">endBox</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOUSE_MOVE</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">expandArea</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MapEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DRAG_START</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">dragStart</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MapEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DRAG_END</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">dragEnd</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Map setter
+         */</span> 
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span>:<span class="ActionScriptDefault_Text">Map</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">!=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * 
+         * Method called on MOUSE_DOWN event
+         *  It create a selection recantgle and add MOUSE_MOVE event handling to the map
+         */</span> 
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">startBox</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span>:<span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptBracket/Brace">)</span> : <span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">active</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptOperator">!</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseNavigationEnabled</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span>;
+            
+            <span class="ActionScriptDefault_Text">fade</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">BlurScreen</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">PopUpManager</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">createPopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">BlurScreen</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">registerMouseUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOUSE_MOVE</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">expandArea</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_drawing</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">beginFill</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_fillColor</span><span class="ActionScriptOperator">,</span>0.5<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">drawRect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseX</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseY</span><span class="ActionScriptOperator">,</span>1<span class="ActionScriptOperator">,</span>1<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">endFill</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_startCoordinates</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getLocationFromMapPx</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Pixel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseX</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseY</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * Method called on MOUSE_UP event. 
+         * It calculates the bounds that matches the selection rectangle and zoom the map accordingly. 
+         * &lt;p&gt;If the user has not drawn a rectangle, the map is center to the mouse location&lt;/p&gt;
+         */</span> 
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">endBox</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span>:<span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptBracket/Brace">)</span> : <span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_drawing</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOUSE_MOVE</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">expandArea</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_drawing</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+                <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptReserved">return</span>;
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">endCoordinates</span>:<span class="ActionScriptDefault_Text">Location</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getLocationFromMapPx</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Pixel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseX</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseY</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_startCoordinates</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">hitTestPoint</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stageX</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stageY</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">_startCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">equals</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">endCoordinates</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">zoomToExtent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Bounds</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">Math</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_startCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lon</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">endCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lon</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">Math</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">min</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">endCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lat</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">_startCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lat</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">Math</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_startCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lon</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">endCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lon</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">Math</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">max</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">endCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lat</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">_startCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lat</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">endCoordinates</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_startCoordinates</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ZoomBoxEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ZoomBoxEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">END</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stage</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">focus</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span>; <span class="ActionScriptComment">// Giving focus back to the map
+</span>                <span class="ActionScriptDefault_Text">fade</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">closeWindow</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private 
+         * Method called on MOUSE_MOVE event. It redraws the selection relcantgle
+         */</span> 
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">expandArea</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span>:<span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptBracket/Brace">)</span> : <span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">hitTestPoint</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stageX</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">e</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">stageY</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">endBox</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">e</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ll</span>:<span class="ActionScriptDefault_Text">Pixel</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getMapPxFromLocation</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_startCoordinates</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">clear</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">lineStyle</span><span class="ActionScriptBracket/Brace">(</span>1<span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">_fillColor</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">beginFill</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_fillColor</span><span class="ActionScriptOperator">,</span>0.25<span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">drawRect</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseX</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseY</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">ll</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">_drawContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">endFill</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * Callback of the MapEvent.DRAG_START event to set the dragging boolean;
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dragStart</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>:<span class="ActionScriptDefault_Text">MapEvent</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_dragging</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * Callback of the MapEvent.DRAG_END event to set the dragging boolean;
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">dragEnd</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>:<span class="ActionScriptDefault_Text">MapEvent</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_dragging</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Color of the rectangle
+         * @default 0xFF0000
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">fillColor</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">uint</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_fillColor</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">fillColor</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span>:<span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_fillColor</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

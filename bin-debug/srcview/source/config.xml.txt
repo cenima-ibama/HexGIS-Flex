@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<configuration>
+
+
+	<userinterface>
+		<showSobre>true</showSobre>
+		<showLogin>true</showLogin>
+		
+		<!-- <title>HexGIS Flex</title>
+		<!-- <subtitle>Free Flex Framework</subtitle> -->
+		<title>HexGIS Flex</title>
+		<subtitle>Sistema Compartilhado</subtitle>
+		
+		<!--  <logo>assets/images/header/ibama_logo.png</logo>-->
+		<!-- <logo>assets/images/header/funasa_hex.png</logo> -->
+		<logo>assets/images/header/logo_hex_100x58.png</logo> 
+
+	    <stylesheet>assets/styles/estilo1.swf</stylesheet>
+	    
+   		<menus>
+    		<menu id="menuCamadas" visible="true">Camadas</menu>
+			<menu id="menuFerramentas" visible="true">Ferramentas</menu>
+			<menu id="menuDownloads" visible="true">Downloads</menu>
+			<menu id="menuArquivos" visible="true">Video</menu>
+		</menus>
+	</userinterface>
+	
+	
+	<widgets>
+		<!-- Widgets Menu Camadas-->
+			<widget menu="menuCamadas" label="Gerenciador de Camadas" preload="true" icon="" config="">widgets/LayerManagerWidget.swf</widget>
+			<widget menu="menuCamadas" label="Adicionar Camadas Dinamicamente" preload="false" icon="" config="">widgets/AddLayersWidget.swf</widget>
+		<!-- Widgets Menu Camadas-->
+			
+		<!-- Widgets Menu Ferramentas-->
+			<widget menu="menuFerramentas" label="Medir" preload="false" icon="" config="">widgets/MeasureWidget.swf</widget>
+			<widget menu="menuFerramentas" label="Adicionar Pontos" preload="false" icon="" config="">widgets/PontosLonLatWidget.swf</widget>
+			<widget menu="menuFerramentas" label="Exportar" icon="" preload="false" config="widgets/ExportWidget.xml">widgets/ExportWidget.swf</widget>
+			<widget menu="menuFerramentas" label="Editar Camadas" icon="" preload="false" config="">widgets/VetorizarWidget.swf</widget>
+			<!-- <widget menu="menuFerramentas" label="Buscar por Elementos" icon="" preload="false" config="">widgets/BuscarPorElementos.swf</widget>  -->
+			<widget menu="menuFerramentas" label="Vetorizar por Coordenadas" icon="" preload="false" config="">widgets/VetorizarCoordenadasWidget.swf</widget>
+			<widget menu="menuFerramentas" label="Informações" icon="" preload="false" config="">widgets/InfoWidget.swf</widget>
+			<widget menu="menuFerramentas" label="Imprimir" icon="" preload="false" config="widgets/PrintWidget.xml">widgets/PrintTool.swf</widget>
+		<!-- Widgets Menu Menu Ferramentas-->	
+	
+		<!-- Widgets Menu Arquivos-->
+		<widget menu="menuArquivos" label="Vídeos" icon="assets/images/icons/new/play_icon48.png">widgets/Iframe.swf</widget>		
+		<!-- Widgets Menu Arquivos-->
+	</widgets>
+	
+	<links>
+		<link label="Geoserver Console" menu="menuCamadas" icon="assets/images/icons/new/geoserver_icon_48.png">http://projetos.hexgis.com/geoserver/index.html</link>
+		<link label="Catálogo de Serviços" menu="menuCamadas" icon="assets/images/icons/new/geoserver_icon_48.png">http://projetos.hexgis.com/geoserver/web/?wicket:bookmarkablePage=:org.geoserver.web.demo.MapPreviewPage</link>
+	
+		<link label="Shapefile Linha" menu="menuDownloads">http://siscom.ibama.gov.br/geo-srv/csr/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=csr:linha&outputFormat=SHAPE-ZIP</link>
+		<link label="Shapefile Ponto" menu="menuDownloads">http://siscom.ibama.gov.br/geo-srv/csr/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=csr:ponto&outputFormat=SHAPE-ZIP</link>
+		<link label="Shapefile Polígono" menu="menuDownloads">http://siscom.ibama.gov.br/geo-srv/csr/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=csr:poligono&outputFormat=SHAPE-ZIP</link>
+	</links>
+	
+	<proxytype>php</proxytype> 
+
+</configuration>

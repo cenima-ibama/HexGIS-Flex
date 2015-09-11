@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="init(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.layer.Bing;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.ogc.WMS;
+			import org.openscales.core.layer.osm.Mapnik;
+			
+			private var _map:Map;
+			
+			
+			public function set map(value:Map):void
+			{
+				if (value)
+				{
+					_map = value;
+				}
+			}
+			
+			/* private function bingOnly(item:Layer, idx:uint, arr:Vector.<Layer>):Boolean 
+			{
+				return (item is Bing);
+			} */
+			
+			protected function changeBaseMap(event:MouseEvent):void
+			{
+				var tam:int;
+				var i:int;
+				var auxLayer:Bing;
+				var nomeCamadaSelecionada:String;
+				var camadas:Vector.<Layer>;
+				
+				if (this._map)
+				{
+					camadas = _map.layers;
+					tam = camadas.length;
+					
+					nomeCamadaSelecionada = (event.currentTarget as Image).id.toString();
+					
+					for (i=0; i<tam; i++)
+					{
+						if (camadas[i] is Bing)
+						{
+							auxLayer = camadas[i] as Bing;
+							
+							if (auxLayer.imagerySet.toUpperCase() == nomeCamadaSelecionada.toUpperCase())
+							{
+								auxLayer.visible = true;
+							}
+							else
+							{
+								auxLayer.visible = false;
+							}
+						}
+						else if ((camadas[i] is Mapnik) && (camadas[i].identifier == "Mapa Base (OSM)"))
+						{
+							camadas[i].visible = false;
+						}
+						else if ((camadas[i] is WMS) && (camadas[i].identifier == "Nasa"))
+						{
+							camadas[i].visible = false;
+						}
+					}
+				}
+
+				this.currentState = nomeCamadaSelecionada + "State";
+				
+				/* if (nomeCamadaSelecionada == "aerial")
+				{
+					btnContainer.filters = [whiteDropShadow];
+				}
+				else
+				{
+					btnContainer.filters = [];
+				} */
+			}
+
+			
+			protected function init(event:FlexEvent):void
+			{
+				var tam:int;
+				var i:int;
+				var auxLayer:Bing;
+				var camadas:Vector.<Layer>;
+				
+				if (this._map)
+				{
+					camadas = _map.layers;
+					tam = camadas.length;
+										
+					for (i=0; i<tam; i++)
+					{
+						if (camadas[i] is Bing)
+						{
+							auxLayer = camadas[i] as Bing;
+							
+							if ((auxLayer.imagerySet == "Road") && (auxLayer.visible == true))
+							{
+								currentState = "roadState";
+							}
+							else if ((auxLayer.imagerySet == "Aerial") && (auxLayer.visible == true))
+							{
+								currentState = "aerialState";
+							}
+						}
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+		<s:Fade id="fade" alphaFrom="0.0" alphaTo="1.0" duration="100"/>
+		
+		<s:DropShadowFilter id="whiteDropShadow" color="#ffffff" 
+							blurX="0" blurY="0" alpha="0.8" distance="3" angle="90"/>
+	</fx:Declarations>
+	
+	
+	<s:states>
+		<s:State name="roadState"/>
+		<s:State name="aerialState"/>
+	</s:states>
+	
+	<s:transitions>
+		<s:Transition fromState="*" toState="*" effect="{fade}"/>
+	</s:transitions>
+	
+	<s:BorderContainer id="btnContainer" width="46" height="41" styleName="estiloBtnMapasContainer">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" gap="0" verticalAlign="middle"
+								paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+		</s:layout>
+		
+		<mx:Image id="road" includeIn="aerialState" click="changeBaseMap(event)"
+				  source="assets/images/icons/road_icon.png" width="40" height="35"
+				  toolTip="Arruamento"/>
+			
+		<mx:Image id="aerial" includeIn="roadState" click="changeBaseMap(event)"
+				  source="assets/images/icons/aerial_icon.png" width="40" height="35"
+				  toolTip="Imagens"/>
+			
+	</s:BorderContainer>
+</s:Group>

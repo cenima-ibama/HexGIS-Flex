@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   creationComplete="init();"
+			   removedFromStage="destroy();"
+			   backgroundColor = "#cccccc"
+			   backgroundAlpha = "0.6"
+			   chromeColor="#7EA2B2"
+			   alpha = "0.8"
+			   borderAlpha="0.5"
+			   close="close();">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			/* import mx.core.LayoutDirection; */
+			import mx.managers.PopUpManager;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			
+			import spark.components.Application;
+			import spark.components.Button;
+			import spark.components.HGroup;
+			import spark.components.Label;
+			import spark.components.Scroller;
+			import spark.components.TextInput;
+			import spark.components.VGroup;
+			import spark.layouts.HorizontalLayout;
+			
+			private var _init:Boolean = false;
+			private var _layer:VectorLayer = null;
+			private var ti:TextInput = null;
+			private var addbtn:Button = null;
+			private var _btnValid:Button = null;
+			protected var _vgroup:VGroup = null;
+			private var scroller:Scroller;
+			private static var DEFAULT_W:Number = 300;
+			private static var DEFAULT_H:Number = 200;
+			
+			/**
+			 * feature associated to the popup
+			 */
+			public function get layer():VectorLayer
+			{
+				return _layer;
+			}
+			/**
+			 * @private
+			 */
+			public function set layer(value:VectorLayer):void
+			{
+				
+				_layer = value;
+				if(this._layer && this._layer.map) {
+					
+					if(!_vgroup) {
+						_vgroup = new VGroup();
+						_vgroup.gap = 10;
+						_vgroup.top = 5;
+						_vgroup.paddingLeft = 15;
+						_vgroup.paddingTop = 10;
+						_vgroup.paddingBottom = 10;
+						//_vgroup.width = DEFAULT_W;
+						//minus 33 because of title bar size
+						_vgroup.height = DEFAULT_H - 33;
+					}
+					
+					this.drawContent();
+					this.localize();
+					
+					scroller = new Scroller();
+					scroller.percentWidth = 100;
+					scroller.viewport = _vgroup;
+					this.addElement(scroller);
+					PopUpManager.addPopUp(this, (FlexGlobals.topLevelApplication as Application), true);
+					this._layer.map.addEventListener(I18NEvent.LOCALE_CHANGED,this.localize);
+				}
+			}
+			
+			protected function drawContent():void {
+				var j:uint = this._layer.attributesId.length;
+				var group:HGroup;
+				var lb:Label;
+				var btn:Button;
+				for(var i:uint = 0;i<j;++i) {
+					var key:String = this._layer.attributesId[i];
+					
+					if(key != "id") {
+						group = new HGroup();
+						group.gap = 10;
+						group.paddingTop = 5;
+						group.paddingLeft = 5;
+						_vgroup.addElement(group);
+						lb = new Label();
+						lb.width = 100;
+						lb.text = key;
+						group.addElement(lb);
+						btn = new Button();
+						btn.id = key;
+						btn.label = "Excluir";
+						btn.setStyle("chromeColor","#cccccc");
+						btn.addEventListener(MouseEvent.CLICK, remove);
+						group.addElement(btn);
+					}
+				}
+				group = new HGroup();
+				group.gap = 10;
+				group.paddingTop = 5;
+				group.paddingLeft = 5;
+				_vgroup.addElement(group);
+				if(!ti) {
+					ti = new TextInput();
+					ti.setStyle("contentBackgroundColor", "#ffffff");
+					ti.setStyle("contentBackgroundAlpha", "0.5");
+				}
+				if(!addbtn) {
+					addbtn = new Button();
+					addbtn.setStyle("chromeColor","#cccccc");
+					addbtn.addEventListener(MouseEvent.CLICK, valid);
+				}
+				
+				if(!this._btnValid) {
+					this._btnValid = new Button();
+					_btnValid.setStyle("chromeColor","#cccccc");
+					this._btnValid.addEventListener(MouseEvent.CLICK, terminate);
+				}
+				
+				ti.text = "";
+				group.addElement(ti);
+				addbtn.label = "Adicionar";
+				group.addElement(addbtn);
+				_vgroup.addElement(this._btnValid);
+			}
+			
+			protected function localize(e:I18NEvent=null):void {
+				this.title = "Atributos da Camada";
+				this._btnValid.label = "Fechar";
+			}
+			
+			protected function init():void {
+				this.x = (parent.width-this.width)/2;
+				this.y = (parent.height-this.height)/2;
+				this.resize(null);
+				parent.addEventListener(Event.RESIZE,this.resize);
+				this._init = true;
+				ti.setFocus();
+			}
+			
+			private function discardPopup():void {
+				if(this._layer.map)
+					this._layer.map.removeEventListener(I18NEvent.LOCALE_CHANGED,this.localize);
+				if(_vgroup)
+					_vgroup.removeAllElements();
+				if(this._init)
+					PopUpManager.removePopUp(this);
+			}
+			
+			protected function destroy():void {
+				if(parent)
+					parent.removeEventListener(Event.RESIZE,this.resize);
+				this.discardPopup();
+			}
+			
+			private function valid(e:Event):void {
+				var found:Boolean = false;
+				var value:String = this.ti.text;
+				if(value == null || value == "")
+					return;
+				
+				for(var i:uint = this._layer.attributesId.length; (i>0 && !found); --i) {
+					if(this._layer.attributesId[i-1]==value)
+						found = true;
+				}
+				if(found) {
+					return;
+				}
+				this.ti.text = "";
+				
+				this._layer.attributesId.push(value);
+				var features:Vector.<Feature> = this._layer.features;
+				if(features) {
+					for(i=features.length;i>0;--i) {
+						if(!features[i-1].attributes[value])
+							features[i-1].attributes[value]="";
+					}
+				}
+				this._vgroup.removeAllElements();
+				this.drawContent();
+				if(this.scroller.horizontalScrollBar)
+					this.scroller.horizontalScrollBar.value = this.scroller.horizontalScrollBar.maximum;
+			}
+			
+			private function remove(e:MouseEvent):void {
+				if(e.target.id && e.target.id!="") {
+					var found:Boolean = false;
+					var value:String = e.target.id;
+					if(value == null || value == "")
+						return;
+					
+					for(var i:uint = this._layer.attributesId.length; i>0; --i) {
+						if(this._layer.attributesId[i-1]==value) {
+							this._layer.attributesId.splice(i-1,1);
+							var features:Vector.<Feature> = this._layer.features;
+							if(features)
+								for(var j:uint = features.length;j>0;--j)
+									features[j-1].attributes[value]=null;
+							break;
+						}
+					}
+					_vgroup.removeAllElements();
+					this.drawContent();
+				}
+			}
+			
+			private function resize(e:Event):void {
+				this.x = (parent.width-this.width)/2;
+				this.y = (parent.height-this.height)/2;
+				this.width = DEFAULT_W;
+				this.height = DEFAULT_H;
+				if(this.width > parent.width) {
+					this.width = parent.width;
+				}
+				if(this.height > parent.height) {
+					this.height = parent.height;
+				}
+			}
+			
+			private function close():void
+			{
+				this.discardPopup();
+			}
+			
+			private function terminate(e:Event):void
+			{
+				this.discardPopup();
+			}
+			
+		]]>
+	</fx:Script>
+</s:TitleWindow>

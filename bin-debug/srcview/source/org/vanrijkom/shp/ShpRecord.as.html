@@ -1,0 +1,133 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ShpRecord.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* ************************************************************************ */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/*  SHP (ESRI ShapeFile Reader)                                                */</span>
+<span class="ActionScriptComment">/*  Copyright (c)2007 Edwin van Rijkom                                        */</span>
+<span class="ActionScriptComment">/*  http://www.vanrijkom.org                                                */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* This library is free software; you can redistribute it and/or            */</span>
+<span class="ActionScriptComment">/* modify it under the terms of the GNU Lesser General Public                */</span>
+<span class="ActionScriptComment">/* License as published by the Free Software Foundation; either                */</span>
+<span class="ActionScriptComment">/* version 2.1 of the License, or (at your option) any later version.        */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* This library is distributed in the hope that it will be useful,            */</span>
+<span class="ActionScriptComment">/* but WITHOUT ANY WARRANTY; without even the implied warranty of            */</span>
+<span class="ActionScriptComment">/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU        */</span>
+<span class="ActionScriptComment">/* Lesser General Public License or the LICENSE file for more details.        */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* ************************************************************************ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">shp</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Endian</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">shp</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ShpPointZ</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">shp</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ShpError</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">shp</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ShpPoint</span>;
+
+<span class="ActionScriptASDoc">/**
+ * The ShpPoint class parses an ESRI Shapefile Record Header from a ByteArray
+ * as well as its associated Shape Object. The parsed object is stored as a 
+ * ShpObject that can be cast to a specialized ShpObject deriving class using 
+ * the found shapeType value.
+ * @author Edwin van Rijkom
+ * 
+ */</span>
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ShpRecord</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptASDoc">/**
+     * Record number 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">number</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * Content length in 16-bit words 
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">contentLength</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * Content length in bytes 
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">contentLengthBytes</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    <span class="ActionScriptASDoc">/**
+     * Type of the Shape Object associated with this Record Header.
+     * Should match one of the constant values defined in the ShpType class.
+     * @see ShpType
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">shapeType</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * Parsed Shape Object. Cast to the specialized ShpObject deriving class
+     * indicated by the shapeType property to obtain Shape type specific
+     * data. 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">shape</span>: <span class="ActionScriptDefault_Text">ShpObject</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * Constructor.
+     * @param src
+     * @return 
+     * @throws ShpError Not a valid header
+     * @throws Shape type is currently unsupported by this library
+     * @throws Encountered unknown shape type
+     * 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ShpRecord</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span>: <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">availableBytes</span>: <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span>;
+        
+        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">availableBytes</span> <span class="ActionScriptOperator">==</span> 0<span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptReserved">throw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpError</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">""</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">ShpError</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ERROR_NODATA</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">&lt;</span> 8<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptReserved">throw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpError</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"Not a valid record header (too small)"</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+    
+        <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">endian</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Endian</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">BIG_ENDIAN</span>;
+        <span class="ActionScriptDefault_Text">number</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readInt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">contentLength</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readInt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">contentLengthBytes</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">contentLength</span><span class="ActionScriptOperator">*</span>2 <span class="ActionScriptOperator">-</span> 4;            
+        <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">endian</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Endian</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">LITTLE_ENDIAN</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">shapeOffset</span>: <span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span>;
+        <span class="ActionScriptDefault_Text">shapeType</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readInt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptReserved">switch</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">shapeType</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POINT</span>:
+                <span class="ActionScriptDefault_Text">shape</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpPoint</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">contentLengthBytes</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POINTZ</span>:
+                <span class="ActionScriptDefault_Text">shape</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpPointZ</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">contentLengthBytes</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POLYGON</span>:
+                <span class="ActionScriptDefault_Text">shape</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpPolygon</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">contentLengthBytes</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POLYLINE</span>:
+                <span class="ActionScriptDefault_Text">shape</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpPolyline</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">contentLengthBytes</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">break</span>;
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_MULTIPATCH</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_MULTIPOINT</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_MULTIPOINTM</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_MULTIPOINTZ</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POINTM</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POLYGONM</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POLYGONZ</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POLYLINEZ</span>:
+            <span class="ActionScriptReserved">case</span> <span class="ActionScriptDefault_Text">ShpType</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SHAPE_POLYLINEM</span>:
+                <span class="ActionScriptReserved">throw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpError</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">shapeType</span><span class="ActionScriptOperator">+</span><span class="ActionScriptString">" Shape type is currently unsupported by this library"</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">break</span>;    
+            <span class="ActionScriptReserved">default</span>:    
+                <span class="ActionScriptReserved">throw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ShpError</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"Encountered unknown shape type ("</span><span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">shapeType</span><span class="ActionScriptOperator">+</span><span class="ActionScriptString">")"</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">break</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+                    
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptComment">// package</span></pre></body>
+</html>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget  	xmlns="*"
+						xmlns:solutions="solutions.*"
+						xmlns:fx="http://ns.adobe.com/mxml/2009"
+						xmlns:mx="library://ns.adobe.com/flex/mx"
+						xmlns:s="library://ns.adobe.com/flex/spark"
+						xmlns:drawing="org.openscales.fx.control.drawing.*" 
+						xmlns:os="http://openscales.org"
+						xmlns:drag="widgets.componentes.informacoes.drag.*"
+						showEffect="{zoom}" creationComplete="configure()"
+						width = "{dragInfoDisplay.width + 30}" height = "{dragInfoDisplay.height + 100}">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:Zoom id="zoom" duration="500" zoomHeightFrom="0" zoomWidthFrom="0" originX="{this.x}" originY="{this.y}"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import widgets.componentes.informacoes.drag.event.TotalRegistrosEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Menu;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.MenuEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import solutions.IBaseWidget;
+			import solutions.SiteContainer;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.RendererExistenceEvent;
+			
+
+			[Bindable]
+			private var _dados:Object = null;
+			
+			[Bindable]
+			private var nResultados:String;
+			
+			[Bindable]
+			private var _nomeCamada:String;
+			
+			[Bindable]
+			private var includeOpcoesBtn:Boolean = false;
+			
+			private var chartData:Object;
+			
+			private var info:IModuleInfo;
+						
+			//private var gerenciaGraficos:ChartManager;
+						
+			[Bindable]
+			private var grafMenuData:ArrayCollection = new ArrayCollection([
+															"Colunas","Barras","Linhas","Áreas","Setores","Bolhas","Candelabros"
+														]);
+			
+			override protected function configure():void
+			{
+				super.reducedHeight = 70;
+				super.configure();
+			}
+			
+			override public function activate():void
+			{
+				super.activate();
+				SiteContainer.addEventListener(TotalRegistrosEvent.TOTAL_REGISTROS, recebeTotal);
+			}
+			
+			private function listaItemClickHandler(event:IndexChangeEvent):void 
+			{
+				var itemSelected:String = grafMenuData[event.newIndex];
+				
+				chartData = new Object();
+				chartData.modo = itemSelected;
+				chartData.camada = this._nomeCamada;
+				chartData.dados = this._dados;
+				
+				var url:String = "widgets/ChartManagerWidget.swf";
+				info = ModuleManager.getModule(url);
+				info.addEventListener(ModuleEvent.READY, widgetReadyHandler);           
+				info.load();
+				
+				this.cursorManager.setBusyCursor();
+			}
+
+			
+			private function widgetReadyHandler(event:ModuleEvent):void
+			{
+				if (chartData)
+				{
+					var info:IModuleInfo = event.module;
+	
+					//var icon:String = configData.configWidgets[id].icon;
+					//var config:String = configData.configWidgets[id].config;
+					var widget:IBaseWidget = info.factory.create() as IBaseWidget;
+					//widget.setId(-1);
+					//widget.setTitle(title);
+					//widget.setIcon(" ");
+					//widget.setConfig(config);
+					//widget.setConfigData(configData);
+					//widget.setLayerName(this._nomeCamada);
+					widget.setMap(map);
+					widget.setData(chartData);
+					
+					PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, false);
+					
+					callLater(removeBusyCursor);
+				}	
+			}
+			
+			private function removeBusyCursor():void
+			{
+				this.cursorManager.removeBusyCursor();
+			}
+			
+			private function recebeTotal(event:TotalRegistrosEvent):void 
+			{
+				if (event.total.toString() == "0") 
+				{
+					includeOpcoesBtn = false;
+					this.setMinMaxBtnVisible(false);
+					nResultados = "Nenhum registro recebido         ";
+					currentState = "minimized";
+				}
+				else
+				{
+					includeOpcoesBtn = true;
+					nResultados = "Total de registros: "+event.total.toString();
+				}
+				SiteContainer.removeEventListener(TotalRegistrosEvent.TOTAL_REGISTROS, recebeTotal);
+			}
+			
+			override public function setLayerName(value:String):void 
+			{
+				_nomeCamada = value;
+			}
+			
+			override public function setData(value:Object):void 
+			{
+				_dados = value;
+			}
+			
+			private function opcoesBtnClick(event:MouseEvent):void
+			{
+				opcoesBtn.styleName = "estiloControlBarBtnOver";
+				menuGraficos.displayPopUp = true;
+			}
+
+			
+			protected function ListRollOut(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				menuGraficos.displayPopUp = false;
+				opcoesBtn.styleName = "estiloControlBarBtn";
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer id="container" styleName="widgetContentContainer">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" 
+							  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5" />
+		</s:layout>
+	
+		<drag:DragFeatureInfoGrid id="dragInfoDisplay" results="{_dados}" color="#000000"/>
+	</s:BorderContainer>
+	
+	<solutions:controlBarContent>
+		
+		<s:BorderContainer borderAlpha="0" backgroundAlpha="0" width="40%" height="20">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle"/>
+			</s:layout>
+			
+			<mx:Label id="lblRegs" text="{nResultados}" styleName="estiloLabel"/>
+		</s:BorderContainer>
+		
+		<s:Group width="60%" height="20" 
+				 visible="{includeOpcoesBtn}" includeInLayout="{includeOpcoesBtn}">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="right" verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:Button id="opcoesBtn"
+					  label="Gráficos" styleName="estiloControlBarBtn" 
+					  height="20" click="opcoesBtnClick(event)"/>
+		
+			<s:PopUpAnchor id="menuGraficos" popUpPosition="right" left="0" top="0">
+				<s:HGroup rollOut="ListRollOut(event)">
+					<s:List id="listaGraficos"
+							change="listaItemClickHandler(event)"
+							dataProvider="{grafMenuData}" 
+							styleName="estiloListaMenu"
+							itemRenderer="widgets.componentes.informacoes.drag.menuGraficos.MenuListItemRenderer">
+
+						<s:layout>
+							<s:VerticalLayout gap="0"/>
+						</s:layout>
+					</s:List>
+				</s:HGroup>
+			</s:PopUpAnchor>
+		</s:Group>
+		
+	</solutions:controlBarContent>
+
+	
+</solutions:BaseWidget>
+

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns="solutions.*"
+			   xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:os="http://openscales.org"
+			   width="100%" height="100%" applicationComplete="init(event)"
+			   viewSourceURL="srcview/index.html">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Declarations>
+		<!--url="http://localhost/ldap/some.php"-->
+		<s:HTTPService id="ldap" url="http://siscom.ibama.gov.br/painelflex/ldap/some.php" 
+					   useProxy="false" resultFormat="e4x"
+					   fault="ldap_fault(event)" result="ldap_result(event)"/>
+		
+		
+		<s:HTTPService id="ldap_out" url="http://siscom.ibama.gov.br/painelflex/ldap/logout.php" 
+					   useProxy="false" resultFormat="e4x" result="logout_result(event)"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.graphics.codec.JPEGEncoder;
+			import mx.controls.Alert;
+			
+			import flash.display.Bitmap;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.BrowserChangeEvent;
+			import mx.events.FlexEvent;
+			import mx.graphics.ImageSnapshot;
+			import mx.managers.BrowserManager;
+			import mx.managers.IBrowserManager;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import org.osmf.events.TimeEvent;
+			import org.vanrijkom.dbf.*;
+			import org.vanrijkom.shp.*;
+			
+			import solutions.BaseWidget;
+			import solutions.ConfigData;
+			import solutions.event.AppEvent;
+			import solutions.utils.StringUtils;
+			
+			import widgets.componentes.ibama.feature.IbamaLineStringFeature;
+			import widgets.componentes.ibama.feature.IbamaPointFeature;
+			import widgets.componentes.ibama.feature.IbamaPolygonFeature;
+			import widgets.componentes.informacoes.drag.event.DrawnBoxEvent;
+			import widgets.componentes.seguranca.LoginWindow;
+			import widgets.componentes.seguranca.event.LoginEvent;
+			import widgets.componentes.seguranca.event.LogoutEvent;
+			import widgets.componentes.vetorizar.event.DisableLayerEvent;
+			import widgets.componentes.vetorizar.event.EnableLayerEvent;
+			
+			
+			private var baseWidget:BaseWidget;
+			private var dlevent:DisableLayerEvent;
+			private var elevent:EnableLayerEvent;
+			private var ibamaPt:IbamaPointFeature;
+			private var ibamaPol:IbamaPolygonFeature;
+			private var ibamaLin:IbamaLineStringFeature;
+			private var wManager:WidgetManager;
+			private var shpRec:ShpRecord;
+			private var shpPt:ShpPoint;
+			private var shpLn:ShpPolyline;
+			private var shpPl:ShpPolygon;
+			private var dbfRcd:DbfRecord;
+			private var dbfHdr:DbfHeader;
+			private var dbfTl:DbfTools;
+			//private var dBoxEvent:DrawnBoxEvent;
+						
+			private var bm:IBrowserManager;
+			public var _ImageSnapshot:ImageSnapshot;
+			
+									
+			protected function init(event:FlexEvent):void
+			{
+				_ImageSnapshot = new ImageSnapshot();
+				SiteContainer.addEventListener(AppEvent.CONFIG_LOADED, setPageTitle);
+				this.addEventListener(LogoutEvent.LOGOUT, sair);
+												
+				ldap.send();
+				
+				/*var obj:Object = new Object();
+				obj.nome = String("Teste");
+				obj.cpf = String("00000000011");
+				obj.email = String("teste@email.com");
+				obj.configXml = 'config.xml';
+				this.container.configManager.init(obj);*/
+			}
+			
+			private function setPageTitle(event:AppEvent):void
+			{    
+				var achou:Boolean = false;
+				var config:ConfigData = (event.data as ConfigData);
+				
+				for (var i:int = 0; ((i < config.configUI.length) && !achou); i++)
+				{
+					if (config.configUI[i].id == "title")
+					{
+						achou = true;
+						
+						bm = BrowserManager.getInstance();
+						bm.setTitle(config.configUI[i].value);
+
+					}
+				}
+					
+			}
+			
+			private function sair(event:LogoutEvent):void
+			{
+				ldap_out.send();
+			}
+			
+			private function logout_result(event:ResultEvent):void
+			{
+				navigateToURL(new URLRequest(FlexGlobals.topLevelApplication.url), "_self");
+			}
+			
+			private function ldap_result(event:ResultEvent):void
+			{
+				var obj:Object;
+				var xml:XML = XML(event.result);
+				
+				if (xml.logged == "true")
+				{	
+					obj = new Object();
+					obj.nome = String(xml.nome);
+					obj.cpf = String(xml.cpf);
+					obj.email = String(xml.email);
+					obj.configXml = 'config.xml';
+				}
+				
+				this.container.configManager.init(obj);
+			}
+			
+			private function ldap_fault(event:FaultEvent):void
+			{
+				this.container.configManager.init();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<SiteContainer id="container">	
+		<configManager> <ConfigManager/> </configManager>
+		<uiManager>     <UIManager/>     </uiManager>
+		<menuController>    <MenuController top="5"/>    </menuController>
+		<!--<dataManager>   <DataManager/>   </dataManager>-->
+		<widgetManager> <WidgetManager/> </widgetManager>
+		<mapManager>  <MapManager/> </mapManager>
+	</SiteContainer>
+	
+</s:Application>

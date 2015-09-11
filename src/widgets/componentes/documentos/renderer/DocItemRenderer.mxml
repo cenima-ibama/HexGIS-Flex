@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false">
+	
+	
+	<fx:Declarations>
+		<s:GlowFilter id="glow" color="#ffffff" alpha="1.0" quality="3" blurX="1" blurY="1"/>
+		
+		<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="500" />
+		
+		<s:Fade id="fadeOut" alphaFrom="1.0" alphaTo="0.0" duration="500" />
+		
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.apdevblog.utils.URLUtils;
+			
+			import flash.external.ExternalInterface;
+			
+			import mx.events.FlexEvent;
+
+			
+			protected function thumbnail_rollOverHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				thumbnail.alpha = 1.0;
+				thumbnail.filters = [glow];
+				
+				nome.styleName = "estiloDocLabelOver";
+				descr.styleName = "estiloLabelOver";
+			}
+			
+			protected function thumbnail_rollOutHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				thumbnail.alpha = 0.9;
+				thumbnail.filters = [];
+				
+				nome.styleName = "estiloTitleLabel";
+				descr.styleName = "estiloLabel";
+			}
+			
+			protected function thumbnailClickHandler(event:MouseEvent):void
+			{		
+				URLUtils.openWindow(""+data.@url+"", "_blank", "scrollbars=yes, resizable=yes, width=500, height=500");
+				/* if (ExternalInterface.available) 
+				{
+					ExternalInterface.call('window.open', ""+data.@url+"" , '_blank', 'scrollbars=yes, resizable=yes, width=500, height=500');
+				} 
+				else
+				{  
+					navigateToURL(new URLRequest(""+data.@url+""), "_blank");
+				} */
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:HGroup gap="10" horizontalAlign="center" verticalAlign="top">
+		
+		<mx:Image id="thumbnail" 
+				  buttonMode="true" useHandCursor="true"
+				  alpha="0.9" width="78" height="100"
+				  click="thumbnailClickHandler(event)" 
+				  source="assets/images/icons/new/text-file-icon.png"
+				  rollOver="thumbnail_rollOverHandler(event)" rollOut="thumbnail_rollOutHandler(event)"/>
+		
+		<s:VGroup gap="5" horizontalAlign="left" verticalAlign="top">
+			<s:Label id="nome"
+					 text="{data.@nome}" 
+					 styleName="estiloTitleLabel" textAlign="left" width="150"/>
+			
+			<s:Label id="descr"
+					text="{data.@descricao}" 
+					styleName="estiloLabel" textAlign="left" width="150"/>
+		</s:VGroup>
+	</s:HGroup>
+
+</s:ItemRenderer>

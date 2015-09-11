@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" showEffect="{fadeIn}" hideEffect="{fadeOut}">
+	
+	
+	<fx:Declarations>
+		
+		<s:GlowFilter id="glow" color="#ffffff" alpha="1.0" quality="3" blurX="1" blurY="1"/>
+		
+		<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="500" />
+		
+		<s:Fade id="fadeOut" alphaFrom="1.0" alphaTo="0.0" duration="500" />
+		
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.apdevblog.utils.URLUtils;
+			
+			import flash.external.ExternalInterface;
+			
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import solutions.CloseWindowBase;
+			
+			import widgets.VideoPlayerWindowWidget;
+			
+			
+			private var video:IModuleInfo
+			
+			
+			protected function thumbnail_rollOverHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				thumbnail.alpha = 1.0;
+				thumbnail.filters = [glow];
+				
+				nome.styleName = "estiloVideoLabelOver";
+				descr.styleName= "estiloLabelOver";
+			}
+			
+			protected function thumbnail_rollOutHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				thumbnail.alpha = 0.9;
+				thumbnail.filters = []
+				
+				nome.styleName = "estiloTitleLabel";
+				descr.styleName= "estiloLabel";
+			}
+			
+			protected function thumbnailClickHandler(event:MouseEvent):void
+			{		
+				//mx.controls.Alert.show("olha a globeleza aí, gente!!");
+				
+				var url:String = "widgets/VideoPlayerWindowWidget.swf";
+				
+				video = ModuleManager.getModule(url);
+				
+				video.addEventListener(ModuleEvent.READY, videoPlayerReady);
+				video.load();
+			}
+			
+			private function videoPlayerReady(event:ModuleEvent):void
+			{
+				var info:IModuleInfo = event.module;
+				
+				var widget:CloseWindowBase = info.factory.create() as CloseWindowBase;
+				
+				widget.setTitle(String(data.@nome));
+				widget.setVideoSource(String(data.@url));
+				
+				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(widget as IFlexDisplayObject);
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<s:HGroup gap="10" horizontalAlign="center" verticalAlign="top">
+		
+		<mx:Image id="thumbnail" 
+				  buttonMode="true" useHandCursor="true"
+				  alpha="0.9" width="100" height="100"
+				  click="thumbnailClickHandler(event)" 
+				  source="assets/images/icons/new/play_icon100.png"
+				  rollOver="thumbnail_rollOverHandler(event)" rollOut="thumbnail_rollOutHandler(event)"/>
+		
+		<s:VGroup gap="5" horizontalAlign="left" verticalAlign="top">
+			<s:Label id="nome"
+					 text="{data.@nome}" 
+					 styleName="estiloTitleLabel" textAlign="left" width="150"/>
+			
+			<s:Label id="descr"
+					 text="{data.@descricao}" 
+					 styleName="estiloLabel" textAlign="left" width="150"/>
+		</s:VGroup>
+	</s:HGroup>
+	
+</s:ItemRenderer>

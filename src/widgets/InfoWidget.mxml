@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:solutions = "solutions.*"
+		  xmlns:drag="widgets.componentes.informacoes.drag.*"
+		  xmlns:click="widgets.componentes.informacoes.click.*"
+		  xmlns:graficos="widgets.componentes.graficos.*"
+		  initialize="init()" creationComplete="configure()">
+	
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.ogc.WMS;
+			
+			import solutions.SiteContainer;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import widgets.componentes.graficos.event.ChartsBarEvents;
+			import widgets.componentes.zoomBox.ZoomBoxActivatedEvent;
+			
+			
+			[Bindable]
+			private var textoMouseDrag:String;
+			
+			[Bindable]
+			private var textoMouseClick:String;
+			
+			[Bindable]
+			private var textoGraf:String;
+			
+			[Bindable]
+			private var textoGraf2:String;
+			
+			[Bindable]
+			private var camadas:ArrayCollection;
+			
+			
+			override protected function configure():void
+			{
+				super.configure();
+				
+				this.atualizaLista();
+				
+				textoMouseDrag = "Clique no retângulo para ativar o modo de seleção geográfica. Em seguida, desenhe uma área no mapa para obter os dados geográficos em uma tabela.";
+			
+				textoMouseClick = "Clique na seta para ativar o modo de seleção por clique. Em seguida, clique sobre a camada do mapa a qual deseja obter os dados geográficos em uma tabela.";
+
+				textoGraf = "Gráficos podem ser gerados dinamicamente a partir das tabelas geradas por meio das funções de seleção acima ou utilizando-se dos botões abaixo.";
+				
+				textoGraf2 = "Clique no ícone referente ao tipo de gráfico que deseja gerar. Selecione a área a qual deseja obter dados para gerar o gráfico dinamicamente.";
+			}
+
+			override public function activate():void
+			{
+				super.activate();
+				
+				if (this.map) 
+				{
+					SiteContainer.addEventListener(ChartsBarEvents.CHART_ACTIVATED, desativaTabelas);
+					SiteContainer.addEventListener(ChartsBarEvents.CHART_DESACTIVATED, onChartDesactivated);
+					this.map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(ZoomBoxActivatedEvent.ZOOMBOX_SELECIONADO, desativaBotoes);
+					
+					this.map.addEventListener(LayerEvent.LAYER_ADDED, atualizaLista);
+					this.map.addEventListener(LayerEvent.LAYER_REMOVED, atualizaLista);
+					this.map.addEventListener(LayerEvent.LAYER_VISIBLE_CHANGED, atualizaLista);
+					
+					this.map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, desativaBotoes);
+					this.map.addEventListener(FeatureEvent.FEATURE_SELECT, desativaBotoes);
+				}
+			}
+			
+			override public function desactivate():void
+			{
+				super.desactivate();
+				
+				if (this.map) 
+				{
+					SiteContainer.removeEventListener(ChartsBarEvents.CHART_ACTIVATED, desativaTabelas);
+					SiteContainer.removeEventListener(ChartsBarEvents.CHART_DESACTIVATED, onChartDesactivated);
+					this.map.removeEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(ZoomBoxActivatedEvent.ZOOMBOX_SELECIONADO, desativaBotoes);
+					
+					this.map.removeEventListener(LayerEvent.LAYER_ADDED, atualizaLista);
+					this.map.removeEventListener(LayerEvent.LAYER_REMOVED, atualizaLista);
+					this.map.removeEventListener(LayerEvent.LAYER_VISIBLE_CHANGED, atualizaLista);
+					
+					this.map.removeEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, desativaBotoes);
+					this.map.removeEventListener(FeatureEvent.FEATURE_SELECT, desativaBotoes);
+				}
+			}
+			
+			private function atualizaLista(event:LayerEvent=null):void
+			{
+				var listaCamadas:Array = listaCamadas();
+				
+				camadas = new ArrayCollection(listaCamadas);
+				
+				if (dropDownListLayers)
+				{
+					dropDownListLayers.selectedIndex = 0;
+				}
+			}
+			
+			private function listaCamadas():Array
+			{
+				var mapLayers:Vector.<Layer>= null;
+				var mapLayersLength:Number = 0;
+				var lista:Array = new Array();
+				var i:Number = 0;
+				
+				if (this.map)
+				{
+					mapLayers= this.map.layers;
+					
+					mapLayersLength = mapLayers.length;
+					
+					for (i = mapLayersLength-1; i>=0; i--)
+					{
+						if (mapLayers[i].visible)
+						{ //the request is made for the top visible wms layer
+							if (mapLayers[i] is WMS)
+							{
+								lista.push(mapLayers[i].identifier);
+							}
+						}
+					}
+				}
+				return lista;
+			}
+
+			private function desativaTabelas(event:ChartsBarEvents):void
+			{
+				clickInfo.active = false;
+				dragInfo.active = false;
+				grupoCamada.visible = true;
+			}
+			
+			private function onChartDesactivated(event:ChartsBarEvents):void
+			{
+				if (!dragInfo.active)
+				{
+					grupoCamada.visible = false;
+				}
+			}
+			
+			private function onDIBClick():void
+			{
+				clickInfo.active = false;
+				chartsBar.active = false;
+				
+				if (!dragInfo.map)
+				{
+					dragInfo.map = this.map;
+				} 
+				
+				dragInfo.active = !dragInfo.active;
+				
+				grupoCamada.visible = dragInfo.active;
+				/* if (dragInfo.active)
+				{
+					dragInfo.active = false;
+					grupoCamada.visible = false;
+				}
+				else
+				{
+					dragInfo.active = true;
+					grupoCamada.visible = true;
+				} */
+			}
+			
+			private function onCIBClick():void
+			{
+				dragInfo.active = false;
+				grupoCamada.visible = false;
+				chartsBar.active = false;
+								
+				if (!clickInfo.map)
+				{
+					clickInfo.map = this.map;
+				} 
+				
+				clickInfo.active = !clickInfo.active;
+				/* if (clickInfo.active)
+				{
+					clickInfo.active = false;
+				}
+				else
+				{
+					clickInfo.active = true;
+				} */
+			}
+			
+			private function desativaBotoes(event:Event=null):void
+			{
+				chartsBar.active = false;
+				dragInfo.active = false;
+				clickInfo.active = false;
+				grupoCamada.visible = false;
+			}
+			
+			override protected function closeWidget(event:MouseEvent):void
+			{
+				desativaBotoes();
+				this.desactivate();
+				super.closeWidget(event);
+			}
+			
+			
+			protected function dropDownListLayers_changeHandler(event:IndexChangeEvent):void
+			{
+				if (dragInfo)
+				{
+					dragInfo.layerName = dropDownListLayers.selectedItem;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer id="container" 
+					   minWidth="400" minHeight="400"
+					   visible="{!this._isReduced}" styleName="widgetContentContainer">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="20" 
+							  paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10"/>
+		</s:layout>
+		
+		<s:Group id="grupoTabelas" width="100%" top="0">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="15"
+								  paddingLeft="0" paddingTop="0" paddingBottom="0" paddingRight="0"/>
+			</s:layout>
+		
+			<s:HGroup width="100%" bottom="0" left="0" right="0" height="5%"
+					  paddingLeft="5" verticalAlign="middle" horizontalAlign="left">
+				<s:Label text="Tabelas" styleName="estiloLabel"/>
+				
+				<s:Line width="90%">
+					<s:stroke>
+						<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+					</s:stroke>
+				</s:Line>
+			</s:HGroup>
+			
+			<s:VGroup width="100%" gap="15" horizontalAlign="center" verticalAlign="middle">
+				
+				<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+					<s:layout>
+						<s:HorizontalLayout gap="0" horizontalAlign="center" verticalAlign="middle"/>
+					</s:layout>
+					<s:HGroup width="50%" verticalAlign="middle" horizontalAlign="center">
+						<drag:DragInfoButton id="dragInfo" map="{map}" 
+						layerName="{dropDownListLayers.selectedItem}" click="onDIBClick()"/>
+					</s:HGroup>
+					
+					<s:HGroup width="50%" verticalAlign="middle" horizontalAlign="center">
+						<click:ClickInfoButton id="clickInfo" map="{map}" click="onCIBClick()"/>
+					</s:HGroup>
+				</s:BorderContainer>
+				
+				<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+					<s:layout>
+						<s:HorizontalLayout gap="10" horizontalAlign="center" verticalAlign="middle"/>
+					</s:layout>
+						
+					<s:Label text="{textoMouseDrag}" width="180" styleName="estiloTextoAjuda" textAlign="justify"/>
+					
+					<s:Label text="OU" styleName="estiloTextoAjuda"/>
+					
+					<s:Label text="{textoMouseClick}" width="180" styleName="estiloTextoAjuda" textAlign="justify"/>
+					
+				</s:BorderContainer>
+				
+				<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+					<s:layout>
+						<s:VerticalLayout gap="0" horizontalAlign="left" verticalAlign="middle"/>
+					</s:layout>
+					<s:Label text="{textoGraf}" width="390" styleName="estiloTextoAjuda" textAlign="left"/>
+				</s:BorderContainer>
+
+			</s:VGroup>
+
+		</s:Group>
+
+		<s:Group id="grupoGraficos" width="100%">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="15"
+								  paddingLeft="0" paddingTop="0" paddingBottom="0" paddingRight="0"/>
+			</s:layout>
+			
+			<s:HGroup width="100%" bottom="0" left="0" right="0" height="5%"
+					  paddingLeft="5" verticalAlign="middle" horizontalAlign="left">
+				<s:Label text="Gráficos" styleName="estiloLabel"/>
+				
+				<s:Line width="90%">
+					<s:stroke>
+						<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+					</s:stroke>
+				</s:Line>
+			</s:HGroup>
+			
+			<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+				<s:layout>
+					<s:VerticalLayout gap="15" horizontalAlign="center" verticalAlign="middle"/>
+				</s:layout>
+				
+				<graficos:ChartsBar id="chartsBar" map="{map}" layerName="{dropDownListLayers.selectedItem}"/>
+				
+				<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+				<s:layout>
+					<s:VerticalLayout gap="0" horizontalAlign="left" verticalAlign="middle"/>
+				</s:layout>
+					<s:Label text="{textoGraf2}" width="390" styleName="estiloTextoAjuda" textAlign="left"/>
+				</s:BorderContainer>
+				
+			</s:BorderContainer>
+		</s:Group>
+		
+		<s:Group id="grupoCamada" width="100%" bottom="0" visible="false">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="15"
+								  paddingLeft="0" paddingTop="0" paddingBottom="0" paddingRight="0"/>
+			</s:layout>
+			
+			<s:HGroup width="100%" bottom="0" left="0" right="0" height="5%"
+					  paddingLeft="5" verticalAlign="middle" horizontalAlign="left">
+				<s:Label text="Camada" styleName="estiloLabel"/>
+				
+				<s:Line width="90%">
+					<s:stroke>
+						<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+					</s:stroke>
+				</s:Line>
+			</s:HGroup>
+			
+			<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+				<s:layout>
+					<s:VerticalLayout gap="0" horizontalAlign="center" verticalAlign="top"/>
+				</s:layout>
+				<s:DropDownList id="dropDownListLayers" minWidth="360"
+								change="dropDownListLayers_changeHandler(event)"
+								dataProvider="{camadas}" styleName="estiloDropDownList"/>
+			</s:BorderContainer>
+		</s:Group>
+	</s:BorderContainer>
+	
+</solutions:BaseWidget>

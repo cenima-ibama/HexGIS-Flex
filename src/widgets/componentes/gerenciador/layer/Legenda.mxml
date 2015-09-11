@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.ogc.WMS;
+			import widgets.componentes.wmsAuthKey.WMSAuthKey;
+			
+			private var _layer:Layer;
+			
+			private var o:Object = new Object();
+						
+			[Bindable]
+			private var fonte:String;
+			
+			[Embed(source="assets/images/icons/default_layer_icon16.png")]
+			[Bindable]
+			public var brokenImg:Class;
+			
+			
+			public function set layer(value:Layer):void
+			{
+				this._layer = value;
+				
+				if (_layer is WMS) 
+				{
+					o = _layer;
+					var camada:String = o.layers;
+					var url:String = o.url;
+					
+					img.visible = true;
+					img.includeInLayout = true;
+								
+					
+					if (_layer is WMSAuthKey)
+					{
+						fonte = url+"?REQUEST=GetLegendGraphic&TRANSPARENT=true&VERSION=1.0.0&FORMAT=image/png&LAYER="+camada+"&WIDTH=20&HEIGHT=20&authkey=88203dcc-2ae8-48ff-99f5-d9eab0f43e7e";
+						/* WIDTH=20&HEIGHT=20& */
+					}
+					else
+					{
+						fonte = url+"?REQUEST=GetLegendGraphic&TRANSPARENT=true&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER="+camada;
+					}
+				}
+				else 
+				{
+					img.visible = false;
+					img.includeInLayout = false; 
+				}
+			}
+	
+		]]>
+	</fx:Script>
+	
+	<mx:Image id="img" source="{fonte}" brokenImageSkin="{brokenImg}"/>
+	
+</s:Group>

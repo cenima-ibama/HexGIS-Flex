@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				autoDrawBackground="false" height="30" width="100%">
+	
+	<fx:Script>
+		<![CDATA[
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer styleName="estiloInvisibleContainer" width="100%" minHeight="30">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"
+								gap="0" paddingBottom="10" paddingLeft="0" paddingRight="20" paddingTop="0"/>
+		</s:layout>
+		
+		<s:BorderContainer id="pontoLonLat" styleName="estiloPontoLonLatList" 
+						   dropShadowVisible="true" width="100%" minHeight="25">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" 
+									paddingLeft="7" paddingRight="7" paddingBottom="5" paddingTop="5"/>
+			</s:layout>
+			<s:Rect width="10"/>
+			<s:Label text="{this.data}" width="100%"/>
+			<s:Rect width="10"/>
+		</s:BorderContainer>
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

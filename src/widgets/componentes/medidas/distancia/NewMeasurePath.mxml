@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<os:IconButton xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:os="http://openscales.org"
+			   implements="org.openscales.core.control.IControl"
+			   toolTip="{this.toolTitle}"
+			   icon="{_btnPath}" alpha="{_alpha}"
+			   width="35" height="35"
+			   click="onClick()" enabled="true"
+			   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import org.openscales.core.Map;
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.control.IControl;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.handler.IHandler;
+			import org.openscales.core.handler.feature.draw.AbstractDrawHandler;
+			import org.openscales.core.handler.feature.draw.DrawPathHandler;
+			import org.openscales.core.handler.mouse.ClickHandler;
+			import org.openscales.core.handler.mouse.DragHandler;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			//import org.openscales.core.measure.Distance;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import widgets.componentes.medidas.distancia.NewDistance;
+			
+			[Bindable]
+			public var toolTitle:String = Catalog.getLocalizationForKey('MeasureBar.distancetooltip');
+			
+			[Bindable]
+			private var _alpha:Number=0.5;
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/ruler30.png")]
+			private var _btnPath:Class;
+			
+			private var _active:Boolean = false;
+			private var _handler:NewDistance= new NewDistance();
+			
+			
+			public function get displaySystem():String
+			{
+				if(this._handler){
+					return this._handler.displaySystem;
+				}
+				else{
+					return null;
+				}
+			}
+			
+			public function set displaySystem(value:String):void
+			{
+				if(this._handler)
+					this._handler.displaySystem = value;
+			}
+			
+			public function get accuracies():HashMap
+			{
+				if(this._handler){
+					return this._handler.accuracies;
+				}else{
+					return null;
+				}
+			}
+			
+			public function set accuracies(value:HashMap):void
+			{
+				if(this._handler)
+					this._handler.accuracies=value;
+			}
+			
+			/**
+			 * Flag for activating and deactivating the component
+			 * @default false;
+			 */
+			[Bindable]
+			public function get active():Boolean{
+				return _active;
+			}
+			
+			public function set active(value:Boolean):void{
+				if(_active == value)
+					return;
+				_active = value;
+				_handler.active = value;
+			}
+			
+			/**
+			 * Map controled by this control
+			 */
+			public function get map():Map{
+				return _handler.map;
+			}
+			public function set map(value:Map):void{
+				if(_handler.map) {
+					_handler.map.removeEventListener(DrawingEvent.CHANGE_ACTIVE_HANDLER, onChangeActiveHandler);
+				}
+				_handler.map = value;
+				_handler.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_HANDLER, onChangeActiveHandler);
+			}
+			
+			/**
+			 * Position (x,y) of the handler
+			 */
+			public function get position():Pixel{
+				
+				return new Pixel(x,y);
+			}
+			public function set position(value:Pixel):void{
+				
+				if(value){
+					x = value.x;
+					y = value.y;
+				}
+			}
+			
+			/**
+			 * On button click, dispatch a DrawingEvent.CHANGE_ACTIVE_HANDLER event
+			 */
+			public function onClick():void
+			{
+				var evt:DrawingEvent = null;
+				if(!this._active){
+					evt= new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_HANDLER);
+					evt.activeHandler = this.id;
+					_handler.map.dispatchEvent(evt);
+					
+					evt = new DrawingEvent(DrawingEvent.DRAW_HANDLER_ACTIVATED);
+					evt.activeHandler = null;
+					_handler.map.dispatchEvent(evt);
+					
+					this.active = true;
+					this.activate();
+				}
+				else{
+					evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_HANDLER);
+					evt.activeHandler = null;
+					_handler.map.dispatchEvent(evt);
+					
+					this.active = false;
+					this.disactivate();
+					_handler.map.mouseNavigationEnabled = true;
+					_handler.map.panNavigationEnabled = true;
+					_handler.map.zoomNavigationEnabled = true;
+					_handler.map.keyboardNavigationEnabled = true;
+				}
+			}
+			
+			/**
+			 * Check the handler when a DrawingEvent.CHANGE_ACTIVE_HANDLER event occured
+			 */
+			private function onChangeActiveHandler(evt:DrawingEvent):void{
+				if(_active && this.id != evt.activeHandler)
+				{
+					this.active = false;
+				}
+				this.disactivate();
+			}
+			
+			// to do
+			public function onMapLanguageChange(event:I18NEvent):void{}
+			
+			public function draw():void{
+				this.invalidateDisplayList();
+			}
+			public function destroy():void{}
+			
+			/**
+			 * To activate or disactivate the handler
+			 */
+			private function activate():void{
+				
+				_handler.active = true;
+				_alpha = 1;
+				_handler.map.mouseNavigationEnabled = false;
+				_handler.map.panNavigationEnabled = false;
+				_handler.map.zoomNavigationEnabled = false;
+				_handler.map.keyboardNavigationEnabled = false;
+			}
+			private function disactivate():void{
+				
+				_handler.active = false;
+				_alpha = 0.5;
+			}
+			
+			private function itemRollOver(event:MouseEvent):void
+			{
+				_alpha = 1.0;
+			}
+			
+			private function itemRollOut(event:MouseEvent):void
+			{				
+				if (!this.active)
+				{
+					_alpha = 0.5;
+				}
+			}
+		]]>
+	</fx:Script>			
+</os:IconButton>

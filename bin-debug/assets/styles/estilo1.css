@@ -1,0 +1,488 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark"; 
+@namespace mx "library://ns.adobe.com/flex/mx";
+@namespace os "http://openscales.org";
+@namespace main "*";
+@namespace bs "com.webmapsolutions.view.components.*";
+@namespace gal "ferramentas.galeria.*";
+@namespace solutions "solutions.*";
+@namespace zoomBox "widgets.componentes.zoomBox.*";
+
+/*@font-face
+{
+}*/
+
+/*main|WidgetPanel {
+	color: #b5cdda; backgroundColor: #99adb7; backgroundAlpha: 0.6;
+	borderVisible: true; borderAlpha: 0.6; borderColor: #99adb7; cornerRadius: 3; borderWeight: 1;
+	contentBackgroundColor: #dddddd; contentBackgroundAlpha: 1.0; dropShadowVisible: true;
+}*/
+
+/**************Barra principal**************/
+.estiloBarra
+{
+	dropShadowVisible: true;
+	borderVisible: true; borderStyle: solid; borderColor: #849fad; borderAlpha: 0.7; borderWeight: 1.5;
+	backgroundColor: #99adb7; backgroundAlpha: 0.6; contentBackgroundAlpha: 1.0; cornerRadius: 2;
+}
+
+.estiloBarraMinimized
+{
+	dropShadowVisible: false;
+	borderVisible: true; borderStyle: solid; borderColor: #99adb7; borderAlpha: 0.0; borderWeight: 2.0;
+	backgroundColor: #99adb7; backgroundAlpha: 0.0; contentBackgroundAlpha: 1.0; cornerRadius: 2;
+}
+
+.estiloTitle
+{
+	fontFamily: Arial;
+	fontWeight: bold;
+	fontSize: 20;
+	color: #22414a;
+}
+
+.estiloSubtitle
+{
+	fontFamily: Arial;
+	fontSize: 13;
+	color: #546269;
+}
+/***********************************/
+
+
+/**************Widgets**************/
+solutions|WidgetTemplate 
+{
+	color: #242e32; backgroundColor: #99adb7; backgroundAlpha: 0.5;
+	borderVisible: true; borderAlpha: 0.6; borderColor: #99adb7; cornerRadius: 3; borderWeight: 1;
+	contentBackgroundColor: #99adb7; contentBackgroundAlpha: 1.0; dropShadowVisible: true;
+}
+
+solutions|CloseWindowTemplate
+{
+	color: #242e32; backgroundColor: #99adb7; backgroundAlpha: 0.5;
+	borderVisible: true; borderAlpha: 0.6; borderColor: #728188; cornerRadius: 1; borderWeight: 1;
+	contentBackgroundColor: #99adb7; contentBackgroundAlpha: 1.0; dropShadowVisible: true;
+	modalTransparency: 0.5; modalTransparencyColor: #a7b9c2; modalTransparencyBlur: 10;
+}
+
+.widgetContentContainer 
+{
+	borderVisible: true; borderAlpha: 0.5; borderColor: #99adb7; cornerRadius: 0; borderWeight: 1; dropShadowVisible: true;
+	backgroundColor: #728188; backgroundAlpha: 0.6; contentBackgroundColor:  #728188; contentBackgroundAlpha: 0.6;
+/*	contentBackgroundColor: #242e32; contentBackgroundAlpha: 0.0;*/
+}
+
+.estiloChartContainer
+{
+	backgroundAlpha: 0.25; backgroundColor: #ffffff; dropShadowVisible:true;
+	borderVisible:true; borderWeight:2; borderAlpha:0.7; borderColor: #ffffff; cornerRadius:3;
+}
+
+.estiloChartConfigContainer
+{
+	borderVisible: true; borderAlpha: 0.5; borderColor: #99adb7; cornerRadius: 3; borderWeight: 1; dropShadowVisible: true;
+	backgroundColor: #99adb7; backgroundAlpha: 0.75; contentBackgroundColor: #242e32; contentBackgroundAlpha: 0.0;
+}
+
+.estiloContainerListaOver
+{
+	borderVisible: true; borderAlpha:0.6; borderColor: #c5f1ec;
+	backgroundAlpha: 0.0; contentBackgroundAlpha: 0.0;
+}
+
+/***********************************/
+
+
+/**************Menus**************/
+.estiloMenu
+{
+	contentBackgroundAlpha: 1; contentBackgroundColor: #728188;
+	borderStyle: solid; borderColor: #728188; borderAlpha: 1;
+	fontSize: 13; symbolColor: #ffffff; color: #ffffff; dropShadowVisible: true;
+	rollOverColor: #ffffff; selectionColor: #ffffff;
+	textRollOverColor: #728188; textSelectedColor: #728188;
+}
+
+.estiloMenuItensContainer
+{
+	backgroundColor: #242e32; backgroundAlpha: 0.8; contentBackgroundAlpha: 1.0;
+	borderColor: #99adb7; borderAlpha:1.0; borderStyle:inset;
+	borderWeight:4; cornerRadius:4; dropShadowVisible:true;
+}
+/*backgroundColor: #242e32*/
+
+.estiloMenuItemRenderer
+{
+	color: #b5cdda; fontWeight: normal;
+}
+
+.estiloMenuItemRendererOver
+{
+	color: #b5cdda; fontWeight: bold;
+}
+/***********************************/
+
+
+/**************Widgets content**************/
+.estiloBorderContainer
+{
+	alpha: 1;
+	backgroundAlpha: 0.8;
+	backgroundColor: #728188;
+	borderColor: #728188;
+	borderVisible: true;
+	color: #000000;
+	cornerRadius: 4;
+	dropShadowVisible:true;
+}
+
+.estiloGrupoLayerManager
+{
+	backgroundColor:#728188; backgroundAlpha:0.6; 
+	borderVisible: true; dropShadowVisible:true;
+	borderAlpha: 0.5; borderColor: #99adb7; cornerRadius: 0; borderWeight: 1;
+}
+/***********************************/
+
+
+/**************Alert**************/
+.estiloAlerta
+{
+	color: #000000; 
+	borderColor: #ff3b27; borderAlpha: 0.75; dropShadowVisible: true;
+	cornerRadius: 0; backgroundColor: #ff0000; backgroundAlpha: 0.5;
+	modalTransparency: 0.5; modalTransparencyBlur: 7;
+	modalTransparencyColor: #99adb7; modalTransparencyDuration: 100;
+}
+
+.estiloMsg
+{
+	color: #000000; 
+	borderColor: #0066c5; borderAlpha: 0.75; dropShadowVisible: true;
+	cornerRadius: 0; backgroundColor: #2478ea; backgroundAlpha: 0.5;
+	modalTransparency: 0.5; modalTransparencyBlur: 7;
+	modalTransparencyColor: #99adb7; modalTransparencyDuration: 100;
+}
+
+/****************************/
+
+
+/**************Data Grids**************/
+.estiloMxDataGrid
+{
+	textAlign:left; variableRowHeight:true;
+	textRollOverColor:#ffffff; textSelectedColor:#FFFFFF;
+	chromeColor:#dddddd; rollOverColor:#999999; selectionColor:#728188;
+	backgroundColor: #ffffff; backgroundAlpha: 0.5;
+	contentBackgroundAlpha:0.0; contentBackgroundColor:#ffffff;
+	borderVisible:true; borderColor:#728188; borderAlpha:0.75;	
+}
+/***********************************/
+
+/**************Container**************/
+.estiloInvisibleContainer
+{
+	color:#000000; borderAlpha: 0.0; backgroundAlpha: 0.0; contentBackgroundAlpha: 0.0;
+}
+
+.estiloCBCont
+{
+	color:#242e32; borderAlpha: 0.0; 
+	backgroundAlpha: 0.0; backgroundColor: #99adb7; contentBackgroundAlpha: 0.0;
+}
+
+.estiloCBContRollOver
+{
+	color:#ffffff; borderAlpha: 0.0; 
+	backgroundAlpha: 0.8; backgroundColor: #000000; contentBackgroundAlpha: 0.0;
+}
+
+.estiloCBContSelected
+{
+	color:#ffffff; borderAlpha: 0.0; 
+	backgroundAlpha: 0.8; backgroundColor: #334e76; contentBackgroundAlpha: 0.0;
+}
+
+.estiloErrorBox
+{
+	color: #b03737;
+	borderColor: #ff3b27; borderAlpha: 0.2; dropShadowVisible: false;
+	cornerRadius: 3; backgroundColor: #ff0000; backgroundAlpha: 0.2;
+}
+
+.estiloStylingContainer
+{
+	color:#000000; borderAlpha: 1.0; backgroundAlpha: 0.0; contentBackgroundAlpha: 0.0;
+}
+/****************************/
+
+
+/**************PopUp Chart Fields**************/
+.estiloPopUpChart
+{
+	color:#242e32; dropShadowVisible: true;
+	backgroundColor: #99adb7; backgroundAlpha: 0.8; 
+	borderColor: #99adb7; borderAlpha: 1.0;
+}
+/****************************/
+
+
+/**************List**************/
+.estiloListaLayerManager
+{
+	contentBackgroundColor: #ffffff; contentBackgroundAlpha: 0.0;
+	color: #000000; chromeColor: #ffffff; borderVisible:false; borderColor: #ffffff;
+}
+
+.estiloListaExport
+{
+	backgroundColor: #ffffff; contentBackgroundColor: #ffffff; backgroundAlpha: 0.7; contentBackgroundAlpha: 1.0;
+	color: #000000; chromeColor: #cccccc; borderVisible:true; borderColor: #ffffff;
+}
+
+.estiloListaMenu
+{
+	color: #99adb7; rollOverColor: #99adb7;
+	backgroundColor: #242e32; contentBackgroundColor: #242e32; backgroundAlpha: 0.0;
+	borderColor: #242e32; borderAlpha: 1.0; contentBackgroundAlpha: 0.0;
+}
+
+.estiloPontoLonLatListOver
+{
+	color:#ffffff; borderAlpha: 0.0; backgroundAlpha: 0.8;
+	backgroundColor: #000000; contentBackgroundAlpha: 0.0;
+}
+
+.estiloPontoLonLatList
+{
+	color:#000000; borderAlpha: 0.0; backgroundAlpha: 0.8;
+	backgroundColor: #99adb7; contentBackgroundAlpha: 0.0;
+}
+
+.estiloAttributesList
+{
+	color:#000000; borderAlpha: 0.0; backgroundAlpha: 0.8;
+	backgroundColor: #c1d0d8; contentBackgroundAlpha: 0.0;
+}
+/***********************************/
+
+
+/**************Botões**************/
+.estiloMenuButton
+{
+	chromeColor: #99adb7;
+	cornerRadius: 0;
+	textRollOverColor: #92c5ca;
+}
+
+.estiloRadioButton
+{
+	color: #242e32;
+	chromeColor: #cccccc;
+}
+
+.estiloWidgetContentButton
+{
+	color: #000000; 
+	cornerRadius: 0;
+	chromeColor: #728188;
+}
+
+.estiloWidgetContentMainButton
+{
+	color: #000000; 
+	cornerRadius: 0;
+	chromeColor: #cccccc;
+	useHandCursor: true;
+	buttonMode: true;
+}
+/*chromeColor: #728188;*/
+
+.estiloControlBarBtn
+{
+	color: #242e32;
+	alpha: 0.6;
+	chromeColor: #99adb7;
+	cornerRadius: 0;
+}
+
+.estiloControlBarBtnOver
+{
+	color: #99adb7;
+	alpha: 0.6;
+	chromeColor: #242e32;
+	cornerRadius: 0;
+}
+
+.estiloWidgetBtn
+{
+	color: #000000;
+	chromeColor: #99adb7;
+	cornerRadius: 0;
+}
+
+.estiloBtnMapasContainer
+{
+	borderAlpha: 0.7; borderColor: #99adb7; borderVisible: true; cornerRadius: 1;
+	backgroundAlpha: 0.7; backgroundColor: #99adb7;
+	contentBackgroundAlpha: 0.0; dropShadowVisible: false;	
+}
+/***********************************/
+
+
+/**************Text Input**************/
+.estiloTextInputInvisivel
+{
+	color: #000000; contentBackgroundAlpha: 0.0;
+}
+
+.estiloTextInput
+{
+	color: #222222; focusAlpha:0.4; paddingLeft: 5; paddingRight: 5; borderAlpha: 0.7;
+	contentBackgroundAlpha: 0.5; contentBackgroundColor: #dddddd; borderVisible:true; focusColor: #70b2ee;
+}
+
+.estiloTextInputOver
+{
+	color: #0000ee; focusAlpha:0.4; paddingLeft: 5; paddingRight: 5; borderAlpha: 0.7;
+	contentBackgroundAlpha: 0.5; contentBackgroundColor: #dddddd; borderVisible:true; focusColor: #70b2ee;
+}
+
+s|TextInput:normalWithPrompt 
+{
+	color: #555555;
+	alpha: 1.0;
+	fontStyle: italic;
+}
+
+s|TextArea:normalWithPrompt 
+{
+	color: #555555;
+	alpha: 1.0;
+	fontStyle: italic;
+}
+/***********************************/
+
+
+/**************Drop Down List**************/
+.estiloDropDownList
+{
+	color: #000000; cornerRadius: 0;
+	borderVisible: true; borderColor: #bbbbbb; borderAlpha: 1.0;
+	contentBackgroundAlpha: 0.9; contentBackgroundColor: #cccccc;
+	textRollOverColor: #ffffff; textSelected: #ffffff; chromeColor: #cccccc;
+	rollOverColor: #444444; selectionColor: #666666;
+}
+/***********************************/
+
+
+/**************Labels**************/
+.estiloLabel
+{
+	/*	color: #303b40;*/
+	/*	color: #414a4f;*/
+	color: #242e32;
+	fontWeight: normal;
+}
+
+.estiloLabelOver
+{
+	color: #000000;
+	fontWeight: normal;
+}
+
+.estiloLabelSelectedFile
+{
+	color: #dddddd;
+	fontWeight: normal;
+}
+
+.estiloTitleLabel
+{
+	color: #242e32;
+	fontWeight: bold;
+}
+
+.estiloVideoLabelOver
+{
+	color: #bf0404;
+	fontWeight: bold;
+}
+
+.estiloDocLabelOver
+{
+/*	1f2a77*/
+	color: #1225ae;
+	fontWeight: bold;
+}
+
+.estiloLabelError 
+{
+	color: #ff0000;
+	fontWeight: normal;
+}
+
+.estiloTextoAjuda
+{
+	color: #242e32; fontSize: 10;
+}
+/*color: #344b54*/
+
+/***********************************/
+
+
+/**************Contador**************/
+.estiloCounterContainer
+{
+	backgroundColor: #99adb7; backgroundAlpha: 0.6; contentBackgroundAlpha: 1.0; cornerRadius: 5;
+	borderColor: #99adb7; borderVisible: true; borderAlpha: 1.0; borderStyle: solid; borderWeight: 2.0;
+}
+/***********************************/
+
+
+/**************Overview**************/
+.estiloOverviewContainer
+{
+	cornerRadius: 4; borderWeight: 4; borderColor: #99adb7; borderStyle:inset; borderAlpha: 1.0;
+	backgroundAlpha: 0.0; contentBackgroundAlpha: 1.0; dropShadowVisible:true;
+}
+/***********************************/
+
+/**************Blur para o drag**************/
+zoomBox|BlurScreen
+{
+	modalTransparency: 0; modalTransparencyBlur: 0;
+	modalTransparencyColor: #ffffff; modalTransparencyDuration: 100;
+}
+/***********************************/
+
+global
+{
+	color: #000000;
+	chrome-color: #cccccc;
+}
+
+
+/*.estiloComboBox
+{
+color: #333333;
+chromeColor: #728188;
+rowCount: 5;
+contentBackgroundAlpha: 1;
+contentBackgroundColor: #747474;
+rollOverColor: #8f8f8f;
+selectionColor: #8f8f8f;
+}*/
+/*	textRollOverColor: #cccccc;*/
+/*	textSelectedColor: #cccccc;*/
+
+/*.estiloLista 
+{
+borderAlpha: 0.7;
+borderColor: #cccccc;
+chromeColor: #cccccc;
+color: #efefef;
+contentBackgroundAlpha: 0;
+contentBackgroundColor: #cccccc;
+}*/

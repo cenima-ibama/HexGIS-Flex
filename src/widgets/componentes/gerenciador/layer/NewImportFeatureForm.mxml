@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 initialize="init(event)" width="100%" height="100%">
+	
+	<fx:Declarations>
+		<!-- Placer ici les éléments non visuels (services et objets de valeur, par exemple). -->
+	</fx:Declarations>
+	
+
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.KML;
+			import org.openscales.core.layer.ogc.GML;
+			import org.openscales.core.layer.ogc.GPX;
+			import org.openscales.core.layer.ogc.GeoRss;
+			import org.openscales.core.layer.osm.OSM;
+			
+			private const FORMAT_PROVIDER_CHANGED:String = "formatProviderChanged";
+			private const VERSION_PROVIDER_CHANGED:String = "versionProviderChanged";
+			
+			/**
+			 * Translation for label Name
+			 */
+			[Bindable]
+			public var nameLabel:String = "Nome";
+			
+			
+			/**
+			 * THe valide import text
+			 */
+			[Bindable]
+			public var importLabel:String = "Importar";
+			
+			/**
+			 * The label url value
+			 */
+			[Bindable]
+			public var urlLabelText:String = "URL";
+			
+			/**
+			 * The label locale file value
+			 */
+			[Bindable]
+			public var localeLabelText:String = "Arquivo";
+			
+			/**
+			 * The label format value
+			 */
+			[Bindable]
+			public var formatLabelText:String = "Formato";	
+			
+			/**
+			 * Translation for label Version
+			 */
+			[Bindable]
+			public var versionLabel:String = "Versão";
+			
+			/**
+			 * Translation for label Name error
+			 */
+			[Bindable]
+			public var nameLabelError:String = "Nome não pode ser vazio ou igual ao de outra camada.";;
+			
+			/**
+			 * Translation for source (url or locale) error (empty)
+			 */
+			[Bindable]
+			public var sourceLabelError:String = "Nenhum arquivo selecionado.";
+			
+			/**
+			 * Browse files
+			 */
+			[Bindable]
+			public var browseLabel:String = "Procurar";
+			
+			/**
+			 * Datas in the format dropdownlist
+			 */
+			private var _formatProvider:ArrayCollection = new ArrayCollection();
+			
+			/**
+			 * The current selected format
+			 * @default the first one : 0
+			 */
+			[Bindable]
+			public var selectedFormat:Number = 0;
+			
+			/**
+			 * Contains all the format supported
+			 */
+			[Bindable]
+			public var supportedFormat:Array = null;
+			
+			/**
+			 * Contains all the version supported
+			 */
+			[Bindable]
+			public var supportedVersion:Array = null;
+			
+			/**
+			 * Datas for the version dropdownList
+			 */
+			[Bindable]
+			private var _versionProvider:ArrayCollection = new ArrayCollection();
+			
+			/**
+			 * The current selected version
+			 * @default the first one : 0
+			 */
+			[Bindable]
+			public var selectedVersion:Number = 0;
+			
+			/**
+			 * @private
+			 * Datas contains in the locale file selected
+			 * @default null
+			 */
+			private var _datasFile:ByteArray = null;
+			
+			/**
+			 * The ImportFeature linked to the current pop up
+			 */
+			private var _importFeat:NewImportFeature = null;
+			
+			/**
+			 * Selected source type
+			 */
+			[Bindable]
+			public var selectedSource:int = -1; 
+			
+			/**
+			 * The file reference
+			 */
+			private var fileReference:FileReference;
+			private var _alreadyInit:Boolean = false;
+			
+			[Bindable]
+			private var nameErrorVisible:Boolean = false;
+			
+			[Bindable]
+			private var sourceErrorVisible:Boolean = false;
+			
+			public function init(event:Event):void
+			{
+				if(this._alreadyInit)
+					return;
+				
+				if(!this.supportedFormat)
+				{
+					// init all available formats
+					this.supportedFormat = new Array();
+					this.supportedFormat[0] = "KML";
+					this.supportedFormat[1] = "GPX";
+					this.supportedFormat[2] = "GeoRSS";
+					this.supportedFormat[3] = "GML";
+				}
+				
+				if(!this.supportedVersion)
+				{
+					this.supportedVersion = new Array();
+					this.supportedVersion[0] = [""]; 
+					this.supportedVersion[1] = ["1.0.0","1.1.0"]; // GPX
+					this.supportedVersion[2] = [""]; 
+					this.supportedVersion[3] = ["2.0.0", "2.1.0" , "3.2.1"]; // GML
+				}
+				
+				// init formats :
+				for each(var format:String in supportedFormat)
+				{
+					this.formatProvider.addItem(format);
+				}
+				
+				// init versions :
+				for each(var version:String in supportedVersion[this.selectedFormat])
+				{
+					this.versionProvider.addItem(version);
+				}
+				
+				this._alreadyInit = true;
+			}
+			
+			/**
+			 * Call when a change event if dispatch by the dropdownlist linked to formats
+			 * Update the current format value according to the new selection
+			 * And then refresh the version list
+			 */
+			public function formatChange(event:Event):void
+			{
+				if(event)
+				{
+					var list:DropDownList = event.currentTarget as DropDownList
+					this.selectedFormat = list.selectedIndex;
+					
+					this.updateVersion();
+				}
+			}
+			
+			/**
+			 * Call when a change event if dispatch by the dropdownlist linked to versions
+			 * Update the current version value according to the new selection
+			 */
+			public function versionChange(event:Event):void
+			{
+				if(event)
+				{
+					var list:DropDownList = event.currentTarget as DropDownList
+					this.selectedVersion = list.selectedIndex;
+				}	
+			}
+			
+			/**
+			 * Change versions value according to current format selection
+			 */
+			public function updateVersion():void
+			{
+				this.versionProvider.removeAll();
+				this.selectedVersion = -1;
+				for each(var version:String in supportedVersion[this.selectedFormat])
+				{
+					this.versionProvider.addItem(version);
+				}
+				this.selectedVersion = 0;
+				
+				if(this.versionProvider.length > 1)
+					versionGroup.visible = true;
+				else
+					versionGroup.visible = false;
+			}
+			
+			/**
+			 * Change the text values on Map Language changed
+			 * @param event The I18N event received
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				/* this.importLabel = Catalog.getLocalizationForKey('drawing.import');
+				this.urlLabelText = Catalog.getLocalizationForKey('drawing.url');
+				this.localeLabelText = Catalog.getLocalizationForKey('drawing.locale'); */
+			}
+			
+			/**
+			 * Called when the user validate the import
+			 * First check that locale file or url is not empty and then create a new Layer with the file data
+			 * 
+			 * @param event The MouseEvent received
+			 */
+			public function validateImportFeature(event:MouseEvent):void
+			{
+				// get and check empty field
+				var valide:Boolean = true;
+				
+				// get the datas fields :
+				var name:String = String(this.inputName.text).replace(/\s/g,"");
+				var format:String = this.formatProvider.getItemAt(this.selectedFormat) as String;
+				var version:String = this.versionProvider.getItemAt(this.selectedVersion) as String;
+				var url:String = (this.urlInput.text).replace(/\s/g,"");
+				var source:String = (this.urlInput.text).replace(/\s/g,"");
+				
+				if(!name || name=="" || !this.validateName(name))
+				{
+					sourceErrorVisible = false;
+					nameErrorVisible = true;
+					valide = false;
+				}
+				else
+				{
+					nameErrorVisible = false;
+					
+					if(selectedSource == -1)
+					{
+						sourceErrorVisible = true;
+						valide = false;
+					}
+					else if(selectedSource == 0)
+					{
+						sourceErrorVisible = true;
+						valide = false;
+					}	
+					else if(selectedSource == 1 && (!url || url=="") )
+					{
+						sourceErrorVisible = true;
+						valide = false;
+					}	
+					else if(selectedSource == 2 && !_datasFile)
+					{
+						sourceErrorVisible = true;
+						valide = false;
+					}	
+				}
+				
+				if(!valide)
+					return;
+				
+				nameErrorVisible = false;
+				sourceErrorVisible = false;
+				
+				var xml:XML = null;
+				var evt:DrawingEvent;
+				
+				if(valide)
+				{
+					switch(format)
+					{
+						case "KML":
+							
+							var kml:KML = null;
+							
+							if(selectedSource == 1)
+							{
+								kml = new KML(name, url);
+								kml.selected = true;
+								kml.editable = true;
+								this.importFeature.map.addLayer(kml);
+							}
+								
+							else // locale file
+							{
+								xml = new XML(_datasFile.readUTFBytes(_datasFile.bytesAvailable));
+								kml = new KML(name, null, xml);
+								kml.selected = true;
+								kml.editable = true;
+								this.importFeature.map.addLayer(kml);
+							}
+							evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_LAYER);
+							evt.layer = kml;
+							this.importFeature.map.dispatchEvent(evt);
+							
+							break;
+						
+						case "GPX":
+							
+							var gpx:GPX = null;
+							
+							if(selectedSource == 1)
+							{
+								gpx = new GPX(name, version, url);
+								gpx.selected = true;
+								gpx.editable = true;
+								this.importFeature.map.addLayer(gpx);
+							}
+							else // locale file
+							{
+								xml = new XML(_datasFile.readUTFBytes(_datasFile.bytesAvailable));
+								gpx = new GPX(name, version, null, xml);
+								gpx.selected = true;
+								gpx.editable = true;
+								this.importFeature.map.addLayer(gpx);
+							}
+							evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_LAYER);
+							evt.layer = gpx;
+							this.importFeature.map.dispatchEvent(evt);
+							
+							break;
+						
+						case "GeoRSS":
+							
+							if(selectedSource == 1)
+							{
+								var geoRss:GeoRss = new GeoRss(name, url);
+								geoRss.selected = true;
+								geoRss.editable = true;
+								this.importFeature.map.addLayer(geoRss);
+							}
+							else // locale file
+							{
+								
+							}
+							evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_LAYER);
+							evt.layer = geoRss;
+							this.importFeature.map.dispatchEvent(evt);
+							
+							break;
+						
+						case "OSM":
+							
+							if(selectedSource == 1)
+							{
+								var osm:OSM = new OSM(name, url);
+								osm.selected = true;
+								this.importFeature.map.addLayer(osm);
+							}
+							else // locale file
+							{
+								
+							}
+							
+							break;
+						
+						case "GML":
+							
+							var gml:GML = null;
+							
+							if(selectedSource == 1)
+							{
+								gml = new GML(name, version, this.importFeature.map.projection, url);
+								gml.selected = true;
+								gml.editable = true;
+								this.importFeature.map.addLayer(gml);
+							}
+							else // locale file
+							{
+								xml = new XML(_datasFile.readUTFBytes(_datasFile.bytesAvailable));
+								gml = new GML(name, version, this.importFeature.map.projection, null, xml);
+								gml.selected = true;
+								gml.editable = true;
+								this.importFeature.map.addLayer(gml);
+							}
+							evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_LAYER);
+							evt.layer = gml;
+							this.importFeature.map.dispatchEvent(evt);
+							
+							break;
+					}	
+					this.importFeature.closePopUp();
+				}
+			}
+			
+			/**
+			 * @private
+			 */
+			private function validateName(value:String):Boolean
+			{
+				if(this.importFeature.map)
+				{
+					if(this.importFeature.map.getLayerByIdentifier(value)==null)
+						return true;
+				}
+				return false;
+			}
+			
+			/**
+			 * Select url procces for import
+			 */
+			public function selectUrl(event:MouseEvent):void
+			{
+				selectedSource = 1;
+				urlInput.visible = true;
+				localeButton.visible = false;
+				selectedLocaleFile.visible = true;
+			}
+			
+			/**
+			 * Select locale process for import
+			 */
+			public function selectLocale(event:MouseEvent):void
+			{
+				selectedSource = 2;
+				urlInput.visible = false;
+				selectedLocaleFile.visible = true;
+				localeButton.visible = true;
+			}
+			
+			/**
+			 * Browse FileSystem to select the locale file to import
+			 */
+			public function browseFiles():void
+			{
+				//create the FileReference instance
+				fileReference = new FileReference();
+				
+				//listen for when they select a file
+				fileReference.addEventListener(Event.SELECT, onFileSelect);
+				
+				//listen for when then cancel out of the browse dialog
+				fileReference.addEventListener(Event.CANCEL,onCancel);
+				
+				//open a native browse dialog that filters for text files
+				fileReference.browse();
+			}
+			
+			/**
+			 * Called when a file is selected on 
+			 */
+			public function onFileSelect(e:Event):void
+			{
+				//listen for when the file has loaded
+				fileReference.addEventListener(Event.COMPLETE, onLoadComplete);
+				
+				//listen for any errors reading the file
+				fileReference.addEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+				
+				//load the content of the file
+				fileReference.load();
+			}
+			
+			/**
+			 * Called when the user cancel the browse process
+			 */
+			public function onCancel(e:Event):void				
+			{
+				fileReference = null;
+			}
+			
+			/**
+			 * private
+			 * called when the file has completed loading
+			 */
+			private function onLoadComplete(e:Event):void
+			{
+				//get the data from the file as a ByteArray
+				_datasFile = fileReference.data;
+				
+				selectedLocaleFile.text = fileReference.name;
+				
+				//clean up the FileReference instance
+				fileReference = null;
+			}
+			
+			//called if an error occurs while loading the file contents
+			private function onLoadError(e:IOErrorEvent):void
+			{
+				trace("Error loading file : " + e.text);
+			}
+			
+			
+			/**
+			 * Return the importFeature linked to theb current form
+			 */
+			public function get importFeature():NewImportFeature
+			{
+				return _importFeat;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set importFeature(value:NewImportFeature):void
+			{
+				_importFeat = value;
+				if(_importFeat.map)
+				{
+					this._importFeat.map.addEventListener(I18NEvent.LOCALE_CHANGED, this.onMapLanguageChange);
+				}
+			}
+			
+			/**
+			 * The different formats available in the dropdownlist
+			 */
+			[Bindable(event=FORMAT_PROVIDER_CHANGED)]
+			public function get formatProvider():ArrayCollection
+			{
+				return this._formatProvider;
+			}
+			
+			public function set formatProvider(value:ArrayCollection):void
+			{
+				if(value)
+				{
+					this._formatProvider = value;
+					dispatchEvent(new Event(FORMAT_PROVIDER_CHANGED));	
+				}
+			}
+			
+			/**
+			 * The different versions available in the dropdownlist
+			 */
+			[Bindable(event=VERSION_PROVIDER_CHANGED)]
+			public function get versionProvider():ArrayCollection
+			{
+				return this._versionProvider;
+			}
+			
+			public function set versionProvider(value:ArrayCollection):void
+			{
+				if(value)
+				{
+					this._versionProvider = value;
+					dispatchEvent(new Event(VERSION_PROVIDER_CHANGED));	
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<s:layout>
+		<s:VerticalLayout gap="15" paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"
+						  verticalAlign="middle" horizontalAlign="left"/>
+	</s:layout>
+	
+	<s:Group id="nameGroup" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:Label id="layerName" text="{this.nameLabel}" styleName="estiloLabel" width="40%" />
+		<s:TextInput id="inputName" width="60%" styleName="estiloTextInput" />
+	</s:Group>
+	
+	<s:Group id="formatGroup" width="100%">
+		<s:layout>
+			<s:HorizontalLayout  horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:Label id="formatLabel" text="{this.formatLabelText}" width="40%" styleName="estiloLabel" />
+		
+		<s:DropDownList id="listFormat" 
+						styleName="estiloDropDownList" width="60%"
+						change="{this.formatChange(event)}"
+						dataProvider="{this.formatProvider}"
+						selectedIndex="{this.selectedFormat}" />
+	</s:Group>
+	
+	
+	<s:Group id="versionGroup" visible="false" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:Label id="version" text="{this.versionLabel}" width="40%" styleName="estiloLabel" />
+		<s:DropDownList id="listVersion"
+						styleName="estiloDropDownList"
+						change="{this.versionChange(event)}"
+						dataProvider="{this.versionProvider}"
+						selectedIndex="{this.selectedVersion}" 
+						width="60%"/>
+	</s:Group>
+	
+	<s:Group id="urlGroup" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:RadioButton groupName="source" 
+					   id="url"
+					   label="{this.urlLabelText}" 
+					   width="40%" 
+					   click="selectUrl(event);"/>
+		
+		<s:TextInput id="urlInput" width="60%" visible="false" styleName="estiloTextInput" />
+	</s:Group>
+	
+	<s:Group id="localeGroup" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:RadioButton groupName="source" 
+					   id="locale"
+					   label="{this.localeLabelText}" 
+					   width="40%" 
+					   click="selectLocale(event);"/>
+		<s:Button id="localeButton" visible="false" width="60%" 
+				  label="{this.browseLabel}" click="{this.browseFiles()}"
+				  styleName="estiloWidgetContentButton"/>
+	</s:Group>
+	
+	<s:Group id="selectedFileGroup" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:Rect width="40%"/>
+		<s:Label id="selectedLocaleFile" visible="false" textAlign="left"
+				 maxWidth="280" width="60%" styleName="estiloLabelSelectedFile"/>
+		
+	</s:Group>
+	
+	<s:Group id="errorLabelsGroup" width="100%" height="50">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" />
+		</s:layout>
+		<s:Label id="nameError"
+				 visible="{nameErrorVisible}" includeInLayout="{nameErrorVisible}"
+				 text="{this.nameLabelError}" width="300" styleName="estiloLabelError"/>
+		
+		<s:Label id="sourceError"
+				 visible="{sourceErrorVisible}" includeInLayout="{sourceErrorVisible}"  
+				 text="{this.sourceLabelError}" width="300" styleName="estiloLabelError"/>
+	</s:Group>
+	
+	<s:Button id="validateImportButton" label="{this.importLabel}" 
+			  click="{this.validateImportFeature(event)}" bottom="0"
+			  styleName="estiloWidgetContentMainButton"/>
+	
+</s:Group>

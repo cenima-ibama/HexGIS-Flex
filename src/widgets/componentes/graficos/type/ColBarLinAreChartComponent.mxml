@@ -1,0 +1,924 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%"
+		 creationComplete="onCreationComplete(event)">
+
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import mx.charts.AreaChart;
+			import mx.charts.BarChart;
+			import mx.charts.CategoryAxis;
+			import mx.charts.ChartItem;
+			import mx.charts.ColumnChart;
+			import mx.charts.LineChart;
+			import mx.charts.chartClasses.Series;
+			import mx.charts.series.AreaSeries;
+			import mx.charts.series.BarSeries;
+			import mx.charts.series.ColumnSeries;
+			import mx.charts.series.LineSeries;
+			import mx.charts.series.items.ColumnSeriesItem;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.IVisualElement;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			import mx.graphics.GradientEntry;
+			import mx.graphics.IFill;
+			import mx.graphics.LinearGradient;
+			import mx.graphics.SolidColor;
+			
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.style.fill.SolidFill;
+			
+			import solutions.SiteContainer;
+			import solutions.utils.ChartUtils;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import widgets.componentes.graficos.ListItemValueObject;
+			import widgets.componentes.graficos.RadioButtonItemObject;
+			import widgets.componentes.informacoes.drag.event.TotalRegistrosEvent;
+			
+			
+			[Bindable]
+			private var _data:Object;
+			
+			[Bindable]
+			private var _mode:String;
+			
+			[Bindable]
+			private var _dateFieldVisible:Boolean = false;
+			
+			[Bindable]
+			private var _listaCamposNomes:Array;
+			
+			[Bindable]
+			private var _listaCamposNumericos:Array;
+			
+			[Bindable]
+			private var _listaCamposDatas:Array;
+			
+			private var selecionouCampos:Boolean = false;
+			
+			private var _dadosSelecionados:ArrayCollection;
+			
+			private var column:ColumnChart;
+			private var bar:BarChart;
+			private var line:LineChart;
+			private var area:AreaChart;
+			
+			private var chartSeries:Array;
+						
+			[Bindable]
+			private var tiposGrafColBar:ArrayCollection = new ArrayCollection([{nome:'Agrupado', tipo:'clustered'},
+																				{nome:'Sobreposto', tipo:'overlaid'},
+																				{nome:'Empilhado', tipo:'stacked'},
+																				{nome:'100%', tipo:'100%'}]);
+			
+			[Bindable]
+			private var tiposGrafArea:ArrayCollection = new ArrayCollection([{nome:'Sobreposto', tipo:'overlaid'},
+																				{nome:'Empilhado', tipo:'stacked'},
+																				{nome:'100%', tipo:'100%'}]);
+			
+			
+
+			public function get data():Object
+			{
+				return this._data;
+			}
+			
+			public function set data(value:Object):void
+			{
+				var listaNomes:Array;
+				var listaNumericos:Array;
+				var listaDatas:Array;
+
+				if (value) 
+				{				
+					this._mode = value.modo;
+					
+					this._data = value.dados;
+					
+					listaNomes = new Array();
+					
+					listaNumericos = new Array();
+					
+					listaDatas = new Array();
+					listaDatas.push("-");
+					
+					var dadosRecebidos:Vector.<Feature> = this.data as Vector.<Feature>;
+					var numeroRegs:int = dadosRecebidos.length;
+					
+					if (numeroRegs > 0)
+					{
+						var attr:Object;
+						var feat:Feature = dadosRecebidos[0];
+						attr = (feat.attributes);
+						
+						for (var name:String in attr) 
+						{ 						
+							if(!isNaN(attr[name])){
+								listaNumericos.push(name);
+							}
+							
+							if ((attr[name] is String) && (isNaN(attr[name]))) 
+							{
+								listaNomes.push(name);
+							}
+							
+							if ((name.search("data") > -1) || (name.search("date") > -1))
+							{
+								listaDatas.push(name);
+								_dateFieldVisible = true;
+							}
+						}
+						
+						preparaCamposNomes(listaNomes);
+						preparaCamposNumericos(listaNumericos);
+						preparaCamposDatas(listaDatas);
+					}
+				}
+			}
+			
+			private function addChart():void
+			{
+				var categoryAxis:CategoryAxis;
+				categoryAxis = new CategoryAxis();
+				categoryAxis.categoryField = "categoryField";
+				
+				switch (this._mode)
+				{
+					case ("Colunas"):
+						column = new ColumnChart();
+						column.percentHeight = 100;
+						column.percentWidth = 100;
+						column.type = "clustered";
+						column.showDataTips = true;
+						
+						chartContainer.addElement(column);
+						
+						column.horizontalAxis = categoryAxis;
+						
+						dropDownList_chartTypes.dataProvider = tiposGrafColBar;
+						dropDownList_chartTypes.selectedIndex = 0;
+						
+						legenda.dataProvider = column;
+						
+						break;
+						
+					case ("Barras"): 
+						bar = new BarChart();
+						bar.percentHeight = 100;
+						bar.percentWidth = 100;
+						bar.type = "clustered";
+						bar.showDataTips = true;
+						
+						chartContainer.addElement(bar);
+						
+						bar.verticalAxis = categoryAxis; 
+						
+						dropDownList_chartTypes.dataProvider = tiposGrafColBar;
+						dropDownList_chartTypes.selectedIndex = 0;
+						
+						legenda.dataProvider = bar;
+
+						break;
+					
+					case ("Linhas"): 
+						line = new LineChart();
+						line.percentHeight = 100;
+						line.percentWidth = 100;
+						line.showDataTips = true;
+						
+						chartContainer.addElement(line);
+						
+						line.horizontalAxis = categoryAxis; 
+						
+						selecChartType.visible = false
+						selecChartType.includeInLayout = false;
+						
+						legenda.dataProvider = line;
+
+						break;
+						
+					case ("Áreas"):
+						area = new AreaChart();
+						area.percentHeight = 100;
+						area.percentWidth = 100;
+						area.type = "overlaid";
+						area.showDataTips = true;
+						
+						chartContainer.addElement(area);
+						
+						area.horizontalAxis = categoryAxis; 
+						
+						dropDownList_chartTypes.dataProvider = tiposGrafArea;
+						dropDownList_chartTypes.selectedIndex = 0;
+						
+						legenda.dataProvider = area;
+						
+						break;
+				}
+			}
+			
+			private function preparaCamposNomes(lista:Array):void
+			{
+				var tamanho:int = lista.length;
+				var itemCamposNomes:Object;
+				
+				lista.sort();
+				
+				//_listaCamposNomes = lista;
+				
+				if (_listaCamposNomes == null)
+				{
+					_listaCamposNomes = new Array();
+				}
+				
+				for (var i:int=0; i<tamanho; i++)
+				{
+					itemCamposNomes = new RadioButtonItemObject();
+					itemCamposNomes.label = lista[i];
+					itemCamposNomes.group = radioGroupNome;
+					
+					_listaCamposNomes.push(itemCamposNomes);
+				} 
+			}
+			
+			private function preparaCamposNumericos(lista:Array):void
+			{
+				var tamanho:int = lista.length;
+				var itemCamposNumericos:Object;
+				
+				lista.sort();
+				
+				if (_listaCamposNumericos == null)
+				{
+					_listaCamposNumericos = new Array();
+				}
+				else
+				{
+					_listaCamposNumericos.slice(0);
+					_listaCamposNumericos = null;
+				}
+				
+				for (var i:int=0; i<tamanho; i++)
+				{
+					itemCamposNumericos = new ListItemValueObject();
+					itemCamposNumericos.label = lista[i];
+					itemCamposNumericos.isSelected = false;
+					
+					_listaCamposNumericos.push(itemCamposNumericos);
+				}
+			}
+			
+			private function preparaCamposDatas(lista:Array):void
+			{
+				_listaCamposDatas = lista;
+			}
+			
+			private function selecionaDados(nome:String, numericos:Array, data:String=null):void
+			{
+				var i:int;
+				var j:int;
+				
+				var dadosRecebidos:Vector.<Feature>;
+				var numeroRegs:int;
+				
+				var auxObject:Object;
+				var attr:Object;
+				
+				var numeroNumericosSelec:int = numericos.length;
+				var labelNumericos:String;
+				var valorAntigo:Number;
+				
+				var tamDadosSelecionados:int;
+				var repeteCategory:Boolean;
+				var ind:int;
+												
+				if (this._data)
+				{
+					if (!_dadosSelecionados)
+					{
+						_dadosSelecionados = new ArrayCollection();
+					}
+					_dadosSelecionados.removeAll();
+					
+					dadosRecebidos = this._data as Vector.<Feature>;
+					numeroRegs = dadosRecebidos.length;
+					
+					if (numeroRegs > 0)
+					{
+						numeroNumericosSelec = numericos.length;
+						
+						for (i = 0; i<numeroRegs; i++)
+						{
+							var feat:Feature = dadosRecebidos[i];
+							
+							attr = (feat.attributes);
+							
+							tamDadosSelecionados = _dadosSelecionados.length;
+							repeteCategory = false;
+							ind = 0;
+														
+							while ((!repeteCategory) && (ind < tamDadosSelecionados))
+							{								
+								var objeto:Object;
+								
+								objeto = _dadosSelecionados.getItemAt(ind);
+								
+								if ((objeto["categoryField"] as String) == (attr[nome] as String)) 
+								{
+									repeteCategory = true;
+									ind--;
+								}
+								ind++;
+							}
+							
+							if (!repeteCategory)
+							{
+								if (attr[nome])
+								{
+									auxObject = new Object();
+									auxObject.categoryField = attr[nome];
+									
+									var name:String;
+									for (j = 0; j < numeroNumericosSelec; j++) 
+									{ 						
+										name = numericos[j].label;
+										
+										if (attr[name])
+										{
+											auxObject[name] = attr[name];
+										}
+										else
+										{
+											auxObject[name] = 0.0;
+										}
+									}
+									
+									/* var palavra:String;
+									for each (palavra in auxObject)
+									{
+										Alert.show("id: "+palavra+", valor: "+auxObject[palavra]);	
+									} 
+									
+									if (_dateFieldVisible)
+									{
+										if ((data != null) && (data != "-") && (attr[data]))
+										{
+											if (dataNoIntervalo(attr[data]))
+											{
+												_dadosSelecionados.addItem(auxObject);
+											}
+										}
+										else if ((data == null) || (data == "-"))
+										{
+											_dadosSelecionados.addItem(auxObject);
+										}
+									}
+									else
+									{*/
+										//Alert.show("auxObject.categoryField: "+auxObject.categoryField);
+									_dadosSelecionados.addItem(auxObject);
+									//}
+								}
+							}
+							else
+							{
+								if (_dateFieldVisible)
+								{
+									if ((data != null) && (data != "-") && (attr[data]))
+									{
+										/* if (dataNoIntervalo(attr[data]))
+										{
+											
+											auxObject = new Object();
+											auxObject = _dadosSelecionados[ind];
+											
+											_dadosSelecionados.removeItemAt(ind);
+											
+											for (j = 0; j < numeroNumericosSelec; j++) 
+											{ 														
+												labelNumericos = numericos[j].label;
+												valorAntigo = Number(auxObject[labelNumericos]) + Number(attr[labelNumericos]);
+												auxObject[labelNumericos] = valorAntigo;
+											} */
+										_dadosSelecionados.addItem(auxObject);
+										//}
+									}
+									else if ((data == null) || (data == "-"))
+									{
+										
+										auxObject = new Object();
+										auxObject = _dadosSelecionados.getItemAt(ind);
+										
+										_dadosSelecionados.removeItemAt(ind);
+										
+										for (var l:int = 0; l< numeroNumericosSelec; l++) 
+										{ 															
+											labelNumericos = numericos[l].label;
+											valorAntigo = Number(auxObject[labelNumericos]) + Number(attr[labelNumericos]);
+											auxObject[labelNumericos] = valorAntigo;
+										}
+										
+										_dadosSelecionados.addItem(auxObject);
+									}
+								}
+								else
+								{
+									auxObject = new Object();
+									auxObject = _dadosSelecionados.getItemAt(ind);
+
+									_dadosSelecionados.removeItemAt(ind);
+									
+									for (j = 0; j < numeroNumericosSelec; j++) 
+									{ 																									
+										labelNumericos = numericos[j].label;
+										valorAntigo = Number(auxObject[labelNumericos]) + Number(attr[labelNumericos]);
+										auxObject[labelNumericos] = valorAntigo;
+									}
+									
+									_dadosSelecionados.addItem(auxObject);
+								}								
+							}
+						}
+						selecionouCampos = true;
+					}
+												
+					chartSeries = new Array();
+					
+					var tamanhoDados:int = numericos.length;
+					var str:String;
+					
+					switch (this._mode)
+					{
+						case ("Colunas"):
+							var colSeries:ColumnSeries;					
+							
+							for (i=0; i<tamanhoDados; i++)
+							{
+								str = numericos[i].label;
+								colSeries = new ColumnSeries();
+								colSeries.xField = "categoryField";
+								colSeries.yField = str;
+								colSeries.displayName = str;
+								colSeries.setStyle("showDataEffect", seriesInterpolateShow);
+								
+								chartSeries.push(colSeries);
+							}
+
+							break;
+						
+						case ("Barras"): 
+							var barSeries:BarSeries;
+							
+							for (i=0; i<tamanhoDados; i++)
+							{
+								str = numericos[i].label;
+								barSeries = new BarSeries();
+								barSeries.yField = "categoryField";
+								barSeries.xField = str;
+								barSeries.displayName = str;
+								barSeries.setStyle("showDataEffect", seriesInterpolateShow);
+								
+								chartSeries.push(barSeries);
+							}
+							break;
+						
+						case ("Linhas"): 
+							var linSeries:LineSeries;					
+							
+							for (i=0; i<tamanhoDados; i++)
+							{
+								str = numericos[i].label;
+								linSeries = new LineSeries();
+								linSeries.xField = "categoryField";
+								linSeries.yField = str;
+								linSeries.displayName = str;
+								linSeries.setStyle("showDataEffect", seriesSlideShow);
+								
+								chartSeries.push(linSeries);
+							}
+							break;
+						
+						case ("Áreas"):
+							var areSeries:AreaSeries;
+							
+							for (i=0; i<tamanhoDados; i++)
+							{
+								str = numericos[i].label;
+								areSeries = new AreaSeries();
+								areSeries.xField = "categoryField";
+								areSeries.yField = str;
+								areSeries.displayName = str;
+								areSeries.setStyle("form", "curve");
+								areSeries.setStyle("showDataEffect", seriesSlideShow);
+								
+								chartSeries.push(areSeries);
+							}
+							break;
+					}
+					
+					ChartUtils.SetColBarLinAreChartSeriesFills(chartSeries, this._mode);
+				
+				}
+			}
+			
+			private function selectedOnly(item:ListItemValueObject, idx:uint, arr:Array):Boolean 
+			{
+				return item.isSelected;
+			}
+			
+			private function verificaCampos():void
+			{
+				var nomeOK:Boolean = false;
+				var numericosOK:Boolean = false;
+				
+				var nomeSelecionado:String;
+				var numericosSelecionados:Array;
+				var dataSelecionada:String;
+				
+				dataSelecionada = "-";
+
+				/* if ((alterouNome) && (!alterouNumericos))
+				{
+					//Muda só o campo do series
+				}
+				else
+				{ */
+					if (radioGroupNome.selectedValue)
+					{						
+						/* idx = int(radioGroupNome.selectedValue);
+						nomeObj = camposNomes.getItemAt(idx);
+						nomeSelecionado = nomeObj.label; */
+						nomeSelecionado = radioGroupNome.selectedValue as String;
+						
+						nomeOK = true;
+					}
+					
+					numericosSelecionados = camposNumericos.source.filter(selectedOnly);
+					
+					
+					if (numericosSelecionados.length > 0)
+					{
+						numericosOK = true;
+					}
+					
+					if (_dateFieldVisible)
+					{
+						//dataSelecionada = comboBoxData.selectedLabel;
+					}
+					if (nomeOK && numericosOK)
+					{
+						selecionaDados(nomeSelecionado, numericosSelecionados, dataSelecionada);
+					}
+				//}
+			}
+
+			protected function onCreationComplete(event:FlexEvent):void
+			{
+				addChart();
+			}
+			
+			protected function geraGrafico(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				verificaCampos();
+				setChartSeries();
+			}
+			
+			private function setChartSeries():void
+			{
+				if (selecionouCampos)
+				{					
+					var auxLabel:String;
+					var numSeries:int;
+					var numCateg:int;
+					
+					numSeries = chartSeries.length;
+					
+					numCateg = _dadosSelecionados.length;
+					
+					if (numCateg == 1)
+					{
+						auxLabel =  "1 categoria, ";
+					}
+					else
+					{
+						auxLabel =  numCateg.toString() + " categorias, ";
+					}
+					
+					if (numSeries == 1)
+					{
+						auxLabel = auxLabel + numSeries.toString() + " série de dados";
+					}
+					else
+					{
+						auxLabel = auxLabel + numSeries.toString() + " séries de dados";
+						
+					}
+					
+					if ((this._mode == "Áreas") && (_dadosSelecionados.length < 2))
+					{
+						area.series = [];
+						area.dataProvider = [];
+						
+						auxLabel = "Não é possível gerar um gráfico de áreas com apenas 1 categoria selecionada";
+						
+						((this.owner as IVisualElement).owner as Object).lblRegs.text = auxLabel;
+						
+						selecionouCampos = false;
+
+					}
+					else
+					{
+						switch (this._mode)
+						{
+							case ("Colunas"):
+								if (column)
+								{
+									column.series = chartSeries;
+									column.dataProvider = [];
+								}
+								break;
+							
+							case ("Barras"): 
+								if (bar)
+								{
+									bar.series = chartSeries;
+								}
+								break;
+							
+							case ("Linhas"): 
+								if (line)
+								{
+									line.series = chartSeries;
+								}
+								break;
+							
+							case ("Áreas"):
+								if (area)
+								{
+									area.series = chartSeries;
+								}
+								break;
+						}
+						
+						
+						((this.owner as IVisualElement).owner as Object).lblRegs.text = auxLabel;
+												
+						callLater(setDataProvider);
+					}
+					
+				}
+			}
+			
+			private function setDataProvider():void
+			{
+				switch (this._mode)
+				{
+					case ("Colunas"):
+						if (column)
+						{
+							column.dataProvider = _dadosSelecionados;
+						}
+						break;
+					
+					case ("Barras"): 
+						if (bar)
+						{
+							bar.dataProvider = _dadosSelecionados;
+						}
+						break;
+					
+					case ("Linhas"): 
+						if (line)
+						{
+							line.dataProvider = _dadosSelecionados;
+						}
+						break;
+					
+					case ("Áreas"):
+						if (area)
+						{
+							area.dataProvider = _dadosSelecionados;
+						}
+						break;
+					
+					selecionouCampos = false;
+				}
+				
+				//SiteContainer.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, _dadosSelecionados.length));
+
+			}
+			
+			protected function dropdownlist1_changeHandler(event:IndexChangeEvent):void
+			{
+				switch (this._mode)
+				{
+					case ("Colunas"):
+						if (column)
+						{
+							column.type = event.target.selectedItem.tipo;
+						}
+						break;
+					
+					case ("Barras"): 
+						if (bar)
+						{
+							bar.type = event.target.selectedItem.tipo;
+						}
+						break;
+					
+					case ("Áreas"):
+						if (area)
+						{
+							area.type = event.target.selectedItem.tipo;
+						}
+						break;
+				}
+			}
+			
+			protected function popUpAnchorcreationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				(event.currentTarget as BorderContainer).styleName = "estiloPopUpChart";
+			}
+			
+			private function rollOverConfigContainer(event:MouseEvent):void
+			{
+				popupNomes.displayPopUp = false;
+				popupNumericos.displayPopUp = false;
+			}
+			
+			protected function scroller_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				(event.currentTarget as Scroller).verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				//(event.currentTarget as Scroller).verticalScrollBar.setStyle("chromeColor", this.getStyle("backgroundColor"));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+		<s:RadioButtonGroup id="radioGroupNome"/>
+		
+		
+		<mx:ArrayCollection id="camposNomes" source="{_listaCamposNomes}"/>
+		<mx:ArrayCollection id="camposNumericos" source="{_listaCamposNumericos}"/>
+
+		
+		<mx:SeriesInterpolate id="seriesInterpolateShow" duration="1000"/>
+		<mx:SeriesSlide id="seriesSlideShow" duration="1000" direction="up" />
+	</fx:Declarations>
+	
+	
+	<s:Group width="100%" height="100%" rollOver="rollOverConfigContainer(event)">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" gap="10"/>
+		</s:layout>
+		
+		<s:BorderContainer id="configContainer" width="18%" height="100%"
+						   styleName="estiloChartConfigContainer">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="top" horizontalAlign="center" gap="15"
+								  paddingBottom="15" paddingLeft="7" paddingRight="7" paddingTop="15"/>
+			</s:layout>
+			
+			<s:Label text="Selecione os campos:" styleName="estiloLabel" width="100%"/>
+	
+			<s:Group width="100%" height="80%">
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="20"/>
+				</s:layout>
+				
+				<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left" verticalAlign="top" gap="0"/>
+					</s:layout>
+					
+					<s:Button width="100%" label="Nome" styleName="estiloWidgetContentMainButton"
+							  skinClass="assets.skins.ButtonAsDropDownListButtonSkin"
+							  click="{popupNomes.displayPopUp = !popupNomes.displayPopUp}"/>
+					
+					<s:PopUpAnchor id="popupNomes" left="0" bottom="0"
+								   popUpPosition="below" popUpWidthMatchesAnchorWidth="false">
+						
+						<s:BorderContainer rollOut="{popupNomes.displayPopUp = false}" 
+										   creationComplete="popUpAnchorcreationCompleteHandler(event)">
+							<s:layout>
+								<s:HorizontalLayout paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+							</s:layout>
+							
+							<s:Scroller left="0" top="0" right="0" bottom="0" focusEnabled="false"
+										verticalScrollPolicy="auto" creationComplete="scroller_creationCompleteHandler(event)">								
+								<s:DataGroup dataProvider="{camposNomes}" 
+											 itemRenderer="widgets.componentes.graficos.renderer.RadioButtonItemRenderer">
+									<s:layout>
+										<s:TileLayout horizontalGap="5" verticalGap="5" 
+													  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+													  requestedColumnCount="3" requestedRowCount="5" columnWidth="200" /> 
+									</s:layout>
+								</s:DataGroup>
+							</s:Scroller>
+						</s:BorderContainer>
+						
+					</s:PopUpAnchor>
+					
+				</s:BorderContainer>
+				
+				
+				<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left" verticalAlign="top" gap="0"/>
+					</s:layout>
+					
+					<s:Button width="100%" label="Valores" styleName="estiloWidgetContentMainButton"
+							  skinClass="assets.skins.ButtonAsDropDownListButtonSkin"
+							  click="{popupNumericos.displayPopUp = !popupNumericos.displayPopUp}"/>
+					
+					<s:PopUpAnchor id="popupNumericos" left="0" bottom="0"
+								   popUpPosition="below" popUpWidthMatchesAnchorWidth="false">
+						
+						<s:BorderContainer rollOut="{popupNumericos.displayPopUp = false}"
+										   creationComplete="popUpAnchorcreationCompleteHandler(event)">
+							<s:layout>
+								<s:HorizontalLayout paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+							</s:layout>
+							
+							<s:Scroller left="0" top="0" right="0" bottom="0" focusEnabled="false"
+										verticalScrollPolicy="auto" creationComplete="scroller_creationCompleteHandler(event)">
+								
+								<s:DataGroup dataProvider="{camposNumericos}" 
+											 itemRenderer="widgets.componentes.graficos.renderer.CheckBoxItemRenderer">
+									<s:layout>
+										<s:TileLayout horizontalGap="5" verticalGap="5" 
+													  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+													  requestedColumnCount="3" requestedRowCount="5" columnWidth="200" /> 
+									</s:layout>
+								</s:DataGroup>
+							</s:Scroller>
+						</s:BorderContainer>
+					</s:PopUpAnchor>
+					
+				</s:BorderContainer>
+	
+			</s:Group>
+			
+			<s:Group width="100%" height="20%">
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" verticalAlign="bottom" gap="35"/>
+				</s:layout>
+	
+				<s:BorderContainer id="selecChartType" width="100%" styleName="estiloInvisibleContainer">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" gap="15"/>
+					</s:layout>
+					
+					<s:Label text="Selecione o tipo do gráfico:" styleName="estiloLabel" width="100%"/>
+	
+					<s:DropDownList id="dropDownList_chartTypes" 
+									styleName="estiloDropDownList"
+								 	width="100%" labelField="nome"
+								 	change="dropdownlist1_changeHandler(event)"/>
+				</s:BorderContainer>
+				
+				<s:Button width="100%" label="Gerar Gráfico" styleName="estiloWidgetContentMainButton" click="geraGrafico(event)"/>
+				
+			</s:Group>
+			
+		</s:BorderContainer>
+	
+	
+		<s:BorderContainer width="82%" height="100%" styleName="estiloChartContainer">
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center" gap="0"
+									paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+			</s:layout>
+	
+			<s:Group width="100%" height="100%" id="chartContainer"/>
+			
+			<mx:Legend id="legenda" height="100%"/>
+		</s:BorderContainer>
+		
+	</s:Group>
+	
+	<!--<s:Group width="100%" height="1%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="bottom" gap="0" paddingBottom="-5"/>
+		</s:layout>
+		
+		<s:Label id="lblRegs" styleName="estiloLabel" width="100%"/>		
+	</s:Group>-->
+
+	
+</s:Group>

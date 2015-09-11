@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:flash = "flash.filters.*" >
+	
+	
+	<fx:Declarations>
+		
+		<!--<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="1000"/>-->
+		
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import solutions.CloseWindowBase;
+			/* [Embed(source="assets/images/icons/new/marca_hex_blue.png")]
+			[Bindable]
+			public var imgMarcaOff:Class;
+			
+			[Embed(source="assets/images/icons/new/marca_hex_colors.png")]
+			[Bindable]
+			public var imgMarcaOn:Class; */
+			
+			[Bindable]
+			private var marcaOnUrl:String = "assets/images/icons/marca_hex_colors.png";
+			
+			[Bindable]
+			private var marcaOffUrl:String = "assets/images/icons/marca_hex_gray.png";
+			
+			private var marcaOn:Boolean = false;
+			
+			private var about:IModuleInfo;
+			
+			
+			
+			protected function image1_clickHandler(event:MouseEvent):void
+			{
+				if (marcaOn)
+				{
+					marcadAgua.source = marcaOffUrl;
+					marcadAgua.alpha = 0.5;
+				}
+				else
+				{
+					marcadAgua.source = marcaOnUrl;
+					marcadAgua.alpha = 0.75;
+					
+					var url:String = "widgets/AboutWindowWidget.swf";
+					
+					about = ModuleManager.getModule(url);
+					about.addEventListener(ModuleEvent.READY, aboutWindowReadyHandler);           
+					about.load();
+				}
+				
+				marcaOn = !marcaOn;
+			}
+			
+			private function aboutWindowReadyHandler(event:ModuleEvent):void
+			{
+				var about:IModuleInfo = event.module;
+				var widget:CloseWindowBase = about.factory.create() as CloseWindowBase;
+				
+				widget.setTitle("Sobre");
+				
+				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(widget as IFlexDisplayObject);
+			}
+			
+			
+		]]>
+	</fx:Script>
+
+	<mx:Image id="marcadAgua" 
+			  width="45" height="45" 
+			  alpha="0.5" source="{marcaOffUrl}"
+			  click="image1_clickHandler(event)"/>
+
+</s:Group>

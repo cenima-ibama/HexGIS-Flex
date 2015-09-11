@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:CloseWindowBase
+		  xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:solutions="solutions.*">
+	
+	<fx:Style source="assets/styles/estiloVideoWindow.css"/>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[			
+		]]>
+	</fx:Script>
+	
+	<s:VideoPlayer  height="480" width="720"
+					chromeColor="#0c0c0c" loop="false"
+					autoDisplayFirstFrame="true" autoPlay="false"
+					source="{videoSource}"/>
+	
+</solutions:CloseWindowBase>

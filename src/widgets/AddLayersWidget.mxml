@@ -1,0 +1,1535 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- The AddLayer control is use for adding layers easily (with just an url, format and version)  -->
+<solutions:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:os="http://openscales.org"
+					  xmlns:solutions = "solutions.*"
+					  creationComplete="configure()">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="radioButtonsGroup" 
+							selectedValue="{this._selectedSource}" 
+							change="handleRadioButtonClick(event);"/>
+	</fx:Declarations>	
+	
+	<fx:Metadata>
+		<![CDATA[
+		/**
+		*  Normal state
+		*/
+		[SkinState("normal")]
+		
+		/**
+		*  State of the component when a search is proceeding 
+		*/
+		[SkinState("searching")]
+		
+		/**
+		*  State of the composent when search results are available
+		*/
+		[SkinState("result")]
+		
+		/**
+		*  State of the component when search has returned no result
+		*/
+		[SkinState("noresult")]
+		]]>
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import com.adobe.utils.StringUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IFlexModule;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import nochump.util.zip.ZipEntry;
+			import nochump.util.zip.ZipFile;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.LineStringFeature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.feature.PolygonFeature;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.IFileUser;
+			import org.openscales.core.layer.KML;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.layer.capabilities.GetCapabilities;
+			import org.openscales.core.layer.ogc.GML;
+			import org.openscales.core.layer.ogc.GPX;
+			import org.openscales.core.layer.ogc.GeoRss;
+			import org.openscales.core.layer.ogc.WFS;
+			import org.openscales.core.layer.ogc.WMS;
+			import org.openscales.core.layer.ogc.WMTS;
+			import org.openscales.core.layer.osm.OSM;
+			import org.openscales.core.ns.os_internal;
+			import org.openscales.core.style.Style;
+			import org.openscales.core.style.fill.SolidFill;
+			import org.openscales.core.style.marker.WellKnownMarker;
+			import org.openscales.core.style.stroke.Stroke;
+			import org.openscales.core.style.symbolizer.PointSymbolizer;
+			import org.openscales.geometry.Geometry;
+			import org.openscales.geometry.LineString;
+			import org.openscales.geometry.LinearRing;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.Polygon;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.proj4as.ProjProjection;
+			import org.vanrijkom.dbf.DbfError;
+			import org.vanrijkom.dbf.DbfHeader;
+			import org.vanrijkom.dbf.DbfRecord;
+			import org.vanrijkom.dbf.DbfTools;
+			import org.vanrijkom.shp.ShpPoint;
+			import org.vanrijkom.shp.ShpPolygon;
+			import org.vanrijkom.shp.ShpPolyline;
+			import org.vanrijkom.shp.ShpRecord;
+			import org.vanrijkom.shp.ShpTools;
+			
+			import solutions.CloseWindowBase;
+			import solutions.utils.Funcoes;
+			import solutions.utils.StyleUtils;
+			
+			import widgets.componentes.alerta.Alerta;
+			
+			
+			use namespace os_internal;
+			
+			private const CLASS_FACTORY:ClassFactory = new ClassFactory(NewFxDefaultCapabilitiesItemRenderer);
+			
+			private const FORMAT_PROVIDER_CHANGED:String = "formatProviderChanged";
+			
+			private const VERSION_PROVIDER_CHANGED:String = "versionProviderChanged";
+			
+			/**
+			 * @private
+			 * Indicates if the version field should appear
+			 * @default true
+			 */
+			[Bindable]
+			private var _displayVersion:Boolean = true;
+			
+			/**
+			 * @private
+			 * The file reference
+			 */
+			private var fileReference:FileReference;
+			
+			/**
+			 * @private
+			 * Datas contains in the local file selected
+			 * @default null
+			 */
+			[Bindable]
+			private var _datasFile:ByteArray;
+			
+			[Bindable]
+			private var _shpByteArray:ByteArray;
+			
+			[Bindable]
+			private var _dbfByteArray:ByteArray;
+			
+			/**
+			 * Translation for the neutral version
+			 */
+			[Bindable]
+			private var _emptyVersionLabel:String = "";
+			
+			[Bindable]
+			private var _formatsProvider:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var _versionsProvider:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var _resultListProvider:ArrayCollection = new ArrayCollection();
+			
+			/**
+			 * The current selected format
+			 * @default the first one : 0
+			 */
+			[Bindable]
+			private var _selectedFormat:Number = 0;
+			
+			/**
+			 * Selected source type (1 means URL, 2 means local file)
+			 */
+			[Bindable]
+			private var _selectedSource:int = -1; 
+			
+			/**
+			 * The current selected version
+			 * @default the first one : 0
+			 */
+			[Bindable]
+			private var _selectedVersion:Number = 0;
+			
+			/**
+			 * The HashMap result when a getCapabilities is called
+			 */
+			private var _capabilities:HashMap = null;
+			
+			/**
+			 * Indicates that the label name error should be displayed or not
+			 * @default false
+			 */
+			[Bindable]
+			private var _displayNameError:Boolean = false;
+			
+			/**
+			 * Indicates that the label url error should be displayed or not
+			 * @default false
+			 */
+			[Bindable]
+			private var _displayUrlError:Boolean = false;
+			
+			/**
+			 * Indicates that the label file error should be displayed or not
+			 * @default false
+			 */
+			[Bindable]
+			private var _displayFileError:Boolean = false;
+			
+			/**
+			 * Indicates that label for file extension error should/should not be displayed
+			 * @default false
+			 */
+			[Bindable]
+			private var _displayFileExtensionError:Boolean = false;
+			
+			[Bindable]
+			private var _iconify:String = "Minimizar";
+			
+			[Bindable]
+			private var _toggle:String = "Maximizar";
+			
+			private var _supportedFormats:HashMap;
+			
+			private var _layerNameErrorLabel:String;
+			
+			private var _layerUrlErrorLabel:String;
+			
+			//private var _fileErrorLabel:String;
+			private var _fileExtensionErrorLabel:String;
+			
+			private var _sourceErrorLabel:String;
+			
+			private var _olderFormat:String;
+			
+			private var _gerenciadorAtr:IModuleInfo;
+			
+			private var _widget:CloseWindowBase;
+						
+			private var _shpAttrList:ArrayCollection;
+			
+			private var _shapes:Array;
+			private var _dbfHeader:DbfHeader;
+			private var _byteArray:ByteArray;
+			private var _shpLayer:VectorLayer;
+			/* [Bindable]
+			protected var _isReduced:Boolean = false; */
+			
+			//protected var _active:Boolean = false;
+			
+			private var _shapefileAttributes:ArrayCollection = new ArrayCollection([
+				"fid", "id", "cpf", "operacao", "data", "id_agente", "condicao", "num_tei", "serie_tei", "num_ai", 
+				"serie_ai", "id_des", "imovel", "tipo", "obs", "referencia", "fonte", "x", "y", "compriment", "area_ha"]);
+			
+			
+			/**
+			 * Function called on creation complete
+			 */ 
+			override protected function configure():void 
+			{
+				super.configure();
+				
+				currentState = "normal";
+				
+				this._isInitialized = true;
+				
+				if ((this.map) && (this.active == false)) 
+				{  
+					this.active = true;
+				}
+				
+				/* if (this.width == 0)
+					this.width = 400;
+				if (this.height==0)
+					this.height = 320; */
+				
+				if (!this._supportedFormats)
+				{
+					this._supportedFormats = new HashMap();
+					this._supportedFormats.put("WMS",[this._emptyVersionLabel,"1.0.0", "1.1.0", "1.1.1", "1.3.0"]);
+					this._supportedFormats.put("WMTS",[this._emptyVersionLabel,"1.0.0"]);
+					this._supportedFormats.put("WFS",[this._emptyVersionLabel, "1.0.0","1.1.0","2.0.0"]);
+					this._supportedFormats.put("KML",["2.0","2.2"]);
+					this._supportedFormats.put("GPX",["1.0","1.1"]);
+					this._supportedFormats.put("GML",["2.0.0", "2.1.0" , "3.2.1"]);
+					this._supportedFormats.put("GeoRSS",["1.1"]);
+					this._supportedFormats.put("Shapefile Zipado",[this._emptyVersionLabel]);
+				}
+				
+				updateDropDownLists();
+				
+				// init the owner in itemRenderer and give the format value
+				this.CLASS_FACTORY.properties = {externalLayers: this};
+				
+				handleRadioButtonClick();
+				
+				setLabels();
+			}
+			
+			override public function setMap(value:Map):void
+			{
+				super.setMap(value);
+				
+				if (this.map)
+				{
+					this.map.addEventListener(LayerEvent.LAYER_ADDED, onLayerAdded);
+				}
+			}
+			
+			private function onLayerAdded(event:LayerEvent):void
+			{
+				if (event.layer is WFS)
+				{
+					var s:Style = StyleUtils.getDefaultPolygonStyle();
+					s.rules[0].symbolizers.push(new PointSymbolizer(new WellKnownMarker(WellKnownMarker.WKN_CIRCLE, new SolidFill(0x0033cc, 0.5), new Stroke(0x032ea9, 3.0, 0.5, "round"))));
+					(event.layer as WFS).style = s;
+					event.layer.redraw();
+				}
+			}
+				
+			
+			public function get datasFile():ByteArray
+			{
+				return this._datasFile;
+			}
+			public function set datasFile(value:ByteArray):void
+			{
+				//Alert.show("_datasFile: "+value.toString());
+				this._datasFile = value;
+			}
+			
+			public function get shpByteArray():ByteArray
+			{
+				return this._shpByteArray;
+			}
+			public function set shpByteArray(value:ByteArray):void
+			{
+				//Alert.show("_shpByteArray: "+value.toString());
+				this._shpByteArray = value;
+			}
+			
+			public function get dbfByteArray():ByteArray
+			{
+				return this._dbfByteArray;
+			}
+			public function set dbfByteArray(value:ByteArray):void
+			{
+				//Alert.show("_dbfByteArray: "+value.toString());
+				this._dbfByteArray = value;
+			}
+			
+			/**
+			 * Handler for "add layer" button
+			 */ 
+			internal function addLayerButtonClick(event:MouseEvent):void
+			{
+				// get the datas fields :
+				var name:String = String(this.layerNameTextInput.text).replace(/\s/g,"");
+				var format:String = this.availableLayerFormatsDropDownList.selectedItem as String;
+				var version:String = this.availableLayerVersionsDropDownList.selectedItem as String;
+				var extension:String;
+				
+				var layer:Layer;
+								
+				var url:String = (this.layerUrlTextInput.text).replace(/\s/g,"");
+				
+				var validate:Boolean = true;
+				
+				var alerta:Alerta = new Alerta();
+				
+				_displayNameError = false;
+				_displayUrlError = false;
+				_displayFileError = false;
+				_displayFileExtensionError = false;
+				
+				
+				if (_olderFormat != format)
+				{
+					onFileLoadComplete();
+				}
+				
+				if (this._selectedVersion == 0)
+					version = null;
+				
+				if (!this.validateName(name, format))
+				{
+					_displayNameError = true;
+					alerta.exibirErro(_layerNameErrorLabel);
+					validate = false;
+					return;
+				}
+				else if (radioButtonsGroup.selectedValue == null)
+				{
+					_displayUrlError = true;
+					alerta.exibirErro(_sourceErrorLabel);
+					validate = false;
+					return;
+				}
+				else if ((_selectedSource == 1) && (!url || (url.length == 0)))
+				{
+					_displayUrlError = true;
+					alerta.exibirErro(_layerUrlErrorLabel);
+					validate = false;
+					return;
+				}
+				else if ((_selectedSource == 2) && !(this.datasFile || (this.shpByteArray && this.dbfByteArray)))
+				{
+					_displayFileError = true;
+					_fileExtensionErrorLabel = "Selecione um arquivo para importação.";
+					alerta.exibirErro(this._fileExtensionErrorLabel);
+					validate = false;
+					return;
+				}
+				
+				var xml:XML = null;
+				
+				if (validate)
+				{
+					if (format == "WMS" || format == "WMTS" || format == "WFS")
+					{
+						var getCapapbilities:GetCapabilities = new GetCapabilities(format, url, this.displayResult, version);
+
+						this.currentState = 'searching';
+					}
+					else
+					{
+						if (_selectedSource == 1) 
+						{
+							extension = url.substr(url.lastIndexOf(".")+1);
+						} 
+						else if (_selectedSource == 2) 
+						{
+							extension = selectedLocalFile.text.substr(selectedLocalFile.text.lastIndexOf(".")+1);
+						}
+
+						switch(format)
+						{
+							case "OSM":	
+								if (_selectedSource == 1) 
+								{
+									layer = new OSM(name, url);
+								}
+								break;
+							
+							case "KML":
+								if (_selectedSource == 1) 
+								{
+									layer = new KML(name, url);
+								} 
+								else if (_selectedSource == 2) 
+								{
+									xml = new XML(this.datasFile.readUTFBytes(this.datasFile.bytesAvailable));
+									layer = new KML(name, null, xml);
+								}
+								break;
+							
+							case "GPX":
+								if (_selectedSource == 1) 
+								{
+									layer = new GPX(name, version, url);
+								} 
+								else if (_selectedSource == 2) 
+								{
+									xml = new XML(this.datasFile.readUTFBytes(this.datasFile.bytesAvailable));
+									layer = new GPX(name, version, null, xml);
+								}
+								break;
+							
+							case "GeoRSS":
+								if (_selectedSource == 1) 
+								{
+									layer = new GeoRss(name,url);
+								} 
+								break;
+							
+							case "GML":
+								if (_selectedSource == 1) 
+								{
+									layer = new GML(name, version, this.map.projection, url);
+									layer.selected = true;
+									(layer as GML).editable = true;
+								} 
+								else if (_selectedSource == 2) 
+								{
+									xml = new XML(this.datasFile.readUTFBytes(this.datasFile.bytesAvailable));
+									layer = new GML(name, version, this.map.projection, url, xml);
+									layer.selected = true;
+									(layer as GML).editable = true;
+								}
+								break;
+							
+							case "Shapefile Zipado":
+								/* if (_selectedSource == 1)
+								{
+									layer = new GML (name, version, this.map.projection, url);
+									layer.selected = true;
+									(layer as GML).editable = true;
+								} 
+								else  */
+								if (_selectedSource == 2)
+								{
+									if ((this.shpByteArray) && (this.shpByteArray.length > 0) && (this.dbfByteArray) && (this.dbfByteArray.length > 0))
+									{
+										if (!layer)
+										{
+											layer = loadShapefile(name, this.shpByteArray, this.dbfByteArray);
+											layer.redraw();
+										}
+									}
+								}
+								break;
+							
+							default:
+								break;
+						}
+												
+						var errorMsg:String ="";
+						
+						if (layer is IFileUser) errorMsg = checkExtension(layer as IFileUser, extension);
+						
+						if (errorMsg=="")
+						{
+							this.map.addLayer(layer);
+							_displayFileExtensionError = false;
+							this.reset();
+						}
+						else
+						{ 
+							_fileExtensionErrorLabel = "Arquivo inválido. Os tipos válidos são: "+ errorMsg;
+							_displayFileExtensionError = true;
+							alerta.exibirErro(_fileExtensionErrorLabel);
+						}
+					}	
+				}
+			}
+			
+			
+			/**
+			 * This function set labels
+			 */ 
+			protected function setLabels():void
+			{
+				this._iconify = "Minimizar";
+				this._toggle = "Maximizar";
+				
+				switch(this.currentState)
+				{
+					case "normal":
+						this.layerNameLabel.text = "Nome";	
+						this.layerFormatLabel.text = "Formato";	
+						this.layerVersionLabel.text = "Versão";	
+						this.layerUrlRadioButton.label = "URL";	
+						this.addLayerButton.label = "Adicionar";
+						//this.mainPanel.title = Catalog.getLocalizationForKey('externalLayers.externalLayers');
+						//this.supportedVersion[3] = Catalog.getLocalizationForKey('externalLayers.noversion');
+						_layerNameErrorLabel = "O nome da camada não pode ser vazio ou igual ao nome de outra camada.";
+						_layerUrlErrorLabel = "O campo URL não pode ser vazio.";
+						//_fileErrorLabel = "Arquivo incorreto.";
+						_sourceErrorLabel = "Selecione um arquivo para importação.";
+						//this.fileExtensionErrorLabel.text = Catalog.getLocalizationForKey('externalLayers.uncorrectExtension');
+						this.chooseLocalFileButton.label = "Procurar";
+						this.layerLocalFileRadioButton.label ="Arquivo";
+						break;
+					case "searching":
+						this.searchingLabel.text="Procurando...";
+						this.backFromSearchingToSearchButton.label = "Voltar";
+						break;
+					case "result":
+						this.backFromResultToSearchButton.label = "Voltar";
+						break;
+					case "noresult":
+						this.backFromNoResultToSearchButton.label = "Voltar";
+						this.noResultLabel.text = "Nenhum resultado encontrado.";
+						break;
+				}
+			}
+			
+			/**
+			 * Called when the component state change
+			 */ 
+			protected function onEnterState():void
+			{
+				setLabels();
+			}
+			
+			/**
+			 * @private
+			 */
+			private function validateName(value:String, format:String = null):Boolean
+			{
+				if (format == "WMS" || format == "WFS" || format == "WMTS")
+				{
+					if (this.map.getLayerByIdentifier(value) == null)
+						return true;
+				}
+					
+				else if (value != "" && value!= null)
+				{
+					if (this.map.getLayerByIdentifier(value) == null)
+					{
+						return true;
+					}
+				}
+				
+				return false;
+			}
+			
+			
+			/**
+			 * Add a layer on the map with informations given by get Capabilities and actual datas (format, version, url, name)
+			 *
+			 * @param data An hash map as the one returned by the <code>CapabilitiesParser.read</code> method
+			 */
+			internal function addLayerOnMap(data:Object):void
+			{
+				var newLayer:Layer;
+				var name:String = this.layerNameTextInput.text;
+				var format:String = this.availableLayerFormatsDropDownList.selectedItem as String;
+				var version:String = this.availableLayerVersionsDropDownList.selectedItem as String;
+				var url:String = this.layerUrlTextInput.text;
+				var availableProjections:Array;
+				var newProjection:ProjProjection = null;
+				
+				
+				if (this._selectedVersion == 0)
+				{
+					version = data.getValue("auto-version");
+				}
+				
+				if ((format == "WMS" || format == "WFS" || format == "WMTS") && (name=="" || name==null))
+				{
+					name = data.getValue('Title');
+					
+					// don't add the same layer name twice
+					if (!validateName(name))
+						return
+				}
+				
+				switch(format)
+				{
+					case "WMS":
+						newLayer = new WMS(name, url, data.getValue("Name"));
+						(newLayer as WMS).version = version;
+						(newLayer as WMS).transparent = true;
+						
+						var _formats:String = (data.getValue("Format") as String);
+						
+						if (_formats.indexOf("image/png") != -1)
+						{
+							(newLayer as WMS).format = "image/png";
+						}
+						else if (_formats.indexOf("image/jpeg") != -1)
+						{
+							(newLayer as WMS).format = "image/jpeg";
+						}
+						else if (_formats.indexOf("image/gif") != -1)
+						{
+							(newLayer as WMS).format = "image/gif";
+						}
+						
+						(newLayer as WMS).projection = this.map.projection;
+						// CRS for WMS 1.3.0 SRS otherwise
+						/* var projection:String = "SRS";
+						if (version == "1.3.0")
+							projection = "CRS";
+						var proj:ProjProjection;
+						availableProjections = new Array();
+						for each(var srs:String in (data.getValue(projection) as String).split(","))
+						{
+						proj = ProjProjection.getProjProjection(srs);
+						if (proj)
+							availableProjections.push(proj);
+						} */
+						
+						//Setting availableProjections for layer
+						/*( newLayer as WMS).availableProjections = (data.getValue(projection) as String);
+						
+						if (this.map.projection)
+						{
+							for each(var val:ProjProjection in availableProjections)
+							{
+								if (this.map.projection == val)
+								{
+									newProjection = val;
+									(newLayer as WMS).projection = val;
+									break;
+								}	
+							}
+						}
+						if (!newProjection)
+							(newLayer as WMS).projection = availableProjections[0]; */
+						
+						break;
+					
+					case "WMTS":
+						var tilematrixSets:HashMap = data.getValue("TileMatrixSets");
+						var keys:Array = tilematrixSets.getKeys();
+						var tileMatrixSet:String = keys[0];
+						
+						newLayer = new WMTS(name, url, data.getValue("Identifier"), tileMatrixSet, tilematrixSets);	
+						(newLayer as WMTS).format = data.getValue("Formats")[0];
+						(newLayer as WMTS).style = data.getValue("DefaultStyle") as String;
+						break;
+					
+					case "WFS":
+						newLayer = new WFS(name, url, data.getValue("Name"), version);
+						newLayer.maxExtent = data.getValue("Extent");
+						//Setting availableProjections for layer
+						var aProj:Vector.<String> = new Vector.<String>();
+						
+						if (version == "1.0.0") 
+						{
+							aProj.push(data.getValue("SRS"));
+						}
+						else 
+						{
+							aProj.push(data.getValue("SRS"));
+							var otherSRS:Vector.<String> = (data.getValue("OtherSRS") as Vector.<String>);
+							for each(var oSrs:String in otherSRS)
+							{
+								if (aProj.indexOf(oSrs) < 0) 
+								{
+									aProj.push(oSrs);
+								}
+							}
+						}
+						
+						(newLayer as WFS).availableProjections = aProj;
+						break;
+				}
+				
+				this.map.addLayer(newLayer);
+				
+				this.reset();
+			}
+			
+			/**
+			 * Cancel the search and go back to previous menu
+			 */
+			protected function backToSearch(event:MouseEvent):void
+			{
+				this.reset();
+			}
+			
+			/**
+			 * Reset data and display main Menu
+			 */
+			private function reset():void
+			{
+				this._selectedSource = -1;
+				this.radioButtonsGroup.selectedValue = null;
+				
+				// reset fields
+				this.selectedLocalFile.text = "";
+				this.layerNameTextInput.text = "";
+				this.layerUrlTextInput.text = "";
+								
+				this.datasFile = null;
+				this.shpByteArray = null;
+				this.dbfByteArray = null;
+				
+				_resultListProvider.removeAll();
+				
+				this.currentState = 'normal';
+				
+				this.layerNameTextInput.setFocus();
+ 			}	
+			
+			
+			/**
+			 * Called when a change event if dispatch by the dropdownlist linked to formats
+			 * Update the current format value according to the new selection
+			 * And then refresh the version list
+			 */
+			protected function formatChange(event:Event):void
+			{					
+				if (event)
+				{
+					this._selectedFormat = availableLayerFormatsDropDownList.selectedIndex;
+					
+					_olderFormat = this.availableLayerFormatsDropDownList.selectedItem as String;
+					
+					if (_olderFormat == "WMS" || _olderFormat == "WFS" || _olderFormat == "WMTS") 
+					{
+						this._selectedSource = 1;
+						
+						this.layerLocalFileRadioButton.visible = false;
+						this.datasFile = null;
+						this.shpByteArray = null;
+						this.dbfByteArray = null;
+						this.selectedLocalFile.text = "";
+						
+						this.layerUrlRadioButton.visible = true;
+						this.layerUrlRadioButton.selected = true;
+					} 
+					else if ((_olderFormat == "Shapefile Zipado") || (_olderFormat == "GeoRSS"))
+					{
+						this._selectedSource = 2;
+						
+						this.layerUrlRadioButton.visible = false;
+						this.layerUrlTextInput.text = "";
+						
+						this.layerLocalFileRadioButton.visible = true;
+						this.layerLocalFileRadioButton.selected = true;
+					}
+					else 
+					{						
+						this.layerUrlRadioButton.visible = true;
+						
+						this.layerLocalFileRadioButton.visible = true;
+					}
+					
+					this.radioButtonsGroup.selectedValue = this._selectedSource;
+				}	
+				
+				this.updateVersion();
+			}
+			
+			/**
+			 * Called when a change event if dispatch by the dropdownlist linked to versions
+			 * Update the current version value according to the new selection
+			 */
+			protected function versionChange(event:Event):void
+			{
+				if (event)
+				{
+					var list:DropDownList = event.currentTarget as DropDownList
+					this._selectedVersion = list.selectedIndex;
+				}	
+			}
+			
+			protected function updateDropDownLists():void
+			{
+				this._formatsProvider = new ArrayCollection(this._supportedFormats.getKeys().sort());
+				//this._selectedFormat = 0;
+				availableLayerFormatsDropDownList.selectedIndex=0;
+				this.updateVersion();
+			}
+			
+			/**
+			 * Change versions dropdown list value according to current format selection
+			 */
+			private function updateVersion():void
+			{
+				this._selectedVersion = -1;
+				if (this.availableLayerVersionsDropDownList)
+				{
+					this._versionsProvider = new ArrayCollection(this._supportedFormats.getValue(this.availableLayerFormatsDropDownList.selectedItem as String));
+				}
+				
+				this._selectedVersion = 0;
+			}
+			
+			/**
+			 * Display results once the getCapabilities is called
+			 */
+			protected function displayResult(getCapabilities:GetCapabilities):void
+			{
+				this._capabilities = getCapabilities.getAllCapabilities();
+				
+				if (this._capabilities.size() == 0)
+				{
+					this.currentState = 'noresult';
+				}
+					
+				else
+				{
+					this.currentState = 'result';
+					
+					var layerArray:ArrayCollection = new ArrayCollection(_capabilities.getKeys().sort());
+					
+					for each(var item:Object in layerArray)
+					{
+						this._resultListProvider.addItem(_capabilities.getValue(item));
+					}
+				}
+			}
+			
+			private function checkExtension(layer:IFileUser, extension:String):String
+			{
+				var msg:String = "";
+				
+				if (layer.acceptedFileExtensions.length>0 && layer.acceptedFileExtensions.indexOf(extension) < 0)
+				{
+					var lgth:int = layer.acceptedFileExtensions.length;
+					
+					for(var i:int=0;i<lgth;++i)
+					{
+						msg+=layer.acceptedFileExtensions[i]+", ";
+					}
+					msg=msg.substr(0,msg.length-2);
+				} 
+				
+				return msg;
+			}
+			
+			/**
+			 * Method called when one of the radio button has been clicked
+			 */ 
+			protected function handleRadioButtonClick(evt:Event=null):void
+			{
+				this._selectedSource = this.radioButtonsGroup.selectedValue as int;
+			}
+			
+			/**
+			 * Browse FileSystem to select the locale file to import
+			 */
+			protected function browseFiles():void
+			{
+				var format:String = this.availableLayerFormatsDropDownList.selectedItem as String;
+				
+				//create the FileReference instance
+				fileReference = new FileReference();
+				
+				//listen for when they select a file
+				fileReference.addEventListener(Event.SELECT, onFileSelect);
+				
+				//listen for when then cancel out of the browse dialog
+				fileReference.addEventListener(Event.CANCEL,onCancel);
+				
+				switch(format)
+				{
+					case "Shapefile Zipado":
+						fileReference.browse([new FileFilter("Zip Files", "*.zip")]);
+						break;
+					
+					default:
+						fileReference.browse();
+						break;
+				}
+				//open a native browse dialog that filters for text files
+				
+			}
+			
+			/**
+			 * Called when a file is selected on 
+			 */
+			protected function onFileSelect(e:Event):void
+			{
+				//listen for when the file has loaded
+				fileReference.addEventListener(Event.COMPLETE, onFileLoadComplete);
+				
+				//listen for any errors reading the file
+				fileReference.addEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+				
+				//load the content of the file
+				fileReference.load();
+			}
+			
+			/**
+			 * Called when the user cancel the browse process
+			 */
+			protected function onCancel(e:Event):void				
+			{
+				fileReference = null;
+			}
+			
+			/**
+			 * private
+			 * called when the file has completed loading
+			 */
+			private function onFileLoadComplete(e:Event=null):void
+			{
+				var format:String = this.availableLayerFormatsDropDownList.selectedItem as String;
+
+				switch (format)
+				{
+					case "Shapefile Zipado":
+											
+						const zipFile:ZipFile =  new ZipFile(fileReference.data); 
+												
+						for each (var entry:ZipEntry in zipFile.entries)
+						{
+							const name:String = entry.name.toLowerCase();
+							// trace( name );
+							if (name.indexOf("__macosx") > -1)
+							{
+								continue;
+							}
+							if (name.indexOf(".shp") == name.length - 4)
+							{
+								this.shpByteArray = zipFile.getInput(entry);
+							}
+							if (name.indexOf(".dbf") == name.length - 4)
+							{
+								this.dbfByteArray = zipFile.getInput(entry);
+							}
+						}
+
+						break;
+					
+					default:
+						//get the data from the file as a ByteArray
+						this.datasFile = fileReference.data;
+												
+						break;
+				}
+				
+				selectedLocalFile.text = fileReference.name;
+				
+				//fileReference = null;
+			}
+			
+			//called if an error occurs while loading the file contents
+			private function onLoadError(e:IOErrorEvent):void
+			{
+			}
+			
+			private function onResultListCreationComplete():void
+			{				
+				resultList.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				resultList.scroller.verticalScrollBar.setStyle("chromeColor", addlayers.getStyle("backgroundColor"));
+			}
+			
+			private function loadShapefile(name:String, shpByteArray:ByteArray, dbfByteArray:ByteArray):VectorLayer
+			{
+				var dbfRecord:DbfRecord;
+				
+				var rings:Array = new Array();
+				
+				var point:org.openscales.geometry.Point;
+				
+				var dpGride:ArrayCollection = new ArrayCollection();
+				
+				var shpLayer:VectorLayer = new VectorLayer(name);
+				shpLayer.visible = true;
+				shpLayer.editable = true;
+				shpLayer.projection = map.projection;
+				shpLayer.maxExtent = map.maxExtent;
+				
+				var local:Location;
+				var grafico:Feature;
+				var atributosOK:Boolean = true;
+				
+				var newPoint:org.openscales.geometry.Point;
+				var newLine:LineString;				
+				var newLRing:LinearRing
+				var newPolygon:Polygon;
+				
+				var o:Object;
+				var i2:int;
+				
+				_byteArray = dbfByteArray;
+				
+				_shapes = ShpTools.readRecords(shpByteArray);
+				
+				_dbfHeader = new DbfHeader(dbfByteArray);				
+								
+				this._shpAttrList = new ArrayCollection();
+				dbfRecord = DbfTools.getRecord(dbfByteArray, _dbfHeader, 0);
+				
+				for(i2=0; i2 < _dbfHeader.fields.length; i2++)
+				{
+					// 78 integer
+					// 67 texto
+					// 68 data
+					// 78 numero
+					o = new Object();
+					o.name = _dbfHeader.fields[i2].name;
+					
+					this._shpAttrList.addItem(o.name);
+					
+					if (this._shapefileAttributes.getItemIndex(o.name) == -1)
+					{
+						atributosOK = false;
+					} 
+				}
+				
+				if (!atributosOK)
+				{
+					this._shpLayer = shpLayer;
+					
+					var url:String = "widgets/componentes/adicionarCamada/GerenciadorAtributos.swf";
+					
+					this.cursorManager.setBusyCursor();   
+					
+					_gerenciadorAtr = ModuleManager.getModule(url);
+					_gerenciadorAtr.addEventListener(ModuleEvent.READY, gerenciadorReadyHandler);           
+					_gerenciadorAtr.load();
+				}
+				else
+				{
+					for (var i:int = 0; i < _shapes.length; i++)
+					{
+						if ((_shapes[i] as ShpRecord).shapeType == 1) // ponto
+						{
+							var auxpon:ShpPoint = (_shapes[i] as ShpRecord).shape as ShpPoint;
+							
+							local = new Location(auxpon.x, auxpon.y, new ProjProjection("EPSG:4326"));
+							local = local.reprojectTo(this.map.projection);
+							
+							newPoint = new org.openscales.geometry.Point(local.lon, local.lat);
+							newPoint.projection = this.map.projection;
+							
+							grafico = new PointFeature(newPoint, null, StyleUtils.getDefaultPointStyle());
+							
+							shpLayer.addFeature(grafico);
+							grafico.draw();
+						} 
+						else if (_shapes[i].shapeType == 3) // linha
+						{				
+							rings = ((_shapes[i] as ShpRecord).shape as ShpPolyline).rings[0]; 
+							
+							newLine = null;
+							
+							for (var i3:int=0; i3 < rings.length; i3++)
+							{
+								var auxpon2:ShpPoint = rings[i3] as ShpPoint;
+								
+								local = new Location(auxpon2.x, auxpon2.y, new ProjProjection("EPSG:4326"));
+								local = local.reprojectTo(this.map.projection);
+								
+								if (newLine == null)
+								{
+									newLine = new LineString(new <Number>[local.x, local.y]);
+									newLine.projection = this.map.projection;
+								} 
+								else
+								{
+									newLine.addPoint(local.x, local.y);
+								}
+							}
+							
+							grafico = new LineStringFeature(newLine, null, StyleUtils.getDefaultLineStyle());
+							
+							shpLayer.addFeature(grafico);
+							grafico.draw();
+						} 
+						else if (_shapes[i].shapeType == 5) // poligono
+						{
+							rings = ((_shapes[i] as ShpRecord).shape as ShpPolygon).rings[0];
+							
+							newLRing = null;
+							
+							for (var i4:int=0; i4 < rings.length; i4++ )
+							{							
+								var auxpon3:ShpPoint = rings[i4] as ShpPoint;
+								
+								local = new Location(auxpon3.x, auxpon3.y, new ProjProjection("EPSG:4326"));
+								local = local.reprojectTo(this.map.projection);
+								
+								if (newLRing == null)
+								{
+									newLRing = new LinearRing(new <Number>[local.x, local.y]);
+									newLRing.projection = this.map.projection;
+								} 
+								else
+								{
+									newLRing.addPoint(local.x, local.y);
+								}
+							}
+							
+							newPolygon = new Polygon(new <Geometry>[newLRing]);						
+							newPolygon.projection = this.map.projection;
+							
+							grafico = new PolygonFeature(newPolygon, null, StyleUtils.getDefaultPolygonStyle(), true);
+							
+							shpLayer.addFeature(grafico);
+							grafico.draw();
+						}
+						
+						if (grafico)
+						{						
+							// ler as informações do dbf e colocar no gride
+							dbfRecord = DbfTools.getRecord(dbfByteArray, _dbfHeader, i);
+							
+							for(i2=0; i2 < _dbfHeader.fields.length; i2++)
+							{
+								// 78 integer
+								// 67 texto
+								// 68 data
+								// 78 numero
+								o = new Object();
+								o.name = _dbfHeader.fields[i2].name;
+								
+								if(_dbfHeader.fields[i2].type == 68 )
+								{
+									o.value = Funcoes.ymd2dmy(dbfRecord.values[o.name]);
+								}
+								else
+								{
+									o.value = StringUtil.trim(dbfRecord.values[o.name].toString());
+								}
+								
+								grafico.attributes[o.name] = o.value;
+								//dpGride.addItem(o); 
+							}
+							//dpGraphics.push(grafico);
+						}
+					}
+				}				
+				
+				return shpLayer;
+			}
+			
+			private function gerenciadorReadyHandler(event:ModuleEvent):void
+			{
+				this.setState(BaseWidget.STATE_MINIMIZED);
+								
+				var _panel:IModuleInfo = event.module;
+				_widget = _panel.factory.create() as CloseWindowBase;			
+				
+				_widget.x = this.x + this.width + 10;
+				_widget.y = this.y + this.height/2 - 100;
+				
+				_widget.setTitle("Gerenciador de Atributos");
+				_widget.setLayer(this._shpLayer);
+				_widget.setAttrList(this._shpAttrList);
+				_widget.setShapesArray(_shapes);
+				_widget.setDBFHeader(_dbfHeader);
+				_widget.setDBFByteArray(_byteArray);
+				_widget.setMap(this.map);
+				
+				PopUpManager.addPopUp(_widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+			}
+			
+			
+			/**
+			 * The different formats supported. The hash map is made as follow:
+			 * 
+			 * <ul>
+			 * <li>key:String The format name</li>
+			 * <li>value:Array.String Versions of the formats that are supported</li>
+			 * </ul>
+			 * 
+			 * @default
+			 * <p>
+			 * WMS:
+			 * </p>
+			 * <ul>
+			 * 	<li>1.0.0</li>
+			 *  <li>1.1.0</li>
+			 * 	<li>1.1.1</li>
+			 * 	<li>1.3.0</li>
+			 * </ul>
+			 * 
+			 * <p>WMTS</p>
+			 * <ul>
+			 * 	<li>1.0.0</li>
+			 * </ul>
+			 * 
+			 * <p>
+			 * WFS:
+			 * </p>
+			 * <ul>
+			 * 	<li>1.0.0</li>
+			 *  <li>1.1.0</li>
+			 * 	<li>2.0.0</li>
+			 * </ul>
+			 * 
+			 * <p>
+			 * KML:
+			 * </p>
+			 * <ul>
+			 * 	<li>2.0</li>
+			 *  <li>2.2</li>
+			 * </ul>
+			 * 
+			 * <p>
+			 * GPX:
+			 * </p>
+			 * <ul>
+			 * 	<li>1.0</li>
+			 *  <li>1.1</li>
+			 * </ul>
+			 * 
+			 * <p>
+			 * GeoRSS:
+			 * </p>
+			 * <ul>
+			 *  <li>1.1</li>
+			 * </ul>
+			 * 
+			 * <p>
+			 * GML:
+			 * </p>
+			 * <ul>
+			 *  <li>2.0.0</li>
+			 *  <li>2.1.0</li>
+			 *  <li>3.2.1</li>
+			 * </ul>
+			 */
+			public function get supportedFormat():HashMap
+			{
+				return this._supportedFormats;
+			}
+			
+			/**
+			 * @private
+			 */ 
+			public function set supportedFormat(value:HashMap):void
+			{
+				if (value)
+				{
+					this._supportedFormats = value;
+					if (this._isInitialized)updateDropDownLists();
+				}
+			}
+			
+			/**
+			 * Indicates if the version field should appear
+			 * 
+			 * @default true
+			 */
+			public function get displayVersion():Boolean
+			{
+				return this._displayVersion;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set displayVersion(value:Boolean):void
+			{
+				this._displayVersion = value;
+			}
+			
+			os_internal function get displayNameError():Boolean
+			{
+				return this._displayNameError;
+			}
+			
+			os_internal function get displayFileError():Boolean
+			{
+				return this._displayFileError;
+			}
+			
+			os_internal function get displayFileExtensionError():Boolean
+			{
+				return this._displayFileExtensionError;
+			}
+			
+			os_internal function get displayUrlError():Boolean
+			{
+				return this._displayUrlError;
+			}
+			
+			os_internal function set selectedFormat(value:Number):void
+			{
+				this._selectedFormat = value;
+			}
+			
+			os_internal function set selectedSource(value:Number):void
+			{
+				this._selectedSource = value;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<solutions:states>
+		<s:State name="normal" enterState="onEnterState()" />
+		<s:State name="searching" enterState="onEnterState()" />
+		<s:State name="result" enterState="onEnterState()" />
+		<s:State name="noresult" enterState="onEnterState()" />
+		<s:State name="maximized"/>
+		<s:State name="minimized"/>
+		<s:State name="opened"/>
+		<s:State name="closed"/>
+	</solutions:states>
+	
+	<s:BorderContainer id="addlayers" width="350" height="250"  styleName="widgetContentContainer">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" 
+							  paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10"/>
+		</s:layout>
+		
+		<s:SkinnableContainer includeIn="normal" styleName="verticalLayout" id="normalContainer" 
+							  width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			
+			<s:Group width="100%" height="90%" top="0">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				
+				<s:SkinnableContainer id="layerNameContainer" width="100%"> 	
+					<s:layout>
+						<s:HorizontalLayout paddingBottom="5" paddingTop="5"/>
+					</s:layout>
+					<s:Label id="layerNameLabel" width="30%" styleName="estiloLabel"/>
+					<s:TextInput styleName="estiloTextInput" id="layerNameTextInput" width="70%" />
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer styleName="horizontalLayout" id="layerFormatContainer" width="100%"> 
+					<s:layout>
+						<s:HorizontalLayout paddingBottom="5" paddingTop="5" />
+					</s:layout>
+					<s:Label id="layerFormatLabel" width="30%" styleName="estiloLabel"/>
+					<s:DropDownList id="availableLayerFormatsDropDownList"
+									change="{this.formatChange(event)}"
+									dataProvider="{this._formatsProvider}"
+									selectedIndex="{this._selectedFormat}"
+									width="70%" styleName="estiloDropDownList"/>
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer styleName="horizontalLayout" id="layerVersionContainer" width="100%"
+									  includeInLayout="{this._displayVersion}"
+									  visible="{this._displayVersion}" > 
+					<s:layout>
+						<s:HorizontalLayout paddingBottom="5" paddingTop="5" />
+					</s:layout>
+					<s:Label id="layerVersionLabel" width="30%" styleName="estiloLabel"/>
+					<s:DropDownList id="availableLayerVersionsDropDownList"
+									change="{this.versionChange(event)}"
+									dataProvider="{this._versionsProvider}"
+									selectedIndex="{this._selectedVersion}" 
+									width="70%" styleName="estiloDropDownList"/>
+				</s:SkinnableContainer>
+				
+				<s:SkinnableContainer id="layerSourceContainer" width="100%">
+					<s:layout>
+						<s:VerticalLayout paddingBottom="0" paddingTop="5" verticalAlign="top"/>
+					</s:layout>
+					<s:VGroup paddingTop="5" width="100%" >
+						<s:SkinnableContainer width="100%">
+							<s:layout>
+								<s:HorizontalLayout paddingBottom="0" paddingTop="0"/>
+							</s:layout>
+							
+							<s:RadioButton groupName="radioButtonsGroup" 
+										   id="layerUrlRadioButton"
+										   value="1" width="30%" styleName="estiloRadioButton"/>
+							
+							<s:TextInput id="layerUrlTextInput"
+										 styleName="estiloTextInput" width="70%" 
+										 visible="{(this._selectedSource == 1)?true:false}"/>
+						</s:SkinnableContainer>
+						
+						<s:SkinnableContainer width="100%">
+							<s:layout>
+								<s:HorizontalLayout paddingBottom="0" paddingTop="5" />
+							</s:layout>
+							
+							<s:RadioButton groupName="radioButtonsGroup" 
+										   id="layerLocalFileRadioButton"
+										   value="2" width="30%" styleName="estiloRadioButton"/>
+							
+							<s:Button id="chooseLocalFileButton" width="100"
+									  styleName="estiloWidgetContentButton" 
+									  visible="{(this._selectedSource == 2)?true:false}" click="{this.browseFiles()}"/>
+						</s:SkinnableContainer>
+					</s:VGroup>
+					
+					<s:Label id="selectedLocalFile" visible="true" width="300" styleName="estiloLabelSelectedFile"/>
+				</s:SkinnableContainer>
+			</s:Group>
+			
+			<s:Group width="100%" height="10%" bottom="0">
+				<s:layout>
+					<s:HorizontalLayout gap="0" horizontalAlign="left" verticalAlign="bottom"/>
+				</s:layout>
+				
+				<s:Button id="addLayerButton" bottom="0" width="100"
+						  styleName="estiloWidgetContentMainButton"
+						  click="{this.addLayerButtonClick(event)}"/>
+			</s:Group>
+		</s:SkinnableContainer>
+		
+		
+		<s:SkinnableContainer includeIn="searching" styleName="verticalLayout" id="searchingContainer" width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			
+			<s:Group width="100%" height="90%" top="0">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				<s:Label id="searchingLabel" styleName="estiloLabel"/>
+			</s:Group>
+			
+			<s:Group width="100%" height="10%" bottom="0">
+				<s:layout>
+					<s:HorizontalLayout gap="0" horizontalAlign="left" verticalAlign="bottom"/>
+				</s:layout>
+				<s:Button id="backFromSearchingToSearchButton" 
+						  click="{this.backToSearch(event)}" width="100"
+						  styleName="estiloWidgetContentMainButton"/>
+			</s:Group>
+		</s:SkinnableContainer>
+		
+		
+		<s:SkinnableContainer includeIn="noresult" styleName="verticalLayout" id="noResultContainer" width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout/>
+			</s:layout>
+			<s:Group width="100%" height="90%" top="0">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				<s:Label id="noResultLabel" styleName="estiloLabel"/>
+			</s:Group>
+			
+			<s:Group width="100%" height="10%" bottom="0">
+				<s:layout>
+					<s:HorizontalLayout gap="0" horizontalAlign="left" verticalAlign="bottom"/>
+				</s:layout>
+				<s:Button id="backFromNoResultToSearchButton" width="100"
+						  click="{this.backToSearch(event)}" styleName="estiloWidgetContentMainButton"/>
+			</s:Group>
+		</s:SkinnableContainer>
+		
+		
+		<s:SkinnableContainer includeIn="result" width="100%" height="100%" styleName="verticalLayout" id="resultsContainer"  >
+			<s:layout>
+				<s:VerticalLayout gap="5"/>
+			</s:layout>
+			<s:List id="resultList"
+					width="100%" height="90%" styleName="estiloInvisibleContainer"
+					creationComplete="onResultListCreationComplete()"
+					dropEnabled="false" dragEnabled="false" dragMoveEnabled="false"
+					dataProvider="{this._resultListProvider}" itemRenderer="{this.CLASS_FACTORY}">
+				<s:layout>
+					<s:VerticalLayout gap="2" verticalAlign="middle" horizontalAlign="left"/>
+				</s:layout>
+			</s:List>
+			
+			<s:Group width="100%" height="10%">
+				<s:layout>
+					<s:HorizontalLayout gap="0" horizontalAlign="left" verticalAlign="bottom"/>
+				</s:layout>
+				<s:Button id="backFromResultToSearchButton"
+						  click="{this.backToSearch(event)}" width="100"
+						  styleName="estiloWidgetContentMainButton"/>
+			</s:Group>
+		</s:SkinnableContainer>
+	</s:BorderContainer>
+	
+</solutions:BaseWidget>

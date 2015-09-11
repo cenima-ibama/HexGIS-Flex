@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<usuarios>
+	<usuario>
+		<nome>Teste</nome>
+		<senha>teste</senha>
+		<cpf>12345678909</cpf>
+		<email>teste</email>
+		<configXml>config.xml</configXml>
+	</usuario>
+	<usuario>
+		<nome>Mariano Pascual</nome>
+		<senha>teste</senha>
+		<cpf>69904723168</cpf>
+		<email>mariano@email.com.br</email>
+		<configXml>config.xml</configXml>
+	</usuario>
+</usuarios>

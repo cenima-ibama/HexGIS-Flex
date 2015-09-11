@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<configuration>
+	<!--<service name="Dados Hex" workspace="hex">
+		<formato url="http://www.hexinformatica.com.br/geoserver/wfs?request=getfeature&service=wfs&version=1.0.0&typename={camadas}&outputformat=SHAPE-ZIP">Shapefile Zipado</formato>				 
+		<formato url="http://www.hexinformatica.com.br/geoserver/wms/kml?layers={camadas}">KML</formato>
+		<formato url="http://www.hexinformatica.com.br/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=image/jpeg">JPEG</formato>
+		<formato url="http://www.hexinformatica.com.br/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=image/png">PNG</formato>
+		<formato url="http://www.hexinformatica.com.br/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=application/pdf">PDF</formato>
+		<formato url="http://www.hexinformatica.com.br/geoserver/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=application/openlayers">Open Layers</formato>
+	</service>-->
+	
+	<service name="Dados HEX" workspace="HEX">
+		<formato url="http://projetos.hexgis.com/geoserver/HEX/ows?request=getfeature&service=wfs&version=1.0.0&typename={camadas}&outputformat=SHAPE-ZIP">Shapefile Zipado</formato>				 
+		<formato url="http://projetos.hexgis.com/geoserver/HEX/wms/kml?layers={camadas}">KML</formato>
+		<formato url="http://projetos.hexgis.com/geoserver/HEX/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=image/jpeg">JPEG</formato>
+		<formato url="http://projetos.hexgis.com/geoserver/HEX/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=image/png">PNG</formato>
+		<formato url="http://projetos.hexgis.com/geoserver/HEX/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=application/pdf">PDF</formato>
+		<formato url="http://projetos.hexgis.com/geoserver/wfs?request=GetFeature&service=wfs&version=1.0.0&typename={camadas}&outputformat=excel">Excel</formato>
+		<formato url="http://projetos.hexgis.com/geoserver/HEX/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=application/openlayers">Open Layers</formato>
+		<formato url="http://projetos.hexgis.com/geoserver/HEX/wms?service=WMS&version=1.1.0&request=GetMap&layers={camadas}&styles=&bbox={bbox}&width=800&height=400&srs={projecao}&format=application/openlayers">Open Layers</formato>
+	</service>
+</configuration>

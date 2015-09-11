@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx = "http://www.adobe.com/2006/mxml"
+		 width="100%" height="100%"
+		 creationComplete = "init(event)">
+	
+	<mx:Script>
+		<![CDATA[
+			import solutions.event.AppEvent;
+			import mx.events.FlexEvent;
+			import mx.controls.Alert;
+			
+			
+			public var configManager:ConfigManager;
+			
+			public var uiManager:UIManager; 
+			
+			public var menuController:MenuController;
+			
+			public var mapManager:MapManager;
+			
+			public var widgetManager:WidgetManager;
+			
+			//public var dataManager:DataManager; 
+			
+			private static var _container:SiteContainer;
+			
+			private static var _lock:Boolean = false;
+			
+			//to make sure the the children are visible.
+			private var isAddChild:Boolean = true;
+			
+			private var _containerEventDispatcher:EventBus;
+			
+			public static var CONTAINER_INITIALIZED:String = "containerInitilized";
+			
+			
+			public function init(event:FlexEvent):void
+			{
+				_container = this;
+				_lock = true; //make sure only one container is created.
+				
+				//initLogging();
+				
+				//make sure the event bus is ready.
+				_containerEventDispatcher = EventBus.getInstance();
+				
+				//prepare to show error message
+				//SiteContainer.addEventListener(AppEvent.APP_ERROR, showError);
+				
+				//tell the modules it's on business.
+				//SiteContainer.dispatch(SiteContainer.CONTAINER_INITIALIZED);	
+				
+			}
+						
+			override protected function commitProperties():void
+			{
+				super.commitProperties();
+				
+				if (isAddChild)
+				{
+					this.addElement(mapManager);
+					this.addElement(menuController);
+					this.addElement(widgetManager);
+					isAddChild = false;
+				}   
+			}
+			
+			/* private function showError(event:AppEvent):void
+			{
+				var errorWindow:ErrorWindow = ErrorWindow(PopUpManager.createPopUp(this, ErrorWindow, true));
+				
+				// Add title to the title bar.
+				errorWindow.errorMessage = event.data as String;
+				
+				// Add a close button.
+				// To close the container, your must also handle the close event.
+				errorWindow.showCloseButton=true;
+				
+			} */
+			
+			/* -----------------------------------------------
+			static functions as proxy of Event Bus
+			----------------------------------------------- */
+			
+			public static function getInstance():SiteContainer
+			{
+				if (!_lock)
+				{
+					_container = new SiteContainer();
+					_lock = true;
+				}
+				return _container;		
+			}
+			
+			//the following are the methods to allow modules access event bus via the contains.
+			public static function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void 
+			{
+				EventBus.getInstance().addEventListener(type, listener, useCapture, priority, useWeakReference);
+			}		    
+			
+			public static function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void 
+			{
+				EventBus.getInstance().removeEventListener(type, listener, useCapture);
+			}		    
+			
+			//this is the simplest way of communicate. Just use a string.
+			public static function dispatch(type:String):Boolean 
+			{
+				return EventBus.getInstance().dispatch(type);
+			}		    
+			
+			public static function dispatchEvent(event:Event):Boolean 
+			{
+				var eventBase:EventBus = EventBus.getInstance();
+
+				return eventBase.dispatchEvent(event);
+			}		    
+			
+			/**
+			 * 
+			 */
+			public static function setStatus(status:String):void
+			{
+				dispatchEvent(new AppEvent(AppEvent.SET_STATUS, false, false, status));
+			}
+		]]>
+	</mx:Script>
+</s:Group>

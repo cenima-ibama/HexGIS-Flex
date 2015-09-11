@@ -1,0 +1,997 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<solutions:CloseWindowBase xmlns:fx="http://ns.adobe.com/mxml/2009"
+						   xmlns:s="library://ns.adobe.com/flex/spark"
+						   xmlns:mx="library://ns.adobe.com/flex/mx"
+						   xmlns:solutions="solutions.*"
+						   xmlns:data="widgets.componentes.data.*"
+						   creationComplete="onCreationCompleteHandler(event)">
+	
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import com.adobe.utils.StringUtil;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IUITextField;
+			import mx.events.DragEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			import mx.utils.ObjectUtil;
+			
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.LineStringFeature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.feature.PolygonFeature;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.geometry.Geometry;
+			import org.openscales.geometry.LineString;
+			import org.openscales.geometry.LinearRing;
+			import org.openscales.geometry.Polygon;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.proj4as.ProjProjection;
+			import org.vanrijkom.dbf.*;
+			import org.vanrijkom.shp.*;
+			
+			import solutions.utils.Funcoes;
+			import solutions.utils.StyleUtils;
+			
+			import spark.events.TextOperationEvent;
+			
+			[Bindable] private var _isPoint:Boolean;
+			
+			[Bindable] private var _isOperacaoSet:Boolean;
+			[Bindable] private var _isDataSet:Boolean;
+			[Bindable] private var _isIdAgenteSet:Boolean;
+			[Bindable] private var _isNumTEISet:Boolean;			
+			[Bindable] private var _isSerieTEISet:Boolean;			
+			[Bindable] private var _isNumAISet:Boolean;			
+			[Bindable] private var _isSerieAISet:Boolean;			
+			[Bindable] private var _isFonteSet:Boolean;
+			[Bindable] private var _isImovelSet:Boolean;
+			[Bindable] private var _isTipoSet:Boolean;
+			[Bindable] private var _isObsSet:Boolean;
+			[Bindable] private var _isReferenciaSet:Boolean;
+
+			
+			protected function onCreationCompleteHandler(event:FlexEvent):void
+			{
+				this.minHeight = 500;
+				this.minWidth = 750;
+													
+				PopUpManager.centerPopUp(this);
+				
+				this.cursorManager.removeBusyCursor();
+			}
+			
+			override public function setShapesArray(value:Array):void
+			{			
+				super.setShapesArray(value);
+				
+				if (this._shapesArray)
+				{
+					if (_shapesArray[0].shapeType == 1) this._isPoint = true;
+				}
+			}
+			
+			protected function input_dragEnterHandler(event:DragEvent):void
+			{
+				if (event.dragSource.hasFormat("itemsByIndex"))
+				{
+					DragManager.acceptDragDrop(TextArea(event.currentTarget));
+				}
+			}
+			
+			protected function input_dragOverHandler(event:DragEvent):void
+			{
+				if (event.dragSource.hasFormat("itemsByIndex"))
+					DragManager.showFeedback(DragManager.COPY);
+			}
+			
+			protected function input_dragDropHandler(event:DragEvent):void
+			{
+				var current:Object;
+				var s:String;
+				
+				current = event.currentTarget;
+				
+				event.preventDefault();
+				var itemsArray:Vector.<Object> = event.dragSource.dataForFormat("itemsByIndex") as Vector.<Object>;
+				if (itemsArray.length > 0)
+				{
+					s = ObjectUtil.toString(itemsArray[0]);
+					
+					if ((current as TextArea).text.length > 0)
+					{
+						dragList.dataProvider.addItem(TextArea(current).text);
+					}
+					dragList.dataProvider.removeItemAt(dragList.dataProvider.getItemIndex(itemsArray[0]));
+					
+					(current as TextArea).text = s.substring(1, s.length-1);
+					
+					if (current == operacao_input)
+					{
+						operacao_input_changeHandler();
+					}
+					else if (current == data_input)
+					{
+						data_input_changeHandler();
+					}
+					else if (current == idAgente_input)
+					{
+						idAgente_input_changeHandler();
+					}
+					else if (current == numTEI_input)
+					{
+						numTEI_input_changeHandler();
+					}
+					else if (current == serieTEI_input)
+					{
+						serieTEI_input_changeHandler();
+					}
+					else if (current == numAI_input)
+					{
+						numAI_input_changeHandler();
+					}
+					else if (current == serieAI_input)
+					{
+						serieAI_input_changeHandler();
+					}
+					else if (current == fonte_input)
+					{
+						fonte_input_changeHandler();
+					}
+					else if (current == imovel_input)
+					{
+						imovel_input_changeHandler();
+					}
+					else if (current == tipo_input)
+					{
+						tipo_input_changeHandler();
+					}
+					else if (current == obs_input)
+					{
+						obs_input_changeHandler();
+					}
+					else if (current == referencia_input)
+					{
+						referencia_input_changeHandler();
+					}
+					
+				}
+				//operacao_input.text = event.draggedItem.toString();
+			}
+						
+			protected function dragList_creationCompleteHandler(event:FlexEvent):void
+			{
+				dragList.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				dragList.scroller.verticalScrollBar.setStyle("chromeColor", this.getStyle("backgroundColor"));
+			}
+			
+			protected function operacao_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isOperacaoSet = true;
+				operacao_value.text = operacao_input.text;
+			}
+			
+			protected function data_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isDataSet = true;
+				data_value.text = data_input.text;
+			}
+			
+			protected function idAgente_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isIdAgenteSet = true;
+				idAgente_value.text = idAgente_input.text;
+			}
+			
+			protected function numTEI_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isNumTEISet = true;
+				numTEI_value.text = numTEI_input.text;
+			}
+			
+			protected function serieTEI_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isSerieTEISet = true;
+				serieTEI_value.text = serieTEI_input.text;
+			}
+			
+			protected function numAI_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isNumAISet = true;
+				numAI_value.text = numAI_input.text;
+			}
+			
+			protected function serieAI_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isSerieAISet = true;
+				serieAI_value.text = serieAI_input.text;
+			}
+			
+			protected function fonte_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isFonteSet = true;
+				fonte_value.text = fonte_input.text;
+			}
+			
+			protected function imovel_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isImovelSet = true;
+				imovel_value.text = imovel_input.text;
+			}
+			
+			protected function tipo_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isTipoSet = true;
+				tipo_value.text = tipo_input.text;
+			}
+			
+			protected function obs_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isObsSet = true;
+				obs_value.text = obs_input.text;
+			}
+			
+			protected function referencia_input_changeHandler(event:TextOperationEvent=null):void
+			{
+				_isReferenciaSet = true;
+				referencia_value.text = referencia_input.text;
+			}
+			
+			protected function operacao_clickHandler(event:MouseEvent):void
+			{
+				if (operacao_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(operacao_value.text, 0);
+				}
+				operacao_value.text = operacao_input.text = "";
+				_isOperacaoSet = false;
+			}
+			
+			protected function data_clickHandler(event:MouseEvent):void
+			{
+				if (data_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(data_value.text, 0);
+				}
+				data_value.text = data_input.text = "";
+				_isDataSet = false;
+			}
+			
+			protected function idAgente_clickHandler(event:MouseEvent):void
+			{
+				if (idAgente_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(idAgente_value.text, 0);
+				}
+				idAgente_value.text = idAgente_input.text = "";
+				_isIdAgenteSet = false;
+			}
+			
+			protected function numTEI_clickHandler(event:MouseEvent):void
+			{
+				if (numTEI_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(numTEI_value.text, 0);
+				}
+				numTEI_value.text = numTEI_input.text = "";
+				_isNumTEISet = false;
+			}
+			
+			protected function serieTEI_clickHandler(event:MouseEvent):void
+			{
+				if (serieTEI_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(serieTEI_value.text, 0);
+				}
+				serieTEI_value.text = serieTEI_input.text = "";
+				_isSerieTEISet = false;
+			}
+			
+			protected function numAI_clickHandler(event:MouseEvent):void
+			{
+				if (numAI_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(numAI_value.text, 0);
+				}
+				numAI_value.text = numAI_input.text = "";
+				_isNumAISet = false;
+			}
+			
+			protected function serieAI_clickHandler(event:MouseEvent):void
+			{
+				if (serieAI_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(serieAI_value.text, 0);
+				}
+				serieAI_value.text = serieAI_input.text = "";
+				_isSerieAISet = false;
+			}
+			
+			protected function fonte_clickHandler(event:MouseEvent):void
+			{
+				if (fonte_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(fonte_value.text, 0);
+				}
+				fonte_value.text = fonte_input.text = "";
+				_isFonteSet = false;
+			}
+			
+			protected function imovel_clickHandler(event:MouseEvent):void
+			{
+				if (imovel_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(imovel_value.text, 0);
+				}
+				imovel_value.text = imovel_input.text = "";
+				_isImovelSet = false;
+			}
+			
+			protected function tipo_clickHandler(event:MouseEvent):void
+			{
+				if (tipo_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(tipo_value.text, 0);
+				}
+				tipo_value.text = tipo_input.text = "";
+				_isTipoSet = false;
+			}
+			
+			protected function obs_clickHandler(event:MouseEvent):void
+			{
+				if (obs_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(obs_value.text, 0);
+				}
+				obs_value.text = obs_input.text = "";
+				_isObsSet = false;
+			}
+			
+			protected function referencia_clickHandler(event:MouseEvent):void
+			{
+				if (referencia_value.text.length > 0)
+				{
+					dragList.dataProvider.addItemAt(referencia_value.text, 0);
+				}
+				referencia_value.text = referencia_input.text = "";
+				_isReferenciaSet = false;
+			}
+			
+			protected function atribuir_clickHandler(event:MouseEvent):void
+			{
+				var dbfRecord:DbfRecord;
+				var local:Location;
+				var grafico:Feature;
+				var rings:Array;
+				var newPoint:org.openscales.geometry.Point;
+				var newLine:LineString;		
+				var newLRing:LinearRing;
+				var newPolygon:Polygon;
+				
+				var i:int;
+				var i2:int;
+				
+				var o:Object;
+				
+				if (this._shapesArray && this._dbfHeader)
+				{			
+					for (i = 0; i < _shapesArray.length; i++)
+					{
+						if (_shapesArray[i].shapeType == 1) // ponto
+						{
+							var auxpon:ShpPoint = (_shapesArray[i] as ShpRecord).shape as ShpPoint;
+							
+							local = new Location(auxpon.x, auxpon.y, new ProjProjection("EPSG:4326"));
+							local = local.reprojectTo(this._map.projection);
+							
+							newPoint = new org.openscales.geometry.Point(local.lon, local.lat);
+							newPoint.projection = this._map.projection;
+							
+							grafico = new PointFeature(newPoint, null, StyleUtils.getDefaultPointStyle());
+						} 
+						else if (_shapesArray[i].shapeType == 3) // linha
+						{
+							rings = ((_shapesArray[i] as ShpRecord).shape as ShpPolyline).rings[0]; 
+							
+							newLine = null;
+							
+							for (var i3:int=0; i3 < rings.length; i3++)
+							{
+								var auxpon2:ShpPoint = rings[i3] as ShpPoint;
+								
+								local = new Location(auxpon2.x, auxpon2.y, new ProjProjection("EPSG:4326"));
+								local = local.reprojectTo(this._map.projection);
+								
+								if (newLine == null)
+								{
+									newLine = new LineString(new <Number>[local.x, local.y]);
+									newLine.projection = this._map.projection;
+								} 
+								else
+								{
+									newLine.addPoint(local.x, local.y);
+								}
+							}
+							
+							grafico = new LineStringFeature(newLine, null, StyleUtils.getDefaultLineStyle());
+						} 
+						else if (_shapesArray[i].shapeType == 5) // poligono
+						{
+							rings = ((_shapesArray[i] as ShpRecord).shape as ShpPolygon).rings[0];
+							
+							newLRing = null;
+							
+							for (var i4:int=0; i4 < rings.length; i4++ )
+							{			
+								var auxpon3:ShpPoint = rings[i4] as ShpPoint;
+								
+								local = new Location(auxpon3.x, auxpon3.y, new ProjProjection("EPSG:4326"));
+								local = local.reprojectTo(this._map.projection);
+								
+								if (newLRing == null)
+								{
+									newLRing = new LinearRing(new <Number>[local.x, local.y]);
+									newLRing.projection = this._map.projection;
+								} 
+								else
+								{
+									newLRing.addPoint(local.x, local.y);
+								}
+							}
+							
+							newPolygon = new Polygon(new <Geometry>[newLRing]);						
+							newPolygon.projection = this._map.projection;
+							
+							grafico = new PolygonFeature(newPolygon, null, StyleUtils.getDefaultPolygonStyle(), true);
+						}
+
+						if (grafico)
+						{					
+							// ler as informações do dbf e colocar no gride
+							dbfRecord = DbfTools.getRecord(this._dbfByteArray, this._dbfHeader, i);
+							
+							for(i2=0; i2 < _dbfHeader.fields.length; i2++)
+							{
+								// 78 integer
+								// 67 texto
+								// 68 data
+								// 78 numero
+								o = new Object();
+								o.name = _dbfHeader.fields[i2].name;
+								
+								if(_dbfHeader.fields[i2].type == 68 )
+								{
+									o.value = Funcoes.ymd2dmy(dbfRecord.values[o.name]);
+								}
+								else
+								{
+									o.value = StringUtil.trim(dbfRecord.values[o.name].toString());
+								}
+								
+								if (o.name == operacao_value.text)
+								{
+									grafico.attributes.operacao = o.value;
+								}
+								else if (o.name == data_value.text)
+								{
+									grafico.attributes.data = o.value;
+								}
+								else if (o.name == idAgente_value.text)
+								{
+									grafico.attributes.id_agente = o.value;
+								}
+								else if (o.name == numTEI_value.text)
+								{
+									grafico.attributes.num_tei = o.value;
+								}
+								else if (o.name == serieTEI_value.text)
+								{
+									grafico.attributes.serie_tei = o.value;
+								}
+								else if (o.name == numAI_value.text)
+								{
+									grafico.attributes.num_ai = o.value;
+								}
+								else if (o.name == serieAI_value.text)
+								{
+									grafico.attributes.serie_ai = o.value;
+								}
+								else if (o.name == fonte_value.text)
+								{
+									grafico.attributes.id_des = o.value;
+								}
+								else if (o.name == imovel_value.text)
+								{
+									grafico.attributes.imovel_tei = o.value;
+								}
+								else if (o.name == tipo_value.text)
+								{
+									grafico.attributes.tipo = o.value;
+								}
+								else if (o.name == obs_value.text)
+								{
+									grafico.attributes.obs = o.value;
+								}
+								else if ((this._isPoint) && (o.name == referencia_value.text))
+								{
+									grafico.attributes.referencia = o.value;
+								}								
+							}
+							grafico.attributes.fid = 0;
+							grafico.attributes.id = 0;
+
+							VectorLayer(this._layer).addFeature(grafico);
+							grafico.draw();
+						}
+					}
+				}
+				else
+				{
+					//erro
+				}
+				
+				this.closeWidget(event);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%"
+			  paddingBottom="5" paddingLeft="10" paddingRight="10" paddingTop="10" gap="10">
+		<s:HGroup height="90%" width="100%" gap="20" verticalAlign="top" horizontalAlign="center">
+			<s:List id="dragList" width="40%"
+					itemRenderer="widgets.componentes.adicionarCamada.renderer.ShapeAttrListItemRenderer"
+					dataProvider="{this._attrList}" allowMultipleSelection="true" 
+					dragEnabled="true" styleName="estiloListaLayerManager" 
+					creationComplete="dragList_creationCompleteHandler(event)" 
+					verticalScrollPolicy="on">
+				<s:layout>
+					<s:VerticalLayout verticalAlign="top" horizontalAlign="center" requestedRowCount="11" gap="10"/>
+				</s:layout>
+			</s:List>
+			
+			<s:VGroup width="60%" gap="15" verticalAlign="top">
+				<s:HGroup width="100%" height="30" verticalAlign="middle">
+					<s:TextArea id="operacao_input" width="{dragList.width-30}" height="25" editable="false"
+								visible="{!_isOperacaoSet}" includeInLayout="{!_isOperacaoSet}" 
+								 styleName="estiloTextInput"
+								 dragEnter="input_dragEnterHandler(event)"
+								 dragOver="input_dragOverHandler(event)" 
+								 dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isOperacaoSet}" includeInLayout="{_isOperacaoSet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="operacao_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="operacao_value" width="100%" height="25" editable="false"
+								   styleName="estiloInvisibleContainer" 
+								   skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+								   dragEnter="input_dragEnterHandler(event)"
+								   dragOver="input_dragOverHandler(event)" 
+								   dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Nome da Operação" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="data_input" width="{dragList.width-30}" height="25" editable="false"
+								styleName="estiloTextInput"
+								visible="{!_isDataSet}" includeInLayout="{!_isDataSet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isDataSet}" includeInLayout="{_isDataSet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30"
+									   click="data_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList"
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="data_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Data da Observação" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="idAgente_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isIdAgenteSet}" includeInLayout="{!_isIdAgenteSet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isIdAgenteSet}" includeInLayout="{_isIdAgenteSet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30"
+									   click="idAgente_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="idAgente_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Identificação do Agente" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="numTEI_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isNumTEISet}" includeInLayout="{!_isNumTEISet}" 
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isNumTEISet}" includeInLayout="{_isNumTEISet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="numTEI_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="numTEI_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Número do TEI" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="serieTEI_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isSerieTEISet}" includeInLayout="{!_isSerieTEISet}" 
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isSerieTEISet}" includeInLayout="{_isSerieTEISet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="serieTEI_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="serieTEI_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Série do TEI" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="numAI_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isNumAISet}" includeInLayout="{!_isNumAISet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isNumAISet}" includeInLayout="{_isNumAISet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="numAI_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="numAI_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Número do AI" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="serieAI_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isSerieAISet}" includeInLayout="{!_isSerieAISet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isSerieAISet}" includeInLayout="{_isSerieAISet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="serieAI_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="serieAI_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Série do AI" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="fonte_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isFonteSet}" includeInLayout="{!_isFonteSet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isFonteSet}" includeInLayout="{_isFonteSet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="fonte_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="fonte_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Fonte" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="imovel_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isImovelSet}" includeInLayout="{!_isImovelSet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isImovelSet}" includeInLayout="{_isImovelSet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="imovel_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="imovel_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Nome do Imóvel" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="tipo_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isTipoSet}" includeInLayout="{!_isTipoSet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isTipoSet}" includeInLayout="{_isTipoSet}" 
+									   styleName="estiloInvisibleContainer" 
+									   width="{dragList.width-30}" height="30" 
+									   click="tipo_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="tipo_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Tipo da Infração" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle">
+					<s:TextArea id="obs_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isObsSet}" includeInLayout="{!_isObsSet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isObsSet}" includeInLayout="{_isObsSet}" 
+									   styleName="estiloInvisibleContainer"
+									   width="{dragList.width-30}" height="30" 
+									   click="obs_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="obs_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Observações" width="40%" textAlign="right"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="25" verticalAlign="middle" 
+						  includeInLayout="{this._isPoint}" visible="{this._isPoint}">
+					<s:TextArea id="referencia_input" width="{dragList.width-30}" height="25" editable="false" 
+								styleName="estiloTextInput"
+								visible="{!_isReferenciaSet}" includeInLayout="{!_isReferenciaSet}"
+								dragEnter="input_dragEnterHandler(event)"
+								dragOver="input_dragOverHandler(event)" 
+								dragDrop="input_dragDropHandler(event)"/>
+					
+					<s:BorderContainer visible="{_isReferenciaSet}" includeInLayout="{_isReferenciaSet}" 
+									   styleName="estiloInvisibleContainer"
+									   width="{dragList.width-30}" height="30" 
+									   click="referencia_clickHandler(event)">
+						<s:layout>
+							<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+						</s:layout>
+						
+						<s:BorderContainer styleName="estiloAttributesList" 
+										   dropShadowVisible="true" width="100%" height="25">
+							<s:layout>
+								<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+							</s:layout>
+							<s:Rect width="10"/>
+							<s:TextArea id="referencia_value" width="100%" height="25" editable="false"
+										styleName="estiloInvisibleContainer" 
+										skinClass="widgets.componentes.adicionarCamada.renderer.InvisibleTextAreaSkin"
+										dragEnter="input_dragEnterHandler(event)"
+										dragOver="input_dragOverHandler(event)" 
+										dragDrop="input_dragDropHandler(event)"/>
+							<s:Rect width="10"/>
+						</s:BorderContainer>
+					</s:BorderContainer>
+					
+					<s:Label text="Referência" width="40%" textAlign="right"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" height="10%" verticalAlign="bottom" horizontalAlign="right" paddingTop="10">
+			<s:Button label="OK" width="100" 
+					  styleName="estiloWidgetContentButton" 
+					  click="atribuir_clickHandler(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+
+	
+</solutions:CloseWindowBase>

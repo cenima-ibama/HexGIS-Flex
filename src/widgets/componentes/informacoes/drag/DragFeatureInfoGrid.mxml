@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- FeatureInfoDisplay Flex control, used to change layer order or visbility -->
+<s:Group xmlns="http://openscales.org"
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 creationComplete="onCompleteCreation()">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.dataGridClasses.DataGridColumn;
+			
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.feature.Feature;
+			
+			import solutions.SiteContainer;
+			
+			import spark.components.gridClasses.GridColumn;
+			
+			import widgets.componentes.informacoes.drag.event.TotalRegistrosEvent;
+					
+			private var _data:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var attr:Object;
+									
+			[Bindable]
+			private var _results:Vector.<Feature>;
+			
+			private var cols:Array = new Array();
+			
+			//private var gridColumn:GridColumn;
+			private var gridColumn:DataGridColumn;
+			
+			private var resultsLength:Number;
+			
+			private var attributesLength:Number;
+			
+			private static var MAX_HEIGHT:Number = 250;
+			private static var MIN_HEIGHT:Number = 120;
+			private static var MAX_WIDTH:Number = 700;
+			private static var MIN_WIDTH:Number = 300;
+							
+			/**
+			 * The dataProvider use for the list.
+			 */
+			[Bindable]
+			public function get data():ArrayCollection
+			{
+				return _data;
+			}
+			/**
+			 * @private
+			 */
+			public function set data(value:ArrayCollection):void
+			{
+				_data = value;
+			}
+			
+			[Bindable]
+			public function get results():Object
+			{
+				return _results;
+			}
+			public function set results(dadosFeature:Object):void
+			{
+				_results = (dadosFeature) as Vector.<Feature>;
+				resultsLength = results.length;
+
+				if (resultsLength > 0)
+				{
+					var aux:Feature = results[0];
+					//gridColumn = new GridColumn("Índice");
+					gridColumn = new DataGridColumn("Índice");
+					//gridColumn.maxWidth = 100;
+					//gridColumn.minWidth = 70;
+					gridColumn.wordWrap = true;
+					cols.push(gridColumn);
+					attr = (aux.attributes);
+					
+					attributesLength = 0;
+					for (var att:String in attr) 
+					{ 
+						attributesLength++;
+						if(att != "coordinates")
+						{
+							//gridColumn = new GridColumn(att);
+							gridColumn = new DataGridColumn(att);
+							//gridColumn.maxWidth = 100;
+							//gridColumn.minWidth = 70;
+							gridColumn.wordWrap = true;
+							cols.push(gridColumn);
+						}
+					}
+					//infoGrid.columns = new ArrayCollection(cols);
+					infoGrid.columns = cols;
+					
+					data.removeAll();
+					var auxObject:Object;
+					for (var i:Number=0; i<resultsLength; ++i)
+					{
+						var feat:Feature = results[i];
+						
+						auxObject = new Object();
+						
+						var arrayNome:Array = feat.name.split(".");
+						
+						auxObject["Índice"] = Number(arrayNome[1]);
+						attr = (feat.attributes);
+						
+						for (var name:String in attr) 
+						{ 
+							if(name != "coordinates"){
+								auxObject[name] = attr[name];
+							}
+						}
+						data.addItem(auxObject);
+					}
+					infoGrid.dataProvider = data;
+					SiteContainer.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, resultsLength));
+					//this.map.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, resultsLength));
+					//Alert.show(resultsLength.toString());
+				}
+				else {
+					infoGrid.visible = false;
+					infoGrid.includeInLayout = false;
+					SiteContainer.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, 0));
+					//this.map.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, 0));
+				}
+				
+			}
+			
+			private function onCompleteCreation():void
+			{
+				var novoWidth:Number;
+				var novoHeight:Number;
+
+				novoWidth = attributesLength*100;
+				novoHeight = resultsLength*40+30;
+				
+				if (novoWidth > MAX_WIDTH) 
+				{
+					infoGrid.width = MAX_WIDTH;
+				}
+				else if (novoWidth < MIN_WIDTH) 
+				{
+					infoGrid.width = MIN_WIDTH;
+				}
+				else 
+				{
+					infoGrid.width = novoWidth;
+				}
+				
+				if (novoHeight > MAX_HEIGHT) 
+				{
+					infoGrid.height = MAX_HEIGHT;
+				}
+				else if (novoHeight < MIN_HEIGHT) 
+				{
+					infoGrid.height = MIN_HEIGHT;
+				}
+				else 
+				{
+					infoGrid.height = novoHeight;
+				}
+				
+				this.width = infoGrid.width;
+				this.height = infoGrid.height;
+			}
+			
+			/* private function onInfoGridCreationComplete():void
+			{
+				//lstCamadas.setStyle("skinClass", LayersListSkin);
+				
+				infoGrid.scroller.verticalScrollBar.setStyle("skinClass", VerticalScrollBarSkin);
+				infoGrid.scroller.verticalScrollBar.setStyle("chromeColor", "#ffffff");
+			} */
+			//creationComplete="onInfoGridCreationComplete()"
+		]]>
+	</fx:Script>
+	<mx:DataGrid id="infoGrid" width="100%" styleName="estiloMxDataGrid"
+				 horizontalScrollPolicy="auto" alternatingItemColors="[#f9f2ee, #dddddd]">
+	</mx:DataGrid>
+	
+	<!--alternatingItemColors="[#e5e5e5, #dddddd]"  textSelectedColor="#ffffff" 
+	rollOverColor="#747474" textRollOverColor="#ffffff" -->
+		
+</s:Group>

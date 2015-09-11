@@ -1,0 +1,687 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<index>
+	<title>Source of HexGIS Flex</title>
+	<nodes>
+		<node label="html-template">
+			<node label="history">
+				<node icon="cssIcon" label="history.css" url="source/html-template/history/history.css.html"/>
+				<node label="history.js" url="source/html-template/history/history.js.txt"/>
+				<node icon="htmlIcon" label="historyFrame.html" url="source/html-template/history/historyFrame.html"/>
+			</node>
+			<node label="AC_OETags.js" url="source/html-template/AC_OETags.js.txt"/>
+			<node icon="htmlIcon" label="index.template.html" url="source/html-template/index.template.html"/>
+			<node icon="swfIcon" label="playerProductInstall.swf" url="source/html-template/playerProductInstall.swf"/>
+			<node label="swfobject.js" url="source/html-template/swfobject.js.txt"/>
+		</node>
+		<node label="libs">
+			<node label="openscales-core-2.1.1.swc" url="source/libs/openscales-core-2.1.1.swc"/>
+			<node label="openscales-core-flash-10.1-2.1.1.swc" url="source/libs/openscales-core-flash-10.1-2.1.1.swc"/>
+			<node label="openscales-core.swc" url="source/libs/openscales-core.swc"/>
+			<node label="openscales-fx-2.1.1.swc" url="source/libs/openscales-fx-2.1.1.swc"/>
+			<node label="openscales-geometry-2.1.1.swc" url="source/libs/openscales-geometry-2.1.1.swc"/>
+			<node label="openscales-proj4as-2.1.1.swc" url="source/libs/openscales-proj4as-2.1.1.swc"/>
+		</node>
+		<node label="linked-libs">
+			<node label="as3corelib-0.92.1.swc" url="source/linked-libs/as3corelib-0.92.1.swc"/>
+			<node label="NorthArrow.swc" url="source/linked-libs/NorthArrow.swc"/>
+			<node label="openscales-fx.swc" url="source/linked-libs/openscales-fx.swc"/>
+		</node>
+		<node label="linked-swc">
+			<node label="flex-iframe-1.5.1.swc" url="source/linked-swc/flex-iframe-1.5.1.swc"/>
+		</node>
+		<node label="src">
+			<node label="assets.images">
+				<node label="dnit">
+					<node icon="imageIcon" label="rodovia.jpg" url="source/assets/images/dnit/rodovia.jpg.html"/>
+					<node icon="imageIcon" label="rodovia2.jpg" url="source/assets/images/dnit/rodovia2.jpg.html"/>
+					<node label="Thumbs.db" url="source/assets/images/dnit/Thumbs.db"/>
+				</node>
+				<node label="header">
+					<node icon="imageIcon" label="addresssearch.png" url="source/assets/images/header/addresssearch.png.html"/>
+					<node icon="imageIcon" label="draw.png" url="source/assets/images/header/draw.png.html"/>
+					<node icon="imageIcon" label="full.png" url="source/assets/images/header/full.png.html"/>
+					<node icon="imageIcon" label="funasa_hex.png" url="source/assets/images/header/funasa_hex.png.html"/>
+					<node icon="imageIcon" label="help.png" url="source/assets/images/header/help.png.html"/>
+					<node icon="imageIcon" label="hex_tst.png" url="source/assets/images/header/hex_tst.png.html"/>
+					<node icon="imageIcon" label="ibama_inv.png" url="source/assets/images/header/ibama_inv.png.html"/>
+					<node icon="imageIcon" label="ibama_logo.png" url="source/assets/images/header/ibama_logo.png.html"/>
+					<node icon="imageIcon" label="ibama_siscom.png" url="source/assets/images/header/ibama_siscom.png.html"/>
+					<node icon="imageIcon" label="identify.png" url="source/assets/images/header/identify.png.html"/>
+					<node icon="imageIcon" label="layers.png" url="source/assets/images/header/layers.png.html"/>
+					<node icon="imageIcon" label="logo.png" url="source/assets/images/header/logo.png.html"/>
+					<node icon="imageIcon" label="logo_hex_100x58.png" url="source/assets/images/header/logo_hex_100x58.png.html"/>
+					<node icon="imageIcon" label="overview.png" url="source/assets/images/header/overview.png.html"/>
+					<node icon="imageIcon" label="print.png" url="source/assets/images/header/print.png.html"/>
+					<node label="Thumbs.db" url="source/assets/images/header/Thumbs.db"/>
+				</node>
+				<node label="icons">
+					<node label="black">
+						<node icon="imageIcon" label="1.png" url="source/assets/images/icons/black/1.png.html"/>
+						<node icon="imageIcon" label="10.png" url="source/assets/images/icons/black/10.png.html"/>
+						<node icon="imageIcon" label="11.png" url="source/assets/images/icons/black/11.png.html"/>
+						<node icon="imageIcon" label="12.png" url="source/assets/images/icons/black/12.png.html"/>
+						<node icon="imageIcon" label="2.png" url="source/assets/images/icons/black/2.png.html"/>
+						<node icon="imageIcon" label="3.png" url="source/assets/images/icons/black/3.png.html"/>
+						<node icon="imageIcon" label="4.png" url="source/assets/images/icons/black/4.png.html"/>
+						<node icon="imageIcon" label="5.png" url="source/assets/images/icons/black/5.png.html"/>
+						<node icon="imageIcon" label="6.png" url="source/assets/images/icons/black/6.png.html"/>
+						<node icon="imageIcon" label="7.png" url="source/assets/images/icons/black/7.png.html"/>
+						<node icon="imageIcon" label="8.png" url="source/assets/images/icons/black/8.png.html"/>
+						<node icon="imageIcon" label="9.png" url="source/assets/images/icons/black/9.png.html"/>
+						<node label="Thumbs.db" url="source/assets/images/icons/black/Thumbs.db"/>
+					</node>
+					<node label="charts">
+						<node icon="imageIcon" label="area_chart_icon256.png" url="source/assets/images/icons/charts/area_chart_icon256.png.html"/>
+						<node icon="imageIcon" label="area_chart_icon30.png" url="source/assets/images/icons/charts/area_chart_icon30.png.html"/>
+						<node icon="imageIcon" label="area_chart_icon48.png" url="source/assets/images/icons/charts/area_chart_icon48.png.html"/>
+						<node icon="imageIcon" label="bar_chart_icon30.png" url="source/assets/images/icons/charts/bar_chart_icon30.png.html"/>
+						<node icon="imageIcon" label="bar_chart_icon400.png" url="source/assets/images/icons/charts/bar_chart_icon400.png.html"/>
+						<node icon="imageIcon" label="bar_chart_icon48.png" url="source/assets/images/icons/charts/bar_chart_icon48.png.html"/>
+						<node icon="imageIcon" label="bubble_chart_icon30.png" url="source/assets/images/icons/charts/bubble_chart_icon30.png.html"/>
+						<node icon="imageIcon" label="bubble_chart_icon415.png" url="source/assets/images/icons/charts/bubble_chart_icon415.png.html"/>
+						<node icon="imageIcon" label="bubble_chart_icon48.png" url="source/assets/images/icons/charts/bubble_chart_icon48.png.html"/>
+						<node icon="imageIcon" label="candlestick_chart_icon30.png" url="source/assets/images/icons/charts/candlestick_chart_icon30.png.html"/>
+						<node icon="imageIcon" label="candlestick_chart_icon400.png" url="source/assets/images/icons/charts/candlestick_chart_icon400.png.html"/>
+						<node icon="imageIcon" label="candlestick_chart_icon48.png" url="source/assets/images/icons/charts/candlestick_chart_icon48.png.html"/>
+						<node icon="imageIcon" label="column_chart_icon100.png" url="source/assets/images/icons/charts/column_chart_icon100.png.html"/>
+						<node icon="imageIcon" label="column_chart_icon30.png" url="source/assets/images/icons/charts/column_chart_icon30.png.html"/>
+						<node icon="imageIcon" label="column_chart_icon48.png" url="source/assets/images/icons/charts/column_chart_icon48.png.html"/>
+						<node icon="imageIcon" label="line_chart_icon30.png" url="source/assets/images/icons/charts/line_chart_icon30.png.html"/>
+						<node icon="imageIcon" label="line_chart_icon412.png" url="source/assets/images/icons/charts/line_chart_icon412.png.html"/>
+						<node icon="imageIcon" label="line_chart_icon48.png" url="source/assets/images/icons/charts/line_chart_icon48.png.html"/>
+						<node icon="imageIcon" label="pie_chart_icon30.png" url="source/assets/images/icons/charts/pie_chart_icon30.png.html"/>
+						<node icon="imageIcon" label="pie_chart_icon416.png" url="source/assets/images/icons/charts/pie_chart_icon416.png.html"/>
+						<node icon="imageIcon" label="pie_chart_icon48.png" url="source/assets/images/icons/charts/pie_chart_icon48.png.html"/>
+						<node label="Thumbs.db" url="source/assets/images/icons/charts/Thumbs.db"/>
+					</node>
+					<node label="White">
+						<node icon="imageIcon" label="1.png" url="source/assets/images/icons/White/1.png.html"/>
+						<node icon="imageIcon" label="10.png" url="source/assets/images/icons/White/10.png.html"/>
+						<node icon="imageIcon" label="11.png" url="source/assets/images/icons/White/11.png.html"/>
+						<node icon="imageIcon" label="12.png" url="source/assets/images/icons/White/12.png.html"/>
+						<node icon="imageIcon" label="2.png" url="source/assets/images/icons/White/2.png.html"/>
+						<node icon="imageIcon" label="3.png" url="source/assets/images/icons/White/3.png.html"/>
+						<node icon="imageIcon" label="4.png" url="source/assets/images/icons/White/4.png.html"/>
+						<node icon="imageIcon" label="5.png" url="source/assets/images/icons/White/5.png.html"/>
+						<node icon="imageIcon" label="6.png" url="source/assets/images/icons/White/6.png.html"/>
+						<node icon="imageIcon" label="7.png" url="source/assets/images/icons/White/7.png.html"/>
+						<node icon="imageIcon" label="8.png" url="source/assets/images/icons/White/8.png.html"/>
+						<node icon="imageIcon" label="9.png" url="source/assets/images/icons/White/9.png.html"/>
+						<node label="Thumbs.db" url="source/assets/images/icons/White/Thumbs.db"/>
+					</node>
+					<node icon="imageIcon" label="add_layer2_icon20.png" url="source/assets/images/icons/add_layer2_icon20.png.html"/>
+					<node icon="imageIcon" label="add_layer2_icon25.png" url="source/assets/images/icons/add_layer2_icon25.png.html"/>
+					<node icon="imageIcon" label="add_layer_icon.png" url="source/assets/images/icons/add_layer_icon.png.html"/>
+					<node icon="imageIcon" label="add_layer_icon30.png" url="source/assets/images/icons/add_layer_icon30.png.html"/>
+					<node icon="imageIcon" label="aerial_icon.png" url="source/assets/images/icons/aerial_icon.png.html"/>
+					<node icon="imageIcon" label="azimuth.png" url="source/assets/images/icons/azimuth.png.html"/>
+					<node icon="imageIcon" label="click_icon.png" url="source/assets/images/icons/click_icon.png.html"/>
+					<node icon="imageIcon" label="click_icon30.png" url="source/assets/images/icons/click_icon30.png.html"/>
+					<node icon="imageIcon" label="coordPoint_icon20.png" url="source/assets/images/icons/coordPoint_icon20.png.html"/>
+					<node icon="imageIcon" label="coordPoint_icon25.png" url="source/assets/images/icons/coordPoint_icon25.png.html"/>
+					<node icon="imageIcon" label="default_layer_icon16.png" url="source/assets/images/icons/default_layer_icon16.png.html"/>
+					<node icon="imageIcon" label="delete_icon.png" url="source/assets/images/icons/delete_icon.png.html"/>
+					<node icon="imageIcon" label="deletePoint_icon100.png" url="source/assets/images/icons/deletePoint_icon100.png.html"/>
+					<node icon="imageIcon" label="deletePoint_icon15.png" url="source/assets/images/icons/deletePoint_icon15.png.html"/>
+					<node icon="imageIcon" label="doc_icon_48.png" url="source/assets/images/icons/doc_icon_48.png.html"/>
+					<node icon="imageIcon" label="doc_icon_64.png" url="source/assets/images/icons/doc_icon_64.png.html"/>
+					<node icon="imageIcon" label="drawingLayer_icon100.png" url="source/assets/images/icons/drawingLayer_icon100.png.html"/>
+					<node icon="imageIcon" label="drawingLayer_icon20.png" url="source/assets/images/icons/drawingLayer_icon20.png.html"/>
+					<node icon="imageIcon" label="earth_icon100.png" url="source/assets/images/icons/earth_icon100.png.html"/>
+					<node icon="imageIcon" label="earth_icon25.png" url="source/assets/images/icons/earth_icon25.png.html"/>
+					<node icon="imageIcon" label="gallery_icon_128.png" url="source/assets/images/icons/gallery_icon_128.png.html"/>
+					<node icon="imageIcon" label="gallery_icon_48.png" url="source/assets/images/icons/gallery_icon_48.png.html"/>
+					<node icon="imageIcon" label="geoserver_icon_48.png" url="source/assets/images/icons/geoserver_icon_48.png.html"/>
+					<node icon="imageIcon" label="Icons-01.png" url="source/assets/images/icons/Icons-01.png.html"/>
+					<node icon="imageIcon" label="Icons-02.png" url="source/assets/images/icons/Icons-02.png.html"/>
+					<node icon="imageIcon" label="Icons-03.png" url="source/assets/images/icons/Icons-03.png.html"/>
+					<node icon="imageIcon" label="Icons-04.png" url="source/assets/images/icons/Icons-04.png.html"/>
+					<node icon="imageIcon" label="Icons-05.png" url="source/assets/images/icons/Icons-05.png.html"/>
+					<node icon="swfIcon" label="Icons-05.swf" url="source/assets/images/icons/Icons-05.swf"/>
+					<node icon="imageIcon" label="Icons-06.png" url="source/assets/images/icons/Icons-06.png.html"/>
+					<node icon="imageIcon" label="Icons-07.png" url="source/assets/images/icons/Icons-07.png.html"/>
+					<node icon="imageIcon" label="Icons-08.png" url="source/assets/images/icons/Icons-08.png.html"/>
+					<node icon="imageIcon" label="Icons-09.png" url="source/assets/images/icons/Icons-09.png.html"/>
+					<node icon="imageIcon" label="Icons-10.png" url="source/assets/images/icons/Icons-10.png.html"/>
+					<node icon="imageIcon" label="Icons-11.png" url="source/assets/images/icons/Icons-11.png.html"/>
+					<node icon="imageIcon" label="Icons-12.png" url="source/assets/images/icons/Icons-12.png.html"/>
+					<node icon="imageIcon" label="Icons-13.png" url="source/assets/images/icons/Icons-13.png.html"/>
+					<node icon="imageIcon" label="Icons-14.png" url="source/assets/images/icons/Icons-14.png.html"/>
+					<node icon="imageIcon" label="Icons-15.png" url="source/assets/images/icons/Icons-15.png.html"/>
+					<node icon="imageIcon" label="Icons-16.png" url="source/assets/images/icons/Icons-16.png.html"/>
+					<node icon="imageIcon" label="Icons-17.png" url="source/assets/images/icons/Icons-17.png.html"/>
+					<node icon="imageIcon" label="Icons-18.png" url="source/assets/images/icons/Icons-18.png.html"/>
+					<node icon="imageIcon" label="Icons-19.png" url="source/assets/images/icons/Icons-19.png.html"/>
+					<node icon="imageIcon" label="Icons-20.png" url="source/assets/images/icons/Icons-20.png.html"/>
+					<node icon="imageIcon" label="Icons-21.png" url="source/assets/images/icons/Icons-21.png.html"/>
+					<node icon="imageIcon" label="Icons-22.PNG" url="source/assets/images/icons/Icons-22.PNG.html"/>
+					<node icon="imageIcon" label="Icons-23.PNG" url="source/assets/images/icons/Icons-23.PNG.html"/>
+					<node icon="imageIcon" label="Icons-24.png" url="source/assets/images/icons/Icons-24.png.html"/>
+					<node icon="imageIcon" label="img_default.PNG" url="source/assets/images/icons/img_default.PNG.html"/>
+					<node icon="imageIcon" label="importFile_icon100.png" url="source/assets/images/icons/importFile_icon100.png.html"/>
+					<node icon="imageIcon" label="importFile_icon20.png" url="source/assets/images/icons/importFile_icon20.png.html"/>
+					<node icon="imageIcon" label="info-icon.png" url="source/assets/images/icons/info-icon.png.html"/>
+					<node icon="imageIcon" label="labelPoint_icon100.png" url="source/assets/images/icons/labelPoint_icon100.png.html"/>
+					<node icon="imageIcon" label="labelPoint_icon15.png" url="source/assets/images/icons/labelPoint_icon15.png.html"/>
+					<node icon="imageIcon" label="logo_hex_100x58.png" url="source/assets/images/icons/logo_hex_100x58.png.html"/>
+					<node icon="imageIcon" label="logo_hex_100x58_pb.png" url="source/assets/images/icons/logo_hex_100x58_pb.png.html"/>
+					<node icon="imageIcon" label="marca_hex.png" url="source/assets/images/icons/marca_hex.png.html"/>
+					<node icon="imageIcon" label="marca_hex_blue.png" url="source/assets/images/icons/marca_hex_blue.png.html"/>
+					<node icon="imageIcon" label="marca_hex_blue2.png" url="source/assets/images/icons/marca_hex_blue2.png.html"/>
+					<node icon="imageIcon" label="marca_hex_colors.png" url="source/assets/images/icons/marca_hex_colors.png.html"/>
+					<node icon="imageIcon" label="marca_hex_colors2.png" url="source/assets/images/icons/marca_hex_colors2.png.html"/>
+					<node icon="imageIcon" label="marca_hex_gray.png" url="source/assets/images/icons/marca_hex_gray.png.html"/>
+					<node icon="imageIcon" label="marca_hex_pb.png" url="source/assets/images/icons/marca_hex_pb.png.html"/>
+					<node icon="imageIcon" label="measures_icon_48.png" url="source/assets/images/icons/measures_icon_48.png.html"/>
+					<node icon="imageIcon" label="namePoint_icon15.png" url="source/assets/images/icons/namePoint_icon15.png.html"/>
+					<node icon="imageIcon" label="namePoint_icon20.png" url="source/assets/images/icons/namePoint_icon20.png.html"/>
+					<node icon="imageIcon" label="namePoint_icon25.png" url="source/assets/images/icons/namePoint_icon25.png.html"/>
+					<node icon="imageIcon" label="play_icon.png" url="source/assets/images/icons/play_icon.png.html"/>
+					<node icon="imageIcon" label="play_icon100.png" url="source/assets/images/icons/play_icon100.png.html"/>
+					<node icon="imageIcon" label="play_icon48.png" url="source/assets/images/icons/play_icon48.png.html"/>
+					<node icon="imageIcon" label="plus_icon.png" url="source/assets/images/icons/plus_icon.png.html"/>
+					<node icon="imageIcon" label="protractor.png" url="source/assets/images/icons/protractor.png.html"/>
+					<node icon="imageIcon" label="protractor50.png" url="source/assets/images/icons/protractor50.png.html"/>
+					<node icon="imageIcon" label="rect_icon_48.png" url="source/assets/images/icons/rect_icon_48.png.html"/>
+					<node icon="imageIcon" label="road_icon.png" url="source/assets/images/icons/road_icon.png.html"/>
+					<node icon="imageIcon" label="ruler.png" url="source/assets/images/icons/ruler.png.html"/>
+					<node icon="imageIcon" label="ruler30.png" url="source/assets/images/icons/ruler30.png.html"/>
+					<node icon="imageIcon" label="ruler50.png" url="source/assets/images/icons/ruler50.png.html"/>
+					<node icon="imageIcon" label="square_ruler.png" url="source/assets/images/icons/square_ruler.png.html"/>
+					<node icon="imageIcon" label="square_ruler35.png" url="source/assets/images/icons/square_ruler35.png.html"/>
+					<node icon="imageIcon" label="text-file-icon.png" url="source/assets/images/icons/text-file-icon.png.html"/>
+					<node label="Thumbs.db" url="source/assets/images/icons/Thumbs.db"/>
+					<node icon="swfIcon" label="zoom_box_icon.swf" url="source/assets/images/icons/zoom_box_icon.swf"/>
+				</node>
+				<node label="popups">
+					<node label="print">
+						<node icon="imageIcon" label="Document-Picture-Png-40x40.png" url="source/assets/images/popups/print/Document-Picture-Png-40x40.png.html"/>
+						<node icon="imageIcon" label="i_nav.png" url="source/assets/images/popups/print/i_nav.png.html"/>
+						<node icon="imageIcon" label="Landscape-40x40.png" url="source/assets/images/popups/print/Landscape-40x40.png.html"/>
+						<node icon="imageIcon" label="logo.png" url="source/assets/images/popups/print/logo.png.html"/>
+						<node icon="imageIcon" label="maximize.png" url="source/assets/images/popups/print/maximize.png.html"/>
+						<node icon="imageIcon" label="minimize.png" url="source/assets/images/popups/print/minimize.png.html"/>
+						<node icon="imageIcon" label="PDF-40x40.png" url="source/assets/images/popups/print/PDF-40x40.png.html"/>
+						<node icon="imageIcon" label="pdfprint.png" url="source/assets/images/popups/print/pdfprint.png.html"/>
+						<node icon="imageIcon" label="pngprint.png" url="source/assets/images/popups/print/pngprint.png.html"/>
+						<node icon="imageIcon" label="Portrait-40x40.png" url="source/assets/images/popups/print/Portrait-40x40.png.html"/>
+						<node icon="imageIcon" label="printpreview.png" url="source/assets/images/popups/print/printpreview.png.html"/>
+						<node label="Thumbs.db" url="source/assets/images/popups/print/Thumbs.db"/>
+					</node>
+					<node label="C" url="source/assets/images/popups/C"/>
+					<node icon="imageIcon" label="deleteLayer.png" url="source/assets/images/popups/deleteLayer.png.html"/>
+					<node icon="imageIcon" label="deleteLayerOver.png" url="source/assets/images/popups/deleteLayerOver.png.html"/>
+					<node icon="imageIcon" label="downArrow.png" url="source/assets/images/popups/downArrow.png.html"/>
+					<node icon="imageIcon" label="downArrowOver.png" url="source/assets/images/popups/downArrowOver.png.html"/>
+					<node icon="imageIcon" label="icon-minus.gif" url="source/assets/images/popups/icon-minus.gif.html"/>
+					<node icon="imageIcon" label="icon-plus.gif" url="source/assets/images/popups/icon-plus.gif.html"/>
+					<node icon="imageIcon" label="marker-blue.png" url="source/assets/images/popups/marker-blue.png.html"/>
+					<node icon="imageIcon" label="panEast.PNG" url="source/assets/images/popups/panEast.PNG.html"/>
+					<node label="Thumbs.db" url="source/assets/images/popups/Thumbs.db"/>
+					<node icon="imageIcon" label="upArrow.png" url="source/assets/images/popups/upArrow.png.html"/>
+					<node icon="imageIcon" label="upArrowOver.png" url="source/assets/images/popups/upArrowOver.png.html"/>
+					<node icon="imageIcon" label="widgetHide.png" url="source/assets/images/popups/widgetHide.png.html"/>
+					<node icon="imageIcon" label="widgetHide2.png" url="source/assets/images/popups/widgetHide2.png.html"/>
+					<node icon="imageIcon" label="widgetHide2Over.png" url="source/assets/images/popups/widgetHide2Over.png.html"/>
+					<node icon="imageIcon" label="widgetShow.png" url="source/assets/images/popups/widgetShow.png.html"/>
+					<node icon="imageIcon" label="widgetShow2.png" url="source/assets/images/popups/widgetShow2.png.html"/>
+					<node icon="imageIcon" label="widgetShow2Over.png" url="source/assets/images/popups/widgetShow2Over.png.html"/>
+				</node>
+				<node label="Thumbs.db" url="source/assets/images/Thumbs.db"/>
+			</node>
+			<node icon="packageIcon" label="assets.skins" expanded="true">
+				<node icon="mxmlIcon" label="ArrowDownBtnSkin.mxml" url="source/assets/skins/ArrowDownBtnSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="ArrowRightBtnSkin.mxml" url="source/assets/skins/ArrowRightBtnSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="ButtonAsDropDownListButtonSkin.mxml" url="source/assets/skins/ButtonAsDropDownListButtonSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="DataGridSkin.mxml" url="source/assets/skins/DataGridSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="NewAlertSkin.mxml" url="source/assets/skins/NewAlertSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="NewTextInputSkin.mxml" url="source/assets/skins/NewTextInputSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="NewVerticalScrollBarSkin.mxml" url="source/assets/skins/NewVerticalScrollBarSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="TabButtonSkin.mxml" url="source/assets/skins/TabButtonSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="WidgetSkin.mxml" url="source/assets/skins/WidgetSkin.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="assets.skins.date" expanded="true">
+				<node icon="mxmlIcon" label="ColorPickerListButtonSkin.mxml" url="source/assets/skins/date/ColorPickerListButtonSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="ColorPickerListSkin.mxml" url="source/assets/skins/date/ColorPickerListSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="DateFieldListButtonSkin.mxml" url="source/assets/skins/date/DateFieldListButtonSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="DateFieldListSkin.mxml" url="source/assets/skins/date/DateFieldListSkin.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="assets.skins.scroller" expanded="true">
+				<node icon="mxmlIcon" label="NewScrollBarDownButtonSkin.mxml" url="source/assets/skins/scroller/NewScrollBarDownButtonSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="NewScrollBarUpButtonSkin.mxml" url="source/assets/skins/scroller/NewScrollBarUpButtonSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="NewVScrollBarThumbSkin.mxml" url="source/assets/skins/scroller/NewVScrollBarThumbSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="NewVScrollBarTrackSkin.mxml" url="source/assets/skins/scroller/NewVScrollBarTrackSkin.mxml.html"/>
+			</node>
+			<node label="assets.styles">
+				<node icon="cssIcon" label="estilo1.css" url="source/assets/styles/estilo1.css.html"/>
+				<node icon="cssIcon" label="estiloAboutWindow.css" url="source/assets/styles/estiloAboutWindow.css.html"/>
+				<node icon="cssIcon" label="estiloGaleria.css" url="source/assets/styles/estiloGaleria.css.html"/>
+				<node icon="cssIcon" label="estiloVideoWindow.css" url="source/assets/styles/estiloVideoWindow.css.html"/>
+			</node>
+			<node icon="packageIcon" label="com.apdevblog.utils" expanded="true">
+				<node icon="actionScriptIcon" label="URLUtils.as" url="source/com/apdevblog/utils/URLUtils.as.html"/>
+			</node>
+			<node label="dados">
+				<node label="documentos">
+					<node label="Regimento_interno_DNIT.pdf" url="source/dados/documentos/Regimento_interno_DNIT.pdf"/>
+				</node>
+				<node label="galeria">
+					<node icon="imageIcon" label="Arrow.jpg" url="source/dados/galeria/Arrow.jpg.html"/>
+					<node icon="imageIcon" label="Arrow_full.jpg" url="source/dados/galeria/Arrow_full.jpg.html"/>
+					<node icon="imageIcon" label="BatesMotel.jpg" url="source/dados/galeria/BatesMotel.jpg.html"/>
+					<node icon="imageIcon" label="BatesMotel_full.jpg" url="source/dados/galeria/BatesMotel_full.jpg.html"/>
+					<node icon="imageIcon" label="Battlestar.jpg" url="source/dados/galeria/Battlestar.jpg.html"/>
+					<node icon="imageIcon" label="Battlestar_full.jpg" url="source/dados/galeria/Battlestar_full.jpg.html"/>
+					<node icon="imageIcon" label="Boardwalk.jpg" url="source/dados/galeria/Boardwalk.jpg.html"/>
+					<node icon="imageIcon" label="Boardwalk_full.jpg" url="source/dados/galeria/Boardwalk_full.jpg.html"/>
+					<node icon="imageIcon" label="BreakingBad.jpg" url="source/dados/galeria/BreakingBad.jpg.html"/>
+					<node icon="imageIcon" label="BreakingBad_full.jpg" url="source/dados/galeria/BreakingBad_full.jpg.html"/>
+					<node icon="imageIcon" label="Carnivale.jpg" url="source/dados/galeria/Carnivale.jpg.html"/>
+					<node icon="imageIcon" label="Carnivale_full.jpg" url="source/dados/galeria/Carnivale_full.jpg.html"/>
+					<node icon="imageIcon" label="DaVinci.jpg" url="source/dados/galeria/DaVinci.jpg.html"/>
+					<node icon="imageIcon" label="DaVinci_full.jpg" url="source/dados/galeria/DaVinci_full.jpg.html"/>
+					<node icon="imageIcon" label="Dexter.jpg" url="source/dados/galeria/Dexter.jpg.html"/>
+					<node icon="imageIcon" label="Dexter_full.jpg" url="source/dados/galeria/Dexter_full.jpg.html"/>
+					<node icon="imageIcon" label="Firefly.jpg" url="source/dados/galeria/Firefly.jpg.html"/>
+					<node icon="imageIcon" label="Firefly_full.jpg" url="source/dados/galeria/Firefly_full.jpg.html"/>
+					<node icon="imageIcon" label="Friends.jpg" url="source/dados/galeria/Friends.jpg.html"/>
+					<node icon="imageIcon" label="Friends_full.jpg" url="source/dados/galeria/Friends_full.jpg.html"/>
+					<node icon="imageIcon" label="Fringe.jpg" url="source/dados/galeria/Fringe.jpg.html"/>
+					<node icon="imageIcon" label="Fringe_full.jpg" url="source/dados/galeria/Fringe_full.jpg.html"/>
+					<node icon="imageIcon" label="Girls.jpg" url="source/dados/galeria/Girls.jpg.html"/>
+					<node icon="imageIcon" label="Girls_full.jpg" url="source/dados/galeria/Girls_full.jpg.html"/>
+					<node icon="imageIcon" label="GoT.jpg" url="source/dados/galeria/GoT.jpg.html"/>
+					<node icon="imageIcon" label="GoT_full.jpg" url="source/dados/galeria/GoT_full.jpg.html"/>
+					<node icon="imageIcon" label="Homeland.jpg" url="source/dados/galeria/Homeland.jpg.html"/>
+					<node icon="imageIcon" label="Homeland_full.jpg" url="source/dados/galeria/Homeland_full.jpg.html"/>
+					<node icon="imageIcon" label="LastResort.jpg" url="source/dados/galeria/LastResort.jpg.html"/>
+					<node icon="imageIcon" label="LastResort_full.jpg" url="source/dados/galeria/LastResort_full.jpg.html"/>
+					<node icon="imageIcon" label="Louvre.jpg" url="source/dados/galeria/Louvre.jpg.html"/>
+					<node icon="imageIcon" label="Louvre_full.jpg" url="source/dados/galeria/Louvre_full.jpg.html"/>
+					<node icon="imageIcon" label="MadMen.jpg" url="source/dados/galeria/MadMen.jpg.html"/>
+					<node icon="imageIcon" label="MadMen_full.jpg" url="source/dados/galeria/MadMen_full.jpg.html"/>
+					<node icon="imageIcon" label="OUAT.jpg" url="source/dados/galeria/OUAT.jpg.html"/>
+					<node icon="imageIcon" label="OUAT_full.jpg" url="source/dados/galeria/OUAT_full.jpg.html"/>
+					<node icon="imageIcon" label="Parks.jpg" url="source/dados/galeria/Parks.jpg.html"/>
+					<node icon="imageIcon" label="Parks_full.jpg" url="source/dados/galeria/Parks_full.jpg.html"/>
+					<node icon="imageIcon" label="Tron.jpg" url="source/dados/galeria/Tron.jpg.html"/>
+					<node icon="imageIcon" label="Tron_full.jpg" url="source/dados/galeria/Tron_full.jpg.html"/>
+				</node>
+				<node label="videos">
+					<node label="20051210-w50s.flv" url="source/dados/videos/20051210-w50s.flv"/>
+					<node label="barsandtone.flv" url="source/dados/videos/barsandtone.flv"/>
+					<node label="Wildlife.wmv" url="source/dados/videos/Wildlife.wmv"/>
+				</node>
+				<node label="camadas.xml" url="source/dados/camadas.xml.txt"/>
+				<node label="camadas_ibama.xml" url="source/dados/camadas_ibama.xml.txt"/>
+				<node label="camadasHex.xml" url="source/dados/camadasHex.xml.txt"/>
+				<node label="documentos.xml" url="source/dados/documentos.xml.txt"/>
+				<node label="galeria.xml" url="source/dados/galeria.xml.txt"/>
+				<node label="videos.xml" url="source/dados/videos.xml.txt"/>
+			</node>
+			<node icon="packageIcon" label="nochump.util.zip" expanded="true">
+				<node icon="actionScriptIcon" label="CRC32.as" url="source/nochump/util/zip/CRC32.as.html"/>
+				<node icon="actionScriptIcon" label="Deflater.as" url="source/nochump/util/zip/Deflater.as.html"/>
+				<node icon="actionScriptIcon" label="Inflater.as" url="source/nochump/util/zip/Inflater.as.html"/>
+				<node icon="actionScriptIcon" label="ZipConstants.as" url="source/nochump/util/zip/ZipConstants.as.html"/>
+				<node icon="actionScriptIcon" label="ZipEntry.as" url="source/nochump/util/zip/ZipEntry.as.html"/>
+				<node icon="actionScriptIcon" label="ZipError.as" url="source/nochump/util/zip/ZipError.as.html"/>
+				<node icon="actionScriptIcon" label="ZipFile.as" url="source/nochump/util/zip/ZipFile.as.html"/>
+				<node icon="actionScriptIcon" label="ZipOutput.as" url="source/nochump/util/zip/ZipOutput.as.html"/>
+			</node>
+			<node icon="packageIcon" label="org.vanrijkom.dbf" expanded="true">
+				<node icon="actionScriptIcon" label="DbfError.as" url="source/org/vanrijkom/dbf/DbfError.as.html"/>
+				<node icon="actionScriptIcon" label="DbfField.as" url="source/org/vanrijkom/dbf/DbfField.as.html"/>
+				<node icon="actionScriptIcon" label="DbfFilter.as" url="source/org/vanrijkom/dbf/DbfFilter.as.html"/>
+				<node icon="actionScriptIcon" label="DbfHeader.as" url="source/org/vanrijkom/dbf/DbfHeader.as.html"/>
+				<node icon="actionScriptIcon" label="DbfRecord.as" url="source/org/vanrijkom/dbf/DbfRecord.as.html"/>
+				<node icon="actionScriptIcon" label="DbfTools.as" url="source/org/vanrijkom/dbf/DbfTools.as.html"/>
+			</node>
+			<node icon="packageIcon" label="org.vanrijkom.shp" expanded="true">
+				<node icon="actionScriptIcon" label="ShpError.as" url="source/org/vanrijkom/shp/ShpError.as.html"/>
+				<node icon="actionScriptIcon" label="ShpHeader.as" url="source/org/vanrijkom/shp/ShpHeader.as.html"/>
+				<node icon="actionScriptIcon" label="ShpObject.as" url="source/org/vanrijkom/shp/ShpObject.as.html"/>
+				<node icon="actionScriptIcon" label="ShpPoint.as" url="source/org/vanrijkom/shp/ShpPoint.as.html"/>
+				<node icon="actionScriptIcon" label="ShpPointZ.as" url="source/org/vanrijkom/shp/ShpPointZ.as.html"/>
+				<node icon="actionScriptIcon" label="ShpPolygon.as" url="source/org/vanrijkom/shp/ShpPolygon.as.html"/>
+				<node icon="actionScriptIcon" label="ShpPolyline.as" url="source/org/vanrijkom/shp/ShpPolyline.as.html"/>
+				<node icon="actionScriptIcon" label="ShpRecord.as" url="source/org/vanrijkom/shp/ShpRecord.as.html"/>
+				<node icon="actionScriptIcon" label="ShpTools.as" url="source/org/vanrijkom/shp/ShpTools.as.html"/>
+				<node icon="actionScriptIcon" label="ShpType.as" url="source/org/vanrijkom/shp/ShpType.as.html"/>
+			</node>
+			<node icon="packageIcon" label="solutions" expanded="true">
+				<node icon="actionScriptIcon" label="BaseWidget.as" url="source/solutions/BaseWidget.as.html"/>
+				<node icon="actionScriptIcon" label="CloseWindowBase.as" url="source/solutions/CloseWindowBase.as.html"/>
+				<node icon="mxmlIcon" label="CloseWindowTemplate.mxml" url="source/solutions/CloseWindowTemplate.mxml.html"/>
+				<node icon="actionScriptIcon" label="ConfigData.as" url="source/solutions/ConfigData.as.html"/>
+				<node icon="actionScriptIcon" label="ConfigManager.as" url="source/solutions/ConfigManager.as.html"/>
+				<node icon="actionScriptIcon" label="EventBus.as" url="source/solutions/EventBus.as.html"/>
+				<node icon="actionScriptIcon" label="IBaseWidget.as" url="source/solutions/IBaseWidget.as.html"/>
+				<node icon="mxmlIcon" label="MapManager.mxml" url="source/solutions/MapManager.mxml.html"/>
+				<node icon="mxmlIcon" label="MenuController.mxml" url="source/solutions/MenuController.mxml.html"/>
+				<node icon="mxmlIcon" label="SiteContainer.mxml" url="source/solutions/SiteContainer.mxml.html"/>
+				<node icon="actionScriptIcon" label="ToolsBase.as" url="source/solutions/ToolsBase.as.html"/>
+				<node icon="actionScriptIcon" label="UIManager.as" url="source/solutions/UIManager.as.html"/>
+				<node icon="mxmlIcon" label="WidgetManager.mxml" url="source/solutions/WidgetManager.mxml.html"/>
+				<node icon="mxmlIcon" label="WidgetTemplate.mxml" url="source/solutions/WidgetTemplate.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="solutions.event" expanded="true">
+				<node icon="actionScriptIcon" label="AppEvent.as" url="source/solutions/event/AppEvent.as.html"/>
+			</node>
+			<node icon="packageIcon" label="solutions.renderer" expanded="true">
+				<node icon="mxmlIcon" label="menuItemRenderer.mxml" url="source/solutions/renderer/menuItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="solutions.utils" expanded="true">
+				<node icon="actionScriptIcon" label="ChartUtils.as" url="source/solutions/utils/ChartUtils.as.html"/>
+				<node icon="actionScriptIcon" label="Funcoes.as" url="source/solutions/utils/Funcoes.as.html"/>
+				<node icon="actionScriptIcon" label="Hashtable.as" url="source/solutions/utils/Hashtable.as.html"/>
+				<node icon="actionScriptIcon" label="StringUtils.as" url="source/solutions/utils/StringUtils.as.html"/>
+				<node icon="actionScriptIcon" label="StyleUtils.as" url="source/solutions/utils/StyleUtils.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets" expanded="true">
+				<node icon="mxmlIcon" label="AboutWindowWidget.mxml" url="source/widgets/AboutWindowWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="AddLayersWidget.mxml" url="source/widgets/AddLayersWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="AdicionarPontosWidget.mxml" url="source/widgets/AdicionarPontosWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="BuscarPorElementos.mxml" url="source/widgets/BuscarPorElementos.mxml.html"/>
+				<node icon="mxmlIcon" label="ChartManagerWidget.mxml" url="source/widgets/ChartManagerWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="ClickInfoDisplayWidget.mxml" url="source/widgets/ClickInfoDisplayWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="DocumentsWidget.mxml" url="source/widgets/DocumentsWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="DragInfoDisplayWidget.mxml" url="source/widgets/DragInfoDisplayWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="ExportWidget.mxml" url="source/widgets/ExportWidget.mxml.html"/>
+				<node label="ExportWidget.xml" url="source/widgets/ExportWidget.xml.txt"/>
+				<node icon="mxmlIcon" label="GalleryWidget.mxml" url="source/widgets/GalleryWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="Iframe.mxml" url="source/widgets/Iframe.mxml.html"/>
+				<node icon="mxmlIcon" label="InfoWidget.mxml" url="source/widgets/InfoWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="LayerManagerWidget.mxml" url="source/widgets/LayerManagerWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="MeasureWidget.mxml" url="source/widgets/MeasureWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="NewFxDefaultCapabilitiesItemRenderer.mxml" url="source/widgets/NewFxDefaultCapabilitiesItemRenderer.mxml.html"/>
+				<node icon="mxmlIcon" label="PontosLonLatWidget.mxml" url="source/widgets/PontosLonLatWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="PrintTool.mxml" url="source/widgets/PrintTool.mxml.html"/>
+				<node label="PrintWidget.xml" url="source/widgets/PrintWidget.xml.txt"/>
+				<node icon="mxmlIcon" label="VetorizarCoordenadasWidget.mxml" url="source/widgets/VetorizarCoordenadasWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="VetorizarWidget.mxml" url="source/widgets/VetorizarWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="VideoPlayerWidget.mxml" url="source/widgets/VideoPlayerWidget.mxml.html"/>
+				<node icon="mxmlIcon" label="VideoPlayerWindowWidget.mxml" url="source/widgets/VideoPlayerWindowWidget.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.adicionarCamada" expanded="true">
+				<node icon="mxmlIcon" label="GerenciadorAtributos.mxml" url="source/widgets/componentes/adicionarCamada/GerenciadorAtributos.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.adicionarCamada.renderer" expanded="true">
+				<node icon="mxmlIcon" label="DragDropListItemRenderer.mxml" url="source/widgets/componentes/adicionarCamada/renderer/DragDropListItemRenderer.mxml.html"/>
+				<node icon="mxmlIcon" label="InvisibleTextAreaSkin.mxml" url="source/widgets/componentes/adicionarCamada/renderer/InvisibleTextAreaSkin.mxml.html"/>
+				<node icon="mxmlIcon" label="ShapeAttrListItemRenderer.mxml" url="source/widgets/componentes/adicionarCamada/renderer/ShapeAttrListItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.alerta" expanded="true">
+				<node icon="mxmlIcon" label="Alerta.mxml" url="source/widgets/componentes/alerta/Alerta.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.botaoMapas" expanded="true">
+				<node icon="mxmlIcon" label="BotaoAlternaMapaBase.mxml" url="source/widgets/componentes/botaoMapas/BotaoAlternaMapaBase.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.contador" expanded="true">
+				<node icon="mxmlIcon" label="Contador.mxml" url="source/widgets/componentes/contador/Contador.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.documentos.renderer" expanded="true">
+				<node icon="mxmlIcon" label="DocItemRenderer.mxml" url="source/widgets/componentes/documentos/renderer/DocItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.exportar" expanded="true">
+				<node icon="actionScriptIcon" label="CheckBoxItemObject.as" url="source/widgets/componentes/exportar/CheckBoxItemObject.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.exportar.renderer" expanded="true">
+				<node icon="mxmlIcon" label="ExportListItemRenderer.mxml" url="source/widgets/componentes/exportar/renderer/ExportListItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.extensao" expanded="true">
+				<node icon="mxmlIcon" label="ExtensaoTotal.mxml" url="source/widgets/componentes/extensao/ExtensaoTotal.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.galeria.renderer" expanded="true">
+				<node icon="mxmlIcon" label="GalleryItemRenderer.mxml" url="source/widgets/componentes/galeria/renderer/GalleryItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.gerenciador.layer" expanded="true">
+				<node icon="mxmlIcon" label="Legenda.mxml" url="source/widgets/componentes/gerenciador/layer/Legenda.mxml.html"/>
+				<node icon="mxmlIcon" label="NewAddVectorLayer.mxml" url="source/widgets/componentes/gerenciador/layer/NewAddVectorLayer.mxml.html"/>
+				<node icon="mxmlIcon" label="NewChangeLayerPosition.mxml" url="source/widgets/componentes/gerenciador/layer/NewChangeLayerPosition.mxml.html"/>
+				<node icon="mxmlIcon" label="NewDeleteLayer.mxml" url="source/widgets/componentes/gerenciador/layer/NewDeleteLayer.mxml.html"/>
+				<node icon="mxmlIcon" label="NewImportFeature.mxml" url="source/widgets/componentes/gerenciador/layer/NewImportFeature.mxml.html"/>
+				<node icon="mxmlIcon" label="NewImportFeatureForm.mxml" url="source/widgets/componentes/gerenciador/layer/NewImportFeatureForm.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.gerenciador.layerGroup" expanded="true">
+				<node icon="mxmlIcon" label="ChangeLayerGroupOpacity.mxml" url="source/widgets/componentes/gerenciador/layerGroup/ChangeLayerGroupOpacity.mxml.html"/>
+				<node icon="mxmlIcon" label="ChangeLayerGroupPosition.mxml" url="source/widgets/componentes/gerenciador/layerGroup/ChangeLayerGroupPosition.mxml.html"/>
+				<node icon="mxmlIcon" label="ChangeLayerGroupVisibility.mxml" url="source/widgets/componentes/gerenciador/layerGroup/ChangeLayerGroupVisibility.mxml.html"/>
+				<node icon="mxmlIcon" label="DeleteLayerGroup.mxml" url="source/widgets/componentes/gerenciador/layerGroup/DeleteLayerGroup.mxml.html"/>
+				<node icon="mxmlIcon" label="GroupLayersList.mxml" url="source/widgets/componentes/gerenciador/layerGroup/GroupLayersList.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.gerenciador.layerGroup.renderer" expanded="true">
+				<node icon="mxmlIcon" label="GroupLayersListItemRenderer.mxml" url="source/widgets/componentes/gerenciador/layerGroup/renderer/GroupLayersListItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.gerenciador.renderer" expanded="true">
+				<node icon="mxmlIcon" label="LayerManagerItemRenderer.mxml" url="source/widgets/componentes/gerenciador/renderer/LayerManagerItemRenderer.mxml.html"/>
+				<node icon="mxmlIcon" label="LayerRenderer.mxml" url="source/widgets/componentes/gerenciador/renderer/LayerRenderer.mxml.html"/>
+				<node icon="actionScriptIcon" label="LayerRendererObject.as" url="source/widgets/componentes/gerenciador/renderer/LayerRendererObject.as.html"/>
+				<node icon="actionScriptIcon" label="NewILayerManagerItemRenderer.as" url="source/widgets/componentes/gerenciador/renderer/NewILayerManagerItemRenderer.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.graficos" expanded="true">
+				<node icon="mxmlIcon" label="ChartManager.mxml" url="source/widgets/componentes/graficos/ChartManager.mxml.html"/>
+				<node icon="mxmlIcon" label="ChartsBar.mxml" url="source/widgets/componentes/graficos/ChartsBar.mxml.html"/>
+				<node icon="actionScriptIcon" label="ListItemValueObject.as" url="source/widgets/componentes/graficos/ListItemValueObject.as.html"/>
+				<node icon="actionScriptIcon" label="RadioButtonItemObject.as" url="source/widgets/componentes/graficos/RadioButtonItemObject.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.graficos.event" expanded="true">
+				<node icon="actionScriptIcon" label="ChartsBarEvents.as" url="source/widgets/componentes/graficos/event/ChartsBarEvents.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.graficos.handler" expanded="true">
+				<node icon="actionScriptIcon" label="GraficoDragHandler.as" url="source/widgets/componentes/graficos/handler/GraficoDragHandler.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.graficos.renderer" expanded="true">
+				<node icon="mxmlIcon" label="CheckBoxItemRenderer.mxml" url="source/widgets/componentes/graficos/renderer/CheckBoxItemRenderer.mxml.html"/>
+				<node icon="mxmlIcon" label="RadioButtonItemRenderer.mxml" url="source/widgets/componentes/graficos/renderer/RadioButtonItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.graficos.type" expanded="true">
+				<node icon="mxmlIcon" label="BubChartComponent.mxml" url="source/widgets/componentes/graficos/type/BubChartComponent.mxml.html"/>
+				<node icon="mxmlIcon" label="CanChartComponent.mxml" url="source/widgets/componentes/graficos/type/CanChartComponent.mxml.html"/>
+				<node icon="mxmlIcon" label="ColBarLinAreChartComponent.mxml" url="source/widgets/componentes/graficos/type/ColBarLinAreChartComponent.mxml.html"/>
+				<node icon="mxmlIcon" label="PieChartComponent.mxml" url="source/widgets/componentes/graficos/type/PieChartComponent.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.html" expanded="true">
+				<node icon="actionScriptIcon" label="IFrame.as" url="source/widgets/componentes/html/IFrame.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.ibama.event" expanded="true">
+				<node icon="actionScriptIcon" label="EditingDisabledEvent.as" url="source/widgets/componentes/ibama/event/EditingDisabledEvent.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.ibama.feature" expanded="true">
+				<node icon="mxmlIcon" label="Gallery.mxml" url="source/widgets/componentes/ibama/feature/Gallery.mxml.html"/>
+				<node icon="actionScriptIcon" label="IbamaLineStringFeature.as" url="source/widgets/componentes/ibama/feature/IbamaLineStringFeature.as.html"/>
+				<node icon="actionScriptIcon" label="IbamaPointFeature.as" url="source/widgets/componentes/ibama/feature/IbamaPointFeature.as.html"/>
+				<node icon="actionScriptIcon" label="IbamaPolygonFeature.as" url="source/widgets/componentes/ibama/feature/IbamaPolygonFeature.as.html"/>
+				<node icon="mxmlIcon" label="LineStringFeaturePanel.mxml" url="source/widgets/componentes/ibama/feature/LineStringFeaturePanel.mxml.html"/>
+				<node icon="mxmlIcon" label="PointFeaturePanel.mxml" url="source/widgets/componentes/ibama/feature/PointFeaturePanel.mxml.html"/>
+				<node icon="mxmlIcon" label="PolygonFeaturePanel.mxml" url="source/widgets/componentes/ibama/feature/PolygonFeaturePanel.mxml.html"/>
+				<node icon="mxmlIcon" label="VerticesPanel.mxml" url="source/widgets/componentes/ibama/feature/VerticesPanel.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.ibama.layer" expanded="true">
+				<node icon="actionScriptIcon" label="RapidEyeTMS.as" url="source/widgets/componentes/ibama/layer/RapidEyeTMS.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.ibama.renderer" expanded="true">
+				<node icon="mxmlIcon" label="galleryItemRenderer.mxml" url="source/widgets/componentes/ibama/renderer/galleryItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes" expanded="true">
+				<node icon="mxmlIcon" label="InfoCaller.mxml" url="source/widgets/componentes/informacoes/InfoCaller.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes.click" expanded="true">
+				<node icon="mxmlIcon" label="ClickFeatureInfoGrid.mxml" url="source/widgets/componentes/informacoes/click/ClickFeatureInfoGrid.mxml.html"/>
+				<node icon="mxmlIcon" label="ClickInfoButton.mxml" url="source/widgets/componentes/informacoes/click/ClickInfoButton.mxml.html"/>
+				<node icon="actionScriptIcon" label="NewFxWMSGetFeatureInfo.as" url="source/widgets/componentes/informacoes/click/NewFxWMSGetFeatureInfo.as.html"/>
+				<node icon="actionScriptIcon" label="NewWMSGetFeatureInfo.as" url="source/widgets/componentes/informacoes/click/NewWMSGetFeatureInfo.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes.click.event" expanded="true">
+				<node icon="actionScriptIcon" label="ClickActivatedEvent.as" url="source/widgets/componentes/informacoes/click/event/ClickActivatedEvent.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes.drag" expanded="true">
+				<node icon="mxmlIcon" label="DragFeatureInfoGrid.mxml" url="source/widgets/componentes/informacoes/drag/DragFeatureInfoGrid.mxml.html"/>
+				<node icon="mxmlIcon" label="DragInfoButton.mxml" url="source/widgets/componentes/informacoes/drag/DragInfoButton.mxml.html"/>
+				<node icon="actionScriptIcon" label="WFSGetFeature.as" url="source/widgets/componentes/informacoes/drag/WFSGetFeature.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes.drag.event" expanded="true">
+				<node icon="actionScriptIcon" label="AtualizaListaEvent.as" url="source/widgets/componentes/informacoes/drag/event/AtualizaListaEvent.as.html"/>
+				<node icon="actionScriptIcon" label="DragActivatedEvent.as" url="source/widgets/componentes/informacoes/drag/event/DragActivatedEvent.as.html"/>
+				<node icon="actionScriptIcon" label="DrawnBoxEvent.as" url="source/widgets/componentes/informacoes/drag/event/DrawnBoxEvent.as.html"/>
+				<node icon="actionScriptIcon" label="GetFeatureEvent.as" url="source/widgets/componentes/informacoes/drag/event/GetFeatureEvent.as.html"/>
+				<node icon="actionScriptIcon" label="SelectedLayerEvent.as" url="source/widgets/componentes/informacoes/drag/event/SelectedLayerEvent.as.html"/>
+				<node icon="actionScriptIcon" label="TotalRegistrosEvent.as" url="source/widgets/componentes/informacoes/drag/event/TotalRegistrosEvent.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes.drag.handler" expanded="true">
+				<node icon="actionScriptIcon" label="DrawBoxHandler.as" url="source/widgets/componentes/informacoes/drag/handler/DrawBoxHandler.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes.drag.menuGraficos" expanded="true">
+				<node icon="mxmlIcon" label="MenuListItemRenderer.mxml" url="source/widgets/componentes/informacoes/drag/menuGraficos/MenuListItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.informacoes.drag.reader" expanded="true">
+				<node icon="actionScriptIcon" label="GMLReader.as" url="source/widgets/componentes/informacoes/drag/reader/GMLReader.as.html"/>
+				<node icon="actionScriptIcon" label="NewGML311.as" url="source/widgets/componentes/informacoes/drag/reader/NewGML311.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.layerGroup" expanded="true">
+				<node icon="actionScriptIcon" label="LayerGroup.as" url="source/widgets/componentes/layerGroup/LayerGroup.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.mapa" expanded="true">
+				<node icon="actionScriptIcon" label="FxHexMap.as" url="source/widgets/componentes/mapa/FxHexMap.as.html"/>
+				<node icon="actionScriptIcon" label="HexMap.as" url="source/widgets/componentes/mapa/HexMap.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.marca" expanded="true">
+				<node icon="mxmlIcon" label="MarcadAguaHex.mxml" url="source/widgets/componentes/marca/MarcadAguaHex.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.medidas.angulo" expanded="true">
+				<node icon="actionScriptIcon" label="NewAzimuth.as" url="source/widgets/componentes/medidas/angulo/NewAzimuth.as.html"/>
+				<node icon="mxmlIcon" label="NewMeasureAzimuth.mxml" url="source/widgets/componentes/medidas/angulo/NewMeasureAzimuth.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.medidas.area" expanded="true">
+				<node icon="mxmlIcon" label="NewMeasureSurface.mxml" url="source/widgets/componentes/medidas/area/NewMeasureSurface.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.medidas.distancia" expanded="true">
+				<node icon="actionScriptIcon" label="NewDistance.as" url="source/widgets/componentes/medidas/distancia/NewDistance.as.html"/>
+				<node icon="mxmlIcon" label="NewMeasurePath.mxml" url="source/widgets/componentes/medidas/distancia/NewMeasurePath.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.mouse" expanded="true">
+				<node icon="mxmlIcon" label="NewMousePosition.mxml" url="source/widgets/componentes/mouse/NewMousePosition.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.overview" expanded="true">
+				<node icon="mxmlIcon" label="NewFxOverviewMapRatio.mxml" url="source/widgets/componentes/overview/NewFxOverviewMapRatio.mxml.html"/>
+				<node icon="actionScriptIcon" label="NewOverviewMapRatio.as" url="source/widgets/componentes/overview/NewOverviewMapRatio.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.pontosLonLat" expanded="true">
+				<node icon="actionScriptIcon" label="PontoLonLatObject.as" url="source/widgets/componentes/pontosLonLat/PontoLonLatObject.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.pontosLonLat.renderer" expanded="true">
+				<node icon="mxmlIcon" label="ListaCamadaPossiveisItemRenderer.mxml" url="source/widgets/componentes/pontosLonLat/renderer/ListaCamadaPossiveisItemRenderer.mxml.html"/>
+				<node icon="mxmlIcon" label="PontosLonLatRenderer.mxml" url="source/widgets/componentes/pontosLonLat/renderer/PontosLonLatRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.printpreview" expanded="true">
+				<node icon="mxmlIcon" label="PrintPreview.mxml" url="source/widgets/componentes/printpreview/PrintPreview.mxml.html"/>
+			</node>
+			<node label="widgets.componentes.printpreview.assets">
+				<node icon="imageIcon" label="i_nav.png" url="source/widgets/componentes/printpreview/assets/i_nav.png.html"/>
+				<node icon="imageIcon" label="logo.png" url="source/widgets/componentes/printpreview/assets/logo.png.html"/>
+				<node icon="imageIcon" label="pdfprint.png" url="source/widgets/componentes/printpreview/assets/pdfprint.png.html"/>
+				<node icon="imageIcon" label="pngprint.png" url="source/widgets/componentes/printpreview/assets/pngprint.png.html"/>
+				<node icon="imageIcon" label="printpreview.png" url="source/widgets/componentes/printpreview/assets/printpreview.png.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.printpreview.layouts" expanded="true">
+				<node icon="mxmlIcon" label="A5_Landscape.mxml" url="source/widgets/componentes/printpreview/layouts/A5_Landscape.mxml.html"/>
+				<node icon="mxmlIcon" label="A5_Portrait.mxml" url="source/widgets/componentes/printpreview/layouts/A5_Portrait.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.printpreview.utils" expanded="true">
+				<node icon="actionScriptIcon" label="BasicPrint.as" url="source/widgets/componentes/printpreview/utils/BasicPrint.as.html"/>
+				<node icon="actionScriptIcon" label="Controller.as" url="source/widgets/componentes/printpreview/utils/Controller.as.html"/>
+				<node icon="mxmlIcon" label="IdentifyTool.mxml" url="source/widgets/componentes/printpreview/utils/IdentifyTool.mxml.html"/>
+				<node icon="mxmlIcon" label="LayersTool.mxml" url="source/widgets/componentes/printpreview/utils/LayersTool.mxml.html"/>
+				<node icon="actionScriptIcon" label="ModelLocator.as" url="source/widgets/componentes/printpreview/utils/ModelLocator.as.html"/>
+				<node icon="actionScriptIcon" label="ObjectTranslator.as" url="source/widgets/componentes/printpreview/utils/ObjectTranslator.as.html"/>
+				<node icon="actionScriptIcon" label="PrintMapUtil.as" url="source/widgets/componentes/printpreview/utils/PrintMapUtil.as.html"/>
+				<node icon="mxmlIcon" label="Search.mxml" url="source/widgets/componentes/printpreview/utils/Search.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.seguranca" expanded="true">
+				<node icon="actionScriptIcon" label="LoginButton.as" url="source/widgets/componentes/seguranca/LoginButton.as.html"/>
+				<node icon="mxmlIcon" label="LoginWindow.mxml" url="source/widgets/componentes/seguranca/LoginWindow.mxml.html"/>
+				<node icon="actionScriptIcon" label="UserObject.as" url="source/widgets/componentes/seguranca/UserObject.as.html"/>
+				<node label="usuarios.xml" url="source/widgets/componentes/seguranca/usuarios.xml.txt"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.seguranca.event" expanded="true">
+				<node icon="actionScriptIcon" label="LoginEvent.as" url="source/widgets/componentes/seguranca/event/LoginEvent.as.html"/>
+				<node icon="actionScriptIcon" label="LogoutEvent.as" url="source/widgets/componentes/seguranca/event/LogoutEvent.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.unidades" expanded="true">
+				<node icon="actionScriptIcon" label="Unit_Ibama.as" url="source/widgets/componentes/unidades/Unit_Ibama.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.desenhar" expanded="true">
+				<node icon="actionScriptIcon" label="FeatureModificadoObj.as" url="source/widgets/componentes/vetorizar/desenhar/FeatureModificadoObj.as.html"/>
+				<node icon="mxmlIcon" label="NewDeleteFeatures.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewDeleteFeatures.mxml.html"/>
+				<node icon="mxmlIcon" label="NewDrawLabel.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewDrawLabel.mxml.html"/>
+				<node icon="mxmlIcon" label="NewDrawPath.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewDrawPath.mxml.html"/>
+				<node icon="mxmlIcon" label="NewDrawPoint.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewDrawPoint.mxml.html"/>
+				<node icon="mxmlIcon" label="NewDrawPolygon.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewDrawPolygon.mxml.html"/>
+				<node icon="mxmlIcon" label="NewDrawShape.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewDrawShape.mxml.html"/>
+				<node icon="mxmlIcon" label="NewEditFeatures.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewEditFeatures.mxml.html"/>
+				<node icon="mxmlIcon" label="NewExportFeature.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewExportFeature.mxml.html"/>
+				<node icon="mxmlIcon" label="NewManageAttributes.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewManageAttributes.mxml.html"/>
+				<node icon="mxmlIcon" label="NewMoveFeatures.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewMoveFeatures.mxml.html"/>
+				<node icon="mxmlIcon" label="NewSelectFeatures.mxml" url="source/widgets/componentes/vetorizar/desenhar/NewSelectFeatures.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.desenhar.atributos.popup" expanded="true">
+				<node icon="mxmlIcon" label="NewManageLayerAttributes.mxml" url="source/widgets/componentes/vetorizar/desenhar/atributos/popup/NewManageLayerAttributes.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.desenhar.exportar" expanded="true">
+				<node icon="mxmlIcon" label="NewExportFeatureForm.mxml" url="source/widgets/componentes/vetorizar/desenhar/exportar/NewExportFeatureForm.mxml.html"/>
+				<node icon="actionScriptIcon" label="NewKMLFormat.as" url="source/widgets/componentes/vetorizar/desenhar/exportar/NewKMLFormat.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.desenhar.handler" expanded="true">
+				<node icon="actionScriptIcon" label="NewDrawPathHandler.as" url="source/widgets/componentes/vetorizar/desenhar/handler/NewDrawPathHandler.as.html"/>
+				<node icon="actionScriptIcon" label="NewDrawPointHandler.as" url="source/widgets/componentes/vetorizar/desenhar/handler/NewDrawPointHandler.as.html"/>
+				<node icon="actionScriptIcon" label="NewDrawPolygonHandler.as" url="source/widgets/componentes/vetorizar/desenhar/handler/NewDrawPolygonHandler.as.html"/>
+				<node icon="actionScriptIcon" label="NewDrawShapeHandler.as" url="source/widgets/componentes/vetorizar/desenhar/handler/NewDrawShapeHandler.as.html"/>
+				<node icon="actionScriptIcon" label="NewFeatureLayerEditionHandler.as" url="source/widgets/componentes/vetorizar/desenhar/handler/NewFeatureLayerEditionHandler.as.html"/>
+				<node icon="actionScriptIcon" label="NewSelectFeaturesHandler.as" url="source/widgets/componentes/vetorizar/desenhar/handler/NewSelectFeaturesHandler.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.desenhar.label.popup" expanded="true">
+				<node icon="mxmlIcon" label="NewEditLabel.mxml" url="source/widgets/componentes/vetorizar/desenhar/label/popup/NewEditLabel.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.event" expanded="true">
+				<node icon="actionScriptIcon" label="DisableLayerEvent.as" url="source/widgets/componentes/vetorizar/event/DisableLayerEvent.as.html"/>
+				<node icon="actionScriptIcon" label="EnableLayerEvent.as" url="source/widgets/componentes/vetorizar/event/EnableLayerEvent.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.handler" expanded="true">
+				<node icon="actionScriptIcon" label="NewAbstractEditCollectionHandler.as" url="source/widgets/componentes/vetorizar/handler/NewAbstractEditCollectionHandler.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.vetorizar.handler.feature.draw" expanded="true">
+				<node icon="actionScriptIcon" label="NewEditPathHandler.as" url="source/widgets/componentes/vetorizar/handler/feature/draw/NewEditPathHandler.as.html"/>
+				<node icon="actionScriptIcon" label="NewEditPolygonHandler.as" url="source/widgets/componentes/vetorizar/handler/feature/draw/NewEditPolygonHandler.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.videos.renderer" expanded="true">
+				<node icon="mxmlIcon" label="VideoItemRenderer.mxml" url="source/widgets/componentes/videos/renderer/VideoItemRenderer.mxml.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.webService" expanded="true">
+				<node icon="actionScriptIcon" label="DeleteFeatureObject.as" url="source/widgets/componentes/webService/DeleteFeatureObject.as.html"/>
+				<node icon="actionScriptIcon" label="UpdateWayPointsAttributesObject.as" url="source/widgets/componentes/webService/UpdateWayPointsAttributesObject.as.html"/>
+				<node icon="actionScriptIcon" label="UpdateWSLineObject.as" url="source/widgets/componentes/webService/UpdateWSLineObject.as.html"/>
+				<node icon="actionScriptIcon" label="UpdateWSPointObject.as" url="source/widgets/componentes/webService/UpdateWSPointObject.as.html"/>
+				<node icon="actionScriptIcon" label="UpdateWSPolygonObject.as" url="source/widgets/componentes/webService/UpdateWSPolygonObject.as.html"/>
+				<node icon="actionScriptIcon" label="WSLinesObject.as" url="source/widgets/componentes/webService/WSLinesObject.as.html"/>
+				<node icon="actionScriptIcon" label="WSPointsObject.as" url="source/widgets/componentes/webService/WSPointsObject.as.html"/>
+				<node icon="actionScriptIcon" label="WSPolygonsObject.as" url="source/widgets/componentes/webService/WSPolygonsObject.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.wmsAuthKey" expanded="true">
+				<node icon="actionScriptIcon" label="WMSAuthKey.as" url="source/widgets/componentes/wmsAuthKey/WMSAuthKey.as.html"/>
+				<node icon="actionScriptIcon" label="WMSAuthKeyTileProvider.as" url="source/widgets/componentes/wmsAuthKey/WMSAuthKeyTileProvider.as.html"/>
+			</node>
+			<node icon="packageIcon" label="widgets.componentes.zoomBox" expanded="true">
+				<node icon="mxmlIcon" label="BlurScreen.mxml" url="source/widgets/componentes/zoomBox/BlurScreen.mxml.html"/>
+				<node icon="mxmlIcon" label="ZoomBox.mxml" url="source/widgets/componentes/zoomBox/ZoomBox.mxml.html"/>
+				<node icon="actionScriptIcon" label="ZoomBoxActivatedEvent.as" url="source/widgets/componentes/zoomBox/ZoomBoxActivatedEvent.as.html"/>
+				<node icon="actionScriptIcon" label="ZoomBoxHandler.as" url="source/widgets/componentes/zoomBox/ZoomBoxHandler.as.html"/>
+			</node>
+			<node label="config.xml" url="source/config.xml.txt"/>
+			<node icon="mxmlAppIcon" selected="true" label="index.mxml" url="source/index.mxml.html"/>
+		</node>
+	</nodes>
+	<zipfile label="Download source (ZIP, 43551K)" url="HexGIS Flex.zip">
+	</zipfile>
+	<sdklink label="Download Flex SDK" url="http://www.adobe.com/go/flex451_sdk_download">
+	</sdklink>
+</index>

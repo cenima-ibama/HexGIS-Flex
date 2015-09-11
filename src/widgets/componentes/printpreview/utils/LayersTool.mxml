@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:ToolsBase xmlns="*" 
+				xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:solutions="solutions.*"
+				xmlns:os="http://openscales.org"
+				width="300" height="280" creationComplete="init()">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.ItemClickEvent;
+				
+			/*override protected function init():void
+			{
+				//Store window height
+				panelHeight = this.height;
+			}*/
+			/**
+			 * Switch between basemaps
+			 **/
+			private function changeBaseMap(event:ItemClickEvent):void
+			{
+ 				 for(var i:int=0;i<_model.map.layers.length;i++)
+			    {
+					if(_model.map.layers[i].name == event.label)
+					{
+						/*_model.map.baseLayer.visible = false;
+	      				_model.map.baseLayer = _model.map.layers[i];
+	      				_model.map.baseLayer.maxZoomLevel = _model.maxzoomlevel;
+	      				_model.map.baseLayer.visible = true;
+	         			_model.map.baseLayer.redraw();*/
+				    }
+				}   				
+			}
+			
+			private function addLegend(event:Event):void
+			{
+				legendpanel.addChild(_model.mapLegend);
+			}			
+		]]>
+	</fx:Script>
+	<mx:VBox horizontalAlign="center" width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Label text="Basemaps" color="black" fontWeight="bold"/>	
+		<!-- Basemap Button Bar -->
+		<mx:HBox right="50" top="5" alpha="0.8" styleName="basemapButtons" borderStyle="solid">
+			<mx:ToggleButtonBar id="togglebar" alpha="1.0" toggleOnClick="true" selectedIndex="0" width="100%" />
+					
+		</mx:HBox>
+		<mx:HRule/>
+		<!-- Layers -->
+		 <mx:TabNavigator id="tn" width="100%" height="100%" creationPolicy="all" change="addLegend(event)">
+		  <mx:VBox id="layerspanel" label="Layers" height="100%" width="100%">
+				 <mx:VBox label="Layers" width="100%" height="100%" verticalScrollPolicy="off" >
+		            
+		        </mx:VBox>
+	      </mx:VBox>
+	      <mx:VBox id="legendpanel" label="Legend" width="100%">
+	       </mx:VBox>
+        </mx:TabNavigator>
+	</mx:VBox>
+
+</solutions:ToolsBase>

@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:solutions="solutions.*"
+				xmlns:os="http://openscales.org"
+				creationComplete="configure()">
+
+	<fx:Style source="assets/styles/estilo1.css"/>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.basetypes.Resolution;
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.feature.PolygonFeature;
+			import org.openscales.core.layer.DrawingsLayer;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.layer.ogc.WMS;
+			import org.openscales.core.measure.IMeasure;
+			import org.openscales.core.measure.Surface;
+			import org.openscales.core.style.Style;
+			import org.openscales.core.utils.Util;
+			import org.openscales.geometry.Geometry;
+			import org.openscales.geometry.LinearRing;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.Polygon;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			import org.openscales.geometry.basetypes.Unit;
+			import org.openscales.proj4as.ProjProjection;
+			
+			import solutions.utils.StyleUtils;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			import widgets.componentes.alerta.Alerta;
+			import widgets.componentes.graficos.RadioButtonItemObject;
+			import widgets.componentes.medidas.distancia.NewDistance;
+			
+			
+			private var _camadaPoligonosDB:WMS;
+			private var _camadaLinhasDB:WMS;
+			private var _camadaPontosDB:WMS;
+			private var _camadaDesenhoSelecionada:String;
+			[Bindable] private var _camadaNova:Boolean;
+			[Bindable] private var _camadaExistente:Boolean;
+			
+			[Bindable] private var _loadFeaturesFromDB:Boolean;
+			[Bindable] private var _exibirOpcoesDB:Boolean;
+			
+			[Bindable] private var _defaultDrawingsLayerName:String = "vetorizar";
+			[Bindable] private var _defaultOtherDrawingsLayerName:String = "vetorizar_outros";
+			[Bindable] private var _labelCarregarDB:String = "Carregar camadas do Banco de Dados";
+			[Bindable] private var _labelSelecionarCamada:String = "Selecione uma camada de vetorização abaixo:";
+			[Bindable] private var _labelCriarCamada:String = "Crie uma nova camada de vetorização:";
+			[Bindable] private var _tipCarregarDB:String = "Carregar pontos, linhas e polígonos";
+			[Bindable] private var _tipSelecionarCamada:String = "Selecionar uma camada já existente";
+			[Bindable] private var _tipCriarCamada:String = "Crie uma nova camada";
+			[Bindable] private var _labelNovaCamada:String = "Crie uma nova camada de vetorização:";
+			[Bindable] private var _tipNovaCamada:String = "Crie uma nova camada";
+			
+			[Bindable] private var camadasPossiveis:ArrayCollection;
+			
+			[Bindable] private var _camadaDesenho:VectorLayer;
+
+			[Bindable]
+			private var listaNS:ArrayCollection = new ArrayCollection(["N", "S"]);
+			
+			[Bindable]
+			private var listaEW:ArrayCollection = new ArrayCollection(["E", "W"]);
+			
+			private var _largSystem:String;
+			private var _comprSystem:String;
+			private var _vertical:String;
+			private var _horizontal:String;
+			
+			private var _accuracies:HashMap = new HashMap();
+			
+			[Bindable] private var _vertice:Boolean = true;
+			[Bindable] private var _retangulo:Boolean = true;
+			
+			[Bindable] private var _listaMedPath:ArrayCollection = new ArrayCollection([
+				{sistema:'Metros', macro:'m'}, 
+				{sistema:'Kilometros', macro:'km'}
+			]);
+			
+			
+			override protected function configure():void
+			{	
+				super.configure();
+				
+				this._accuracies.put(Unit.KILOMETER,3);
+				this._accuracies.put(Unit.METER,0);
+
+				this.map.addEventListener(LayerEvent.LAYER_ADDED, addCamadasPossiveis);
+				this.map.addEventListener(LayerEvent.LAYER_REMOVED, removeCamadasPossiveis);
+			}
+			
+			private function addCamadasPossiveis(event:LayerEvent):void
+			{
+				var item:RadioButtonItemObject;
+				var tam:int = camadasPossiveis.length;
+				var i:int;
+				
+				if ((event.layer) && (event.layer is VectorLayer) && (event.layer.displayInLayerManager))
+				{
+					if (!camadasPossiveis)
+					{
+						camadasPossiveis = new ArrayCollection();
+					}
+					
+					item = new RadioButtonItemObject();
+					item.group = grupoCamadasPossiveis;
+					item.label = event.layer.identifier;
+					
+					camadasPossiveis.addItemAt(item, 0);
+					camadasPossiveis.refresh();
+				}
+			}
+			
+			private function removeCamadasPossiveis(event:LayerEvent):void
+			{
+				var item:RadioButtonItemObject;
+				var i:int;
+				
+				var camPosAux:ArrayCollection = new ArrayCollection();
+				camPosAux.source = camadasPossiveis.source;
+				lstCamadas.dataProvider = camPosAux;
+				
+				for (i=0; i<camadasPossiveis.length; i++)
+				{
+					item = camadasPossiveis.getItemAt(i) as RadioButtonItemObject;
+					
+					if (item.label == event.layer.identifier)
+					{
+						camadasPossiveis.removeItemAt(i);
+						camadasPossiveis.refresh();
+					}
+				}
+				
+				lstCamadas.dataProvider = camadasPossiveis;
+				
+				if (this.currentState == "vetorState")
+				{
+					if (_camadaDesenho.identifier == event.layer.identifier)
+					{						
+						//resetarWidget();
+					}
+				}
+			}
+			
+			protected function onListaCamadasCreationCompleteHandler(event:FlexEvent):void
+			{
+				lstCamadas.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				lstCamadas.scroller.verticalScrollBar.setStyle("chromeColor", container.getStyle("backgroundColor"));
+				
+				var auxCamadas:Vector.<Layer>;
+				var tamAux:int;
+				var i:int;
+				var item:RadioButtonItemObject;
+				
+				camadasPossiveis = new ArrayCollection();
+				
+				if (map)
+				{
+					auxCamadas = map.layers;
+					tamAux = auxCamadas.length;
+					
+					for (i=0; i<tamAux; i++)
+					{
+						if ((auxCamadas[i] is VectorLayer) && (auxCamadas[i].displayInLayerManager))
+						{
+							item = new RadioButtonItemObject();
+							item.label = auxCamadas[i].identifier;
+							item.group = grupoCamadasPossiveis;
+							camadasPossiveis.addItemAt(item, 0);
+						}
+					}
+				}
+				camadasPossiveis.refresh();
+				lstCamadas.dataProvider = camadasPossiveis;
+			}
+			
+			protected function continuarClickHandler(event:MouseEvent):void
+			{
+				var alerta:Alerta = new Alerta();
+				
+				if (_camadaNova)
+				{
+					var nomeNovaCam:String = nomeNovaCamadaDesenho.text;
+					
+					if (nomeNovaCam.length > 0)
+					{
+						if (map.getLayerByIdentifier(nomeNovaCam))
+						{							
+							alerta.exibirErro("Já existe uma camada com este nome. Escolha outro nome para a camada.");
+						}
+						else
+						{
+							_camadaDesenho = new DrawingsLayer(nomeNovaCam);
+							
+							if (_camadaDesenho)
+							{
+								_camadaDesenho.displayedName = nomeNovaCam;
+								_camadaDesenho.projection = map.projection;
+								_camadaDesenho.maxExtent = map.maxExtent;
+								_camadaDesenho.editable = true;
+								_camadaDesenho.visible = true;
+								
+								map.addLayer(_camadaDesenho);
+								
+								this.currentState = "vetorState";
+							}
+							else
+							{
+								alerta.exibirErro("Não foi possível criar a camada.");
+							}
+						}
+					}
+					else
+					{
+						alerta.exibirErro("Nome inválido.");
+					}
+				}
+				else if (_camadaExistente)
+				{	
+					if (_camadaDesenhoSelecionada)
+					{
+						_camadaDesenho = map.getLayerByIdentifier(this._camadaDesenhoSelecionada) as VectorLayer;
+						
+						if (_camadaDesenho)
+						{
+							_camadaDesenho.editable = true;
+							_camadaDesenho.visible = true;
+							
+							this.currentState = "vetorState";
+						}
+						else
+						{
+							alerta.exibirErro("Não foi possível carregar a camada desejada.");
+						}
+					}
+					else
+					{
+						alerta.exibirErro("Selecione uma camada.");
+					}
+				}
+				else
+				{						
+					alerta.exibirErro("Selecione uma camada.");
+				}
+				
+			} 
+			
+			protected function buttonArrow_clickHandler(event:MouseEvent):void
+			{
+				_exibirOpcoesDB = !_exibirOpcoesDB;
+			}
+			
+			protected function nomeNovaCamadaDesenho_changeHandler(event:TextOperationEvent):void
+			{
+				nvcRadioBtn.selected = true;
+				nvcRadioBtn_changeHandler(event);
+			}
+			
+			protected function nvcRadioBtn_changeHandler(event:Event):void
+			{
+				_camadaExistente = false;
+				_camadaNova = nvcRadioBtn.selected;
+			}
+			
+			protected function slcRadioBtn_changeHandler(event:Event):void
+			{
+				_camadaNova = false;
+				_camadaExistente = slcRadioBtn.selected;
+			}
+			
+			private function pressionaEnter(event:KeyboardEvent):void
+			{
+				if (event.charCode == 13)
+				{
+					continueBtn.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+				}
+			}
+			
+			protected function grupoCamadasPossiveis_changeHandler(event:Event):void
+			{
+				_camadaDesenhoSelecionada = grupoCamadasPossiveis.selectedValue as String;
+				slcRadioBtn.selected = true;
+				slcRadioBtn_changeHandler(event);
+			}
+			
+			private function pressionaEnterPonto(event:KeyboardEvent):void
+			{
+				if (event.charCode == 13)
+				{
+					addFeatBtn.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+				}
+			}
+			
+			protected function addFeatBtn_clickHandler(event:MouseEvent):void
+			{
+				var longitude:String;
+				var latitude:String;
+				
+				var long:Number;
+				var lati:Number;
+				var localPonto:Location;
+				
+				var point1:org.openscales.geometry.Point;
+				var point2:org.openscales.geometry.Point;
+				var point3:org.openscales.geometry.Point;
+				var point4:org.openscales.geometry.Point;
+				
+				var lgGraus:Number;
+				var lgMinutos:Number;
+				var lgSegundos:Number;
+				
+				var ltGraus:Number;
+				var ltMinutos:Number;
+				var ltSegundos:Number;
+				
+				var lgGrausOK:Boolean;
+				var lgMinutosOK:Boolean;
+				var lgSegundosOK:Boolean;
+				
+				var ltGrausOK:Boolean;
+				var ltMinutosOK:Boolean;
+				var ltSegundosOK:Boolean;
+				
+				var lgOK:Boolean;
+				var ltOK:Boolean;
+									
+				var res:Resolution = map.resolution;
+				
+				var alerta:Alerta = new Alerta();
+				
+				
+				if (longGraus.text.length == 0)
+				{
+					longGraus.text = "0.0";
+				}
+				
+				if (longMinutos.text.length == 0)
+				{
+					longMinutos.text = "0.0";
+				}
+				
+				if (longSegundos.text.length == 0)
+				{
+					longSegundos.text = "0.0";
+				}
+				
+				if (latGraus.text.length == 0)
+				{
+					latGraus.text = "0.0";
+				}
+				
+				if (latMinutos.text.length == 0)
+				{
+					latMinutos.text = "0.0";
+				}
+				
+				if (latSegundos.text.length == 0)
+				{
+					latSegundos.text = "0.0";
+				}
+				
+				lgGraus = Number(longGraus.text);
+				lgMinutos = Number(longMinutos.text);
+				lgSegundos = Number(longSegundos.text);
+				
+				ltGraus = Number(latGraus.text);
+				ltMinutos = Number(latMinutos.text);
+				ltSegundos = Number(latSegundos.text);
+				
+				if ((!isNaN(lgGraus)) && (!isNaN(lgMinutos)) && (!isNaN(lgSegundos)) &&
+					(!isNaN(ltGraus)) && (!isNaN(ltMinutos)) && (!isNaN(ltSegundos)))
+				{
+					lgGrausOK = ((lgGraus < 180) && (lgGraus > -1));
+					lgMinutosOK = ((lgMinutos < 60) && (lgMinutos > -1));
+					lgSegundosOK = ((lgSegundos < 60) && (lgSegundos > -1));
+					
+					ltGrausOK = ((ltGraus < 90) && (ltGraus > -1));
+					ltMinutosOK = ((ltMinutos < 60) && (ltMinutos > -1));
+					ltSegundosOK = ((ltSegundos < 60) && (ltSegundos > -1));
+					
+					lgOK = (lgGrausOK && lgMinutosOK && lgSegundosOK);
+					ltOK = (ltGrausOK && ltMinutosOK && ltSegundosOK);
+					
+					if ((lgOK || ((lgGraus == 180) && (lgMinutos == 0.0) && (lgSegundos == 0.0))) &&
+						(ltOK || ((ltGraus == 90) && (ltMinutos == 0.0) && (ltSegundos == 0.0))))
+					{			
+						longitude = longGraus.text + "° " + longMinutos.text + "' " + longSegundos.text + '" ' + String(EorW.selectedItem);
+						latitude = latGraus.text + "° " + latMinutos.text + "' " + latSegundos.text + '" ' + String(NorS.selectedItem);
+
+						long = Number(Util.dmsToDeg(longitude));
+						lati = Number(Util.dmsToDeg(latitude));
+						
+						localPonto = new Location(long, lati, new ProjProjection("EPSG:4326"));
+						localPonto = localPonto.reprojectTo(map.projection);
+
+						_camadaDesenho.scaleX = 1;
+						_camadaDesenho.scaleY = 1;
+					
+						if ((comprTextInput.text.length > 0) && (largTextInput.text.length > 0))
+						{
+							var compr:Number = Math.abs(Number(comprTextInput.text));
+							var larg:Number = Math.abs(Number(largTextInput.text));
+
+							if (!isNaN(compr) && !isNaN(larg))
+							{
+								if (_comprSystem.toLowerCase() == Unit.KILOMETER) 
+								{
+									compr*=1000;
+								} 
+								
+								if (_largSystem.toLowerCase() == Unit.KILOMETER) 
+								{
+									larg*=1000;
+								}
+								
+								/*Cria e adiciona polígono*/
+								var featPol:PolygonFeature;
+								var lring:LinearRing;
+								var polygon:Polygon;
+									
+								if (_vertice)
+								{
+									point1 = new org.openscales.geometry.Point(localPonto.lon, localPonto.lat);
+									lring = new LinearRing(new <Number>[point1.x,point1.y]);
+									lring.projection = this.map.projection;
+								
+									polygon = new Polygon(new <Geometry>[lring]);
+									polygon.projection = this.map.projection;
+									
+									featPol = new PolygonFeature(polygon, null, StyleUtils.getDefaultPolygonStyle());
+									_camadaDesenho.addFeature(featPol);
+									featPol.draw();
+																	
+									//------------------------
+									if (_vertical == "S")
+									{
+										localPonto = new Location(point1.x, point1.y-compr, map.projection);
+									}
+									else
+									{
+										localPonto = new Location(point1.x, point1.y+compr, map.projection);
+									}
+									point2 = new org.openscales.geometry.Point(localPonto.lon, localPonto.lat);
+									
+									//------------------------
+									if (_horizontal == "E")
+									{
+										localPonto = new Location(point1.x+larg, point1.y, map.projection);
+									}
+									else
+									{
+										localPonto = new Location(point1.x-larg, point1.y, map.projection);
+									}
+									point3 = new org.openscales.geometry.Point(localPonto.lon, localPonto.lat);
+																	
+									lring.addPoint(point2.x, point2.y);
+									if (_retangulo) lring.addPoint(point3.x, point2.y);
+									lring.addPoint(point3.x, point3.y);
+								}
+								else
+								{
+									point1 = new org.openscales.geometry.Point(localPonto.lon+larg/2, localPonto.lat-compr/2);
+									point2 = new org.openscales.geometry.Point(localPonto.lon-larg/2, localPonto.lat+compr/2);
+									
+									lring = new LinearRing(new <Number>[point1.x, point2.y]);
+									lring.projection = this.map.projection;
+									
+									polygon = new Polygon(new <Geometry>[lring]);
+									polygon.projection = this.map.projection;
+									
+									featPol = new PolygonFeature(polygon, null, StyleUtils.getDefaultPolygonStyle());
+									_camadaDesenho.addFeature(featPol);
+									featPol.draw();
+									
+									lring.addPoint(point1.x, point1.y);
+									lring.addPoint(point2.x, point1.y);
+									lring.addPoint(point2.x, point2.y);
+								}
+							}
+						}	
+					}
+					else
+					{
+						alerta.exibirErro("Coordenadas inválidas.");
+					}
+				}
+				else
+				{
+					alerta.exibirErro("Preencha os campos somente com números. Use ponto para separar casas decimais.");
+				}
+			}
+			
+			private function comboBoxComprChangeHandler(event:IndexChangeEvent):void
+			{
+				_comprSystem = medCompr.selectedItem.macro;
+			}
+			
+			private function comboBoxLargChangeHandler(event:IndexChangeEvent):void
+			{
+				_largSystem = medLarg.selectedItem.macro;
+			}
+			
+			protected function medCompr_creationCompleteHandler(event:FlexEvent):void
+			{
+				_comprSystem = medCompr.selectedItem.macro;
+			}
+			
+			protected function medLarg_creationCompleteHandler(event:FlexEvent):void
+			{
+				_largSystem = medLarg.selectedItem.macro;
+			}
+			
+			protected function EouD_creationCompleteHandler(event:FlexEvent):void
+			{
+				_horizontal = EouD.selectedItem;
+			}
+			
+			protected function CouB_creationCompleteHandler(event:FlexEvent):void
+			{
+				_vertical = CouB.selectedItem;
+			}
+			
+			protected function EouD_changeHandler(event:IndexChangeEvent):void
+			{
+				_horizontal = EouD.selectedItem;
+			}
+			
+			protected function CouB_changeHandler(event:IndexChangeEvent):void
+			{
+				_vertical = CouB.selectedItem;
+			}
+			
+			protected function resetWidget(event:MouseEvent):void
+			{	
+				if (_camadaDesenho)
+				{
+					_camadaDesenho.visible = false;
+				}
+				this.currentState = "camadaState";
+			}
+			
+			protected function grupoPosicaoPonto_changeHandler(event:Event):void
+			{
+				_vertice = false;
+				if (grupoPosicaoPonto.selectedValue == "Vértice")
+				{
+					_vertice = true;
+				}
+			}
+			
+			protected function grupoTipoPoligono_changeHandler(event:Event):void
+			{
+				_retangulo = false;
+				if (grupoTipoPoligono.selectedValue == "Retângulo")
+				{
+					_retangulo = true;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="500" />
+		
+		<s:Fade id="fadeOut" alphaFrom="1.0" alphaTo="0.0" duration="500" />
+		
+		<s:RadioButtonGroup id="grupoCamadasPossiveis" change="grupoCamadasPossiveis_changeHandler(event)"/>
+		
+		<s:RadioButtonGroup id="grupoTipoCamada"/>
+		
+		<s:RadioButtonGroup id="grupoPosicaoPonto" change="grupoPosicaoPonto_changeHandler(event)" selectedValue="Vértice"/>
+		
+		<s:RadioButtonGroup id="grupoTipoPoligono" change="grupoTipoPoligono_changeHandler(event)"/>
+		
+	</fx:Declarations>
+	
+	<solutions:states>
+		<s:State name="camadaState"/>
+		<s:State name="vetorState"/>
+		<s:State name="maximized"/>
+		<s:State name="minimized"/>
+		<s:State name="opened"/>
+		<s:State name="closed"/>
+	</solutions:states>
+	
+	<s:BorderContainer id="container" styleName="widgetContentContainer" width="350" height="400">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="15"
+							  paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10"/>
+		</s:layout>
+		
+		<s:Group id="camada" includeIn="camadaState" width="100%" height="100%" keyDown="pressionaEnter(event)" >
+			
+			<s:VGroup gap="0" width="100%" height="100%" verticalAlign="bottom" horizontalAlign="center">
+				
+				<s:VGroup id="lstCamadasContainer" height="60%" width="100%"
+						  gap="5" verticalAlign="top" horizontalAlign="center"
+						  paddingBottom="7" paddingLeft="5" paddingRight="5" paddingTop="7">
+					
+					
+					<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="left" paddingBottom="7">
+						<s:RadioButton 	id="slcRadioBtn" change="slcRadioBtn_changeHandler(event)"
+										label="{_labelSelecionarCamada}" 
+										toolTip="{_tipSelecionarCamada}" styleName="estiloLabel"
+										group="{grupoTipoCamada}" width="100%"/>
+					</s:HGroup>
+					
+					<s:List id="lstCamadas"
+							width="100%" height="100%" 
+							maxHeight="240" styleName="estiloInvisibleContainer" 
+							itemRenderer="widgets.componentes.pontosLonLat.renderer.ListaCamadaPossiveisItemRenderer"
+							creationComplete="onListaCamadasCreationCompleteHandler(event)">
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="center" gap="2"/>
+						</s:layout>
+					</s:List>
+					
+				</s:VGroup>
+				
+				<s:HGroup width="100%" bottom="0" left="0" right="0" height="5%"
+						  paddingLeft="5" verticalAlign="middle" horizontalAlign="left">
+					<s:Line width="100%">
+						<s:stroke>
+							<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+				
+				
+				<s:VGroup id="novaCamadaContainer" width="100%" height="35%"
+						  gap="10" verticalAlign="middle" horizontalAlign="center" 
+						  paddingBottom="7" paddingLeft="5" paddingRight="5" paddingTop="7">
+					
+					<s:RadioButton 	id="nvcRadioBtn"
+									change="nvcRadioBtn_changeHandler(event)"
+									label="{_labelCriarCamada}" 
+									toolTip="{_tipCriarCamada}" styleName="estiloLabel"
+									group="{grupoTipoCamada}" width="100%"/>
+					
+					<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="center" paddingLeft="20" paddingRight="0">
+						<s:Label text="Nome" width="15%" textAlign="left" styleName="estiloLabel"/>
+						
+						<s:TextInput id="nomeNovaCamadaDesenho" styleName="estiloTextInput" width="85%" change="nomeNovaCamadaDesenho_changeHandler(event)"/>
+					</s:HGroup>
+				</s:VGroup>
+				
+				<s:HGroup width="100%" bottom="0" left="0" right="0" height="10%"
+						  paddingRight="5" verticalAlign="bottom" horizontalAlign="right">
+					<s:Button  id="continueBtn" label="Continuar" bottom="0" width="100"
+							   click="continuarClickHandler(event)" styleName="estiloWidgetContentMainButton" />
+				</s:HGroup>
+				
+			</s:VGroup>
+		</s:Group>
+		
+		<s:VGroup id="ponto" width="100%" height="100%" 
+				  keyDown="pressionaEnterPonto(event)" verticalAlign="top" horizontalAlign="center"
+				  gap="0" includeIn="vetorState">
+						
+			<s:VGroup gap="0" width="100%" height="90%" verticalAlign="top" horizontalAlign="center" paddingBottom="10">
+				
+				<s:HGroup width="100%" height="5%" verticalAlign="middle" horizontalAlign="left" paddingBottom="7" paddingTop="5">
+					<s:Label text="Origem" styleName="estiloLabel"/>
+					
+					<s:Line width="90%">
+						<s:stroke>
+							<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+				
+				<s:VGroup width="100%" height="60%" gap="15" 
+						  verticalAlign="top" horizontalAlign="center" 
+						  paddingLeft="5" paddingRight="5" paddingTop="20">
+										
+					<s:HGroup gap="10" width="100%" height="70%" verticalAlign="top" horizontalAlign="center">
+						
+						<s:VGroup gap="20" width="20%" verticalAlign="top" horizontalAlign="center">				
+							<s:Label width="100%" styleName="estiloLabel" text="Long" textAlign="left" paddingTop="30"/>
+							
+							<s:Label width="100%" styleName="estiloLabel" text="Lat" textAlign="left"/>
+							
+						</s:VGroup>
+						
+						<s:VGroup gap="10" width="80%" verticalAlign="middle" horizontalAlign="left">
+							
+							<s:HGroup gap="10" width="100%">
+								<s:HGroup width="25%" verticalAlign="bottom" horizontalAlign="center">
+									<s:Label styleName="estiloLabel" text="G"/>
+								</s:HGroup>
+								
+								<s:HGroup width="25%" verticalAlign="middle" horizontalAlign="center">
+									<s:Label styleName="estiloLabel" text="M"/>
+								</s:HGroup>
+								
+								<s:HGroup width="25%" verticalAlign="middle" horizontalAlign="center">
+									<s:Label styleName="estiloLabel" text="S"/>
+								</s:HGroup>
+								
+								<s:HGroup width="25%" verticalAlign="middle" horizontalAlign="center">
+									<s:Label styleName="estiloLabel" text="Hemisférios"/>
+								</s:HGroup>
+							</s:HGroup>
+							
+							<s:HGroup gap="10" verticalAlign="middle" horizontalAlign="left">
+								<s:HGroup gap="3">
+									<s:TextInput id="longGraus" width="50" prompt="0.0" restrict="0-9."
+												 styleName="estiloTextInput" textAlign="center"/>
+									<s:Label text="°"/>
+								</s:HGroup>
+								
+								<s:HGroup gap="3">
+									<s:TextInput id="longMinutos" width="50" prompt="0.0" restrict="0-9."
+												 styleName="estiloTextInput" textAlign="center"/>
+									<s:Label text="'"/>
+								</s:HGroup>
+								
+								<s:HGroup gap="3">
+									<s:TextInput id="longSegundos" width="50" prompt="0.0" restrict="0-9."
+												 styleName="estiloTextInput" textAlign="center"/>
+									<s:Label text='"'/>
+								</s:HGroup>
+								
+								<s:DropDownList id="EorW" prompt="Selecione" selectedIndex="1" enabled="{_vertice}"
+												dataProvider="{listaEW}" width="70" styleName="estiloDropDownList"/>
+							</s:HGroup>
+							
+							<s:HGroup gap="10">
+								<s:HGroup gap="3">
+									<s:TextInput id="latGraus" width="50" prompt="0.0" restrict="0-9."
+												 styleName="estiloTextInput" textAlign="center"/>
+									<s:Label text="°"/>
+								</s:HGroup>
+								
+								<s:HGroup gap="3">
+									<s:TextInput id="latMinutos" width="50" prompt="0.0" restrict="0-9."
+												 styleName="estiloTextInput" textAlign="center"/>
+									<s:Label text="'"/>
+								</s:HGroup>
+								
+								<s:HGroup gap="3">
+									<s:TextInput id="latSegundos" width="50" prompt="0.0" restrict="0-9."
+												 styleName="estiloTextInput" textAlign="center"/>
+									<s:Label text='"'/>
+								</s:HGroup>
+								
+								<s:DropDownList id="NorS" prompt="Selecione" selectedIndex="1" enabled="{_vertice}"
+												dataProvider="{listaNS}" width="70" styleName="estiloDropDownList"/>
+							</s:HGroup>
+						</s:VGroup>
+					</s:HGroup>
+					
+					<s:HGroup width="100%">					
+						<s:RadioButton id="rbVert" label="Vértice" group="{grupoPosicaoPonto}" width="50%"/>
+						
+						<s:RadioButton id="rbTCent" label="Centro" group="{grupoPosicaoPonto}" width="50%"/>
+					</s:HGroup>
+				</s:VGroup>
+				
+				<s:HGroup width="100%" height="5%" verticalAlign="middle" horizontalAlign="left">
+					<s:Line width="100%">
+						<s:stroke>
+							<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+				
+				<s:VGroup width="100%" height="45%" gap="15" verticalAlign="top" horizontalAlign="center" paddingTop="25" paddingLeft="5" paddingRight="5">
+					<!--<s:HGroup width="100%">
+						<s:RadioButton id="rbTri" label="Triângulo" group="{grupoTipoPoligono}" width="50%"/>
+						
+						<s:RadioButton id="rbRet" label="Retângulo" group="{grupoTipoPoligono}" width="50%"/>
+					</s:HGroup>-->
+				
+					<s:VGroup width="100%" verticalAlign="bottom" horizontalAlign="right">
+						<s:HGroup width="100%" horizontalAlign="right" gap="10" paddingRight="10">
+							<s:Label styleName="estiloLabel" textAlign="center" text="Unidade de Medida" width="20%"/>
+							<s:Label styleName="estiloLabel" textAlign="center" text="Sentido" width="20%"/>
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label width="25%" text="Largura"/>
+							<s:TextInput id="largTextInput" restrict="0-9." textAlign="center" width="25%" styleName="estiloTextInput"/>
+							<s:DropDownList id="medLarg" width="70" 
+											dataProvider="{_listaMedPath}" 
+											labelField="sistema" selectedIndex="1" 
+											creationComplete="medLarg_creationCompleteHandler(event)"
+											change="comboBoxLargChangeHandler(event)" styleName="estiloDropDownList" />
+							<s:DropDownList id="EouD" prompt="Selecione" selectedIndex="1"
+											creationComplete="EouD_creationCompleteHandler(event)" 
+											change="EouD_changeHandler(event)" enabled="{_vertice}"
+											dataProvider="{listaEW}" width="70" styleName="estiloDropDownList"/>
+						</s:HGroup>
+						
+						<s:HGroup width="100%">
+							<s:Label width="25%" text="Comprimento"/>
+							<s:TextInput id="comprTextInput" restrict="0-9." textAlign="center" width="25%" styleName="estiloTextInput"/>
+							<s:DropDownList id="medCompr" width="70"
+											dataProvider="{_listaMedPath}" 
+											labelField="sistema" selectedIndex="1" 
+											creationComplete="medCompr_creationCompleteHandler(event)"
+											change="comboBoxComprChangeHandler(event)" styleName="estiloDropDownList" />
+							<s:DropDownList id="CouB" prompt="Selecione" selectedIndex="1" 
+											creationComplete="CouB_creationCompleteHandler(event)" 
+											change="CouB_changeHandler(event)" enabled="{_vertice}"
+											dataProvider="{listaNS}" width="70" styleName="estiloDropDownList"/>
+						</s:HGroup>
+					</s:VGroup>
+				</s:VGroup>
+			</s:VGroup>
+			
+			<s:HGroup width="100%" height="10%" paddingTop="5" gap="0"
+					  verticalAlign="bottom" horizontalAlign="center">
+				
+				<s:HGroup width="50%" verticalAlign="bottom" horizontalAlign="left">
+					<s:Button id="resetBtn" label="Voltar" width="100"
+							  styleName="estiloWidgetContentMainButton" click="resetWidget(event)" />
+					<!--click="resetarWidget(event)"-->
+				</s:HGroup>
+				<s:HGroup width="50%" verticalAlign="bottom" horizontalAlign="right">
+					<s:Button id="addFeatBtn" 
+							  label="Adicionar" width="100" click="addFeatBtn_clickHandler(event)"
+							  styleName="estiloWidgetContentMainButton" />
+					<!-- click="adicionaPonto(event)"-->
+				</s:HGroup>
+			</s:HGroup>
+		</s:VGroup>
+		
+	</s:BorderContainer>
+	
+</solutions:BaseWidget>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:CloseWindowTemplate xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							   xmlns:s="library://ns.adobe.com/flex/spark" 
+							   xmlns:mx="library://ns.adobe.com/flex/mx"
+							   xmlns:solutions="solutions.*" 
+							   height="410" width="330" 
+							   creationComplete="config(event)"
+							   showEffect="{showEff}">
+	
+	<s:VGroup width="100%" height="100%"
+			  paddingBottom="0" paddingLeft="10" 
+			  paddingRight="10" paddingTop="0">
+		
+		<!--<s:HGroup width="100%" horizontalAlign="right" verticalAlign="top" paddingTop="-60" paddingRight="-5">
+			<s:Image source="assets/images/header/ibama_logo.png" />
+		</s:HGroup>-->
+		
+		<s:VGroup width="100%" height="10%" paddingTop="-10">
+			<s:HGroup width="100%" horizontalAlign="center" verticalAlign="top">
+				<s:Image source="assets/images/header/ibama_inv.png" />
+			</s:HGroup>
+			
+			<s:Line width="100%">
+				<s:stroke>
+					<s:SolidColorStroke color="{this.getStyle('backgroundColor')}" weight="1" caps="square"/>
+				</s:stroke>
+			</s:Line>
+		</s:VGroup>
+		
+		<s:VGroup width="100%" height="65%" verticalAlign="top" gap="20">
+			
+			<s:BorderContainer id="errorBox" width="100%" height="40%"
+								styleName="estiloErrorBox" visible="false">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center"/>
+				</s:layout>
+				
+				<s:Label id="errorLabel" width="310" textAlign="center"/>
+			</s:BorderContainer>
+			
+			<s:VGroup width="100%" height="60%" gap="10">
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:HGroup width="30%" horizontalAlign="left">
+						<s:Label text="Usuário" styleName="estiloLabel"/>
+					</s:HGroup>
+					
+					<s:HGroup width="70%" horizontalAlign="right">
+						<s:TextInput id="campoUsuario" width="100%" height="25"
+									 styleName="estiloTextInput" restrict="0-9" maxChars="11"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:HGroup width="30%" horizontalAlign="left">
+						<s:Label text="Senha" styleName="estiloLabel"/>
+					</s:HGroup>	
+					
+					<s:HGroup width="70%" horizontalAlign="right">
+						<s:TextInput id="campoSenha" width="100%" height="25"
+									 displayAsPassword="true" styleName="estiloTextInput"/>
+					</s:HGroup>		
+				</s:HGroup>
+			</s:VGroup>
+			
+		</s:VGroup>
+				
+		<s:HGroup width="100%" height="10%" verticalAlign="bottom">
+			<s:HGroup width="100%" horizontalAlign="right">
+				<s:Button id="btnLogin" label="Entrar" width="100" 
+						  styleName="estiloWidgetContentMainButton" click="Logar(event)"/>
+			</s:HGroup>
+			
+			<!--<s:HGroup width="50%" horizontalAlign="right">
+				<s:Button id="btnCont" label="Cancelar" 
+						  click="Cancelar(event)" 
+						  toolTip="Cancelar"
+						  width="100" styleName="estiloWidgetContentMainButton"/>
+			</s:HGroup>-->
+		</s:HGroup>
+		
+		<s:VGroup width="100%" height="25%" gap="15" paddingTop="10">
+			<s:Line width="100%">
+				<s:stroke>
+					<s:SolidColorStroke color="{this.getStyle('backgroundColor')}" weight="1" caps="square"/>
+				</s:stroke>
+			</s:Line>
+			
+			<s:VGroup width="100%" verticalAlign="middle" horizontalAlign="center" gap="10">
+				<s:Label width="310" fontWeight="bold" fontSize="15" text="Acesso Restrito"/>
+				<s:Label width="310" text="{_textAcesso}" fontSize="13" textJustify="distribute"/>
+			</s:VGroup>
+		</s:VGroup>
+		
+	</s:VGroup>
+	
+	
+	<fx:Declarations>
+		
+		<s:Parallel id="showEff" duration="900">
+			<s:Rotate3D angleXFrom="-10"
+						angleXTo="0"
+						autoCenterTransform="true" />
+			
+			<s:Fade alphaFrom="0.0" alphaTo="1.0"/>
+		</s:Parallel>
+		
+		<!--url="http://siscom.ibama.gov.br/painelflex/ldap/index.php"-->
+		<s:HTTPService id="ldap" url="http://siscom.ibama.gov.br/painelflex/ldap/index.php"
+					   useProxy="false" method="POST" resultFormat="e4x"
+					   fault="ldap_fault(event)" result="ldap_result(event)">
+			<s:request xmlns="">
+				<userid>{campoUsuario.text}</userid>
+				<passwd>{campoSenha.text}</passwd>
+			</s:request>
+		</s:HTTPService>
+		
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import solutions.utils.StringUtils;
+			
+			import spark.events.TextOperationEvent;
+			
+			import widgets.componentes.seguranca.event.LoginEvent;
+
+			
+			private var _textInputBorderColor:uint;
+			private var _textInputFocusColor:uint;
+			
+			private var _userError:String = "O campo 'Usuário' é requisitado";
+			private var _passwdError:String = "O campo 'Senha' é requisitado";
+			private var _loginError:String = "Erro com a autenticação LDAP";
+			
+			[Bindable]
+			private var _textAcesso:String = "O acesso a essa sessão é permitido somente a usuários registrados no sistema Ibama-Net.";
+			
+			
+			protected function config(event:FlexEvent):void
+			{
+				//this.title = "";
+				this.setCloseBtnVisibility(true);
+				
+				this.addEventListener(KeyboardEvent.KEY_DOWN, pressionaEnter);
+				
+				campoUsuario.setFocus();
+			}
+			
+			private function Logar(event:MouseEvent): void
+			{
+				_textInputBorderColor = campoUsuario.getStyle("borderColor");
+				_textInputFocusColor = campoUsuario.getStyle("focusColor");
+				
+				if (campoUsuario.text == '')
+				{
+					errorLabel.text = _userError;
+					errorBox.visible = true;
+				}
+				else if (campoSenha.text == '')
+				{
+					errorLabel.text = _passwdError;
+					errorBox.visible = true;
+				}
+				else
+				{
+					ldap.send();
+				}
+				
+			}
+			
+			private function ldap_fault(event:FaultEvent):void
+			{
+				campoUsuario.text = "";
+				campoSenha.text = "";
+								
+				errorLabel.text = _loginError;
+				errorBox.visible = true;
+								
+				campoUsuario.setFocus();
+			}
+			
+			protected function ldap_result(event:ResultEvent):void
+			{
+				var xmlUser:XML = new XML(event.result);
+				var userData:UserObject;
+												
+				if (xmlUser.logged == true)
+				{
+					/* userData = new UserObject();
+					userData.nome = xmlUser.nome;
+					userData.cpf = xmlUser.cpf;
+					userData.email = xmlUser.email; 
+					//userData.configXml = ;
+					
+					if(!userData.configXml)
+					{
+						userData.configXml = 'config.xml';
+					} */
+					
+					this.dispatchEvent(new LoginEvent(LoginEvent.LOGGED_IN, userData));
+					
+					PopUpManager.removePopUp(this);
+				}
+				else
+				{
+					campoUsuario.text = "";
+					campoSenha.text = "";
+					
+					errorLabel.text = _loginError;
+					errorBox.visible = true;
+					
+					campoUsuario.setFocus();
+				}
+			}
+			
+			protected function Cancelar(event:MouseEvent):void
+			{
+				//dispatchEvent(new LoginEvent(LoginEvent.LOGGED_IN, null));
+				
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function campo_changeHandler(event:TextOperationEvent):void
+			{
+				(event.currentTarget as TextInput).setStyle("borderColor", _textInputBorderColor);
+				(event.currentTarget as TextInput).setStyle("focusColor", _textInputFocusColor);
+			}
+			
+			private function pressionaEnter(event:KeyboardEvent):void
+			{
+				if (event.charCode == 13)
+				{
+					btnLogin.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+</solutions:CloseWindowTemplate>
+

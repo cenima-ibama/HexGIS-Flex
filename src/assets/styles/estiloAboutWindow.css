@@ -1,0 +1,39 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+@namespace solutions "solutions.*";
+
+
+solutions|CloseWindowTemplate
+{
+/*	133960*/
+	color: #242e32; 
+	backgroundColor: #99adb7; backgroundAlpha: 0.6;
+	borderVisible: true; borderAlpha: 0.75; borderColor: #728188; cornerRadius: 1; borderWeight: 1;
+	contentBackgroundColor: #728188; contentBackgroundAlpha: 1.0; dropShadowVisible: true;
+	modalTransparency: 0.3; modalTransparencyColor: #99adb7; modalTransparencyBlur: 5;
+/*	color: #333333; backgroundColor: #ffffff; backgroundAlpha: 0.75;
+	borderVisible: true; borderAlpha: 0.6; borderColor: #cccccc; cornerRadius: 1; borderWeight: 1;
+	contentBackgroundColor: #ffffff; contentBackgroundAlpha: 0.75; dropShadowVisible: true;
+	modalTransparency: 0.35; modalTransparencyColor: #ffffff;*/
+}
+
+.closeBtnLabel
+{
+	color: #242e32; fontWeight: bold;
+}
+
+.closeBtnLabelOver
+{
+	color: #242e32; fontWeight: bold;
+}
+
+.estiloLabel
+{
+	color: #242e32; fontSize: 15;
+}
+
+.estiloLabelOver
+{
+	color: #0000ee; fontSize: 15;
+}

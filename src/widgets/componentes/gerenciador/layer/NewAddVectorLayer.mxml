@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:os="org.openscales.fx.control.*">
+	
+	<os:IconButton icon="{_btnAddVector}" id="iconButton" 
+				   click="onClick()" toolTip="{this.labelAddVector}"
+				   width="38" height="17" alpha="{_alpha}" 
+				   rollOver="rollOverHandler(event)" rollOut="rollOutHandler(event)" />
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.DrawingsLayer;
+			import org.openscales.core.layer.VectorLayer;
+			
+			import solutions.CloseWindowTemplate;
+			
+			import spark.components.Button;
+			import spark.components.Label;
+			import spark.components.TextInput;
+			import spark.components.TitleWindow;
+			import spark.layouts.HorizontalAlign;
+			import spark.layouts.HorizontalLayout;
+			import spark.layouts.VerticalLayout;
+			
+			[Bindable]
+			private var _alpha:Number = 0.5;
+			/**
+			 * Translation for label button
+			 */
+			[Bindable]
+			[Embed(source="/assets/images/icons/black/11.png")]
+			private var _btnAddVector:Class;
+			
+			[Bindable]
+			public var labelAddVector:String = "Adicionar nova camada de vetorização";
+			
+			[Bindable]
+			public var labelText:String = "Nome";
+			
+			[Bindable]
+			public var validateLabel:String = "Adicionar";
+			
+			/**
+			 * Translation for label Name error
+			 */
+			[Bindable]
+			public var nameLabelError:String = "Nome não pode ser vazio ou igual ao de outra camada.";
+			
+			[Bindable]
+			public var displayNameError:Boolean = false;
+			
+			private var _map:Map = null;
+			
+			private var _input:TextInput = null;
+			private var _errorLabel:Label = null;
+			/**
+			 * The title window (that display the form)
+			 */
+			//public var myWindow:TitleWindow = new TitleWindow();
+			public var myWindow:CloseWindowTemplate = new CloseWindowTemplate();
+			
+			private var _drawingMode:String;
+			
+			/**
+			 * Indicates for Drawing mode
+			 * multiple : tools are in the LayerSwitcher
+			 * unique : tools are in the DrawingToolbar
+			 */
+			[Bindable]
+			public function get drawingMode():String
+			{
+				return _drawingMode;
+			}
+			
+			public function set drawingMode(value:String):void
+			{
+				_drawingMode = value;
+			}
+			
+			public function onClick():void
+			{
+				// Set the TitleWindow container properties.
+				//myWindow = new TitleWindow();
+				myWindow = new CloseWindowTemplate();
+				var vertical:VerticalLayout = new VerticalLayout();
+				vertical.paddingBottom = 0;
+				vertical.paddingTop = 0;
+				vertical.paddingLeft = 0;
+				vertical.paddingRight = 0;
+				vertical.verticalAlign = "middle";
+				vertical.horizontalAlign = "left";
+				vertical.gap = 0;
+				myWindow.layout = vertical;
+				
+				myWindow.title = "Adicionar camada de vetorização";
+				myWindow.addEventListener(FlexEvent.CREATION_COMPLETE, this.onPopUpCreationComplete);
+				
+				// Call the method to add the Button control to the 
+				// TitleWindow container.
+				populateWindow();
+				
+				myWindow.width = 320;
+				myWindow.minHeight = 140;
+				
+				// place at the center
+				//myWindow.x = (this.map.width/2)-(myWindow.width/2);
+				//myWindow.y = (this.map.height/2)-(myWindow.height/2);
+				
+				// Use the PopUpManager to display the TitleWindow container.
+				PopUpManager.addPopUp(myWindow as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(myWindow as IFlexDisplayObject);
+			}
+			
+			private function onPopUpCreationComplete(e:Event):void
+			{
+				//myWindow.closeButton.addEventListener(MouseEvent.CLICK, this.closePopUp);
+				this._input.setFocus();
+			}
+			
+			/**
+			 * Function that fill the popUp
+			 */
+			private function populateWindow():void 
+			{	
+				var group:Group = new Group();
+				group.percentWidth = 100;
+				var vertical:VerticalLayout = new VerticalLayout();
+				vertical.paddingBottom = 10;
+				vertical.paddingTop = 10;
+				vertical.paddingLeft = 10;
+				vertical.paddingRight = 10;
+				vertical.verticalAlign = "middle";
+				vertical.horizontalAlign = "left";
+				vertical.gap = 15;
+				group.layout = vertical;
+				
+				var nameGroup:Group = new Group()
+				nameGroup.percentWidth = 100;
+				nameGroup.top = 0;
+				var horizontal:HorizontalLayout = new HorizontalLayout();
+				horizontal.paddingBottom = 0;
+				horizontal.paddingTop = 0;
+				horizontal.paddingLeft = 0;
+				horizontal.paddingRight = 0;
+				horizontal.horizontalAlign = "center";
+				horizontal.verticalAlign = "middle";
+				nameGroup.layout = horizontal;
+				
+				var label:Label = new Label();
+				label.text = labelText;
+				label.setStyle("textAlign", "left");
+				label.percentWidth = 40;
+				label.styleName = "estiloLabel";
+				nameGroup.addElement(label); 
+				
+				this._input = new TextInput();
+				this._input.percentWidth = 60;
+				this._input.styleName = "estiloTextInput";
+				nameGroup.addElement(this._input); 
+				
+				group.addElement(nameGroup);
+				
+				this._errorLabel = new Label();
+				this._errorLabel.styleName = "estiloLabelError";
+				this._errorLabel.text = this.nameLabelError;
+				this._errorLabel.width = 260;
+				this._errorLabel.setStyle("textAlign", "justify");
+				this._errorLabel.includeInLayout = true;
+				this._errorLabel.visible = this.displayNameError;
+				group.addElement(this._errorLabel); 
+				
+				var button:Button = new Button();
+				button.bottom = 0;
+				button.label = this.validateLabel;
+				button.styleName = "estiloWidgetContentMainButton";
+				button.addEventListener(MouseEvent.CLICK, addVectorLayer);
+				
+				group.addElement(button); 
+				
+				myWindow.addElement(group);
+			}
+			
+			/**
+			 * Add a nex vector layer on the map
+			 */
+			public function addVectorLayer(event:MouseEvent):void
+			{
+				var value:String = this._input.text;
+				
+				if((!value) || (value=="") || (this.map.getLayerByIdentifier(value) != null))
+				{
+					this.displayNameError = true;
+					this._errorLabel.includeInLayout = this.displayNameError;
+					this._errorLabel.visible = this.displayNameError;
+					return;
+				}
+				
+				this.displayNameError = false;
+				this._errorLabel.includeInLayout = this.displayNameError;
+				this._errorLabel.visible = this.displayNameError;
+				
+				var layer:DrawingsLayer = new DrawingsLayer();
+				layer.displayedName = value;
+				layer.identifier = value;
+				layer.selected = true;
+				layer.projection = this.map.projection;
+				layer.displayInLayerManager = true;
+				this.map.addLayer(layer, true);	
+				
+				var evt:DrawingEvent = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_LAYER);
+				evt.layer = layer;
+				this.map.dispatchEvent(evt);
+				
+				this.closePopUp();
+			}
+			
+			/**
+			 * @private
+			 */
+			private function validateName(value:String):Boolean
+			{
+				if(this.map)
+				{
+					if(this.map.getLayerByIdentifier(value)==null)
+						return true;
+				}
+				return false;
+			}
+			
+			/**
+			 * Change the text values on Map Language changed
+			 * @param event The I18N event received
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				/* labelAddVector = Catalog.getLocalizationForKey('drawing.addvectorlayer');
+				labelText = Catalog.getLocalizationForKey('drawing.name');
+				validateLabel = Catalog.getLocalizationForKey('drawing.add');
+				nameLabelError = Catalog.getLocalizationForKey('drawing.nameerror'); */
+			}
+			
+			/**
+			 * Close the PopUp window
+			 */
+			public function closePopUp(event:MouseEvent = null):void
+			{
+				// close the pop up file
+				PopUpManager.removePopUp(myWindow);
+			}
+			
+			/**
+			 * The map linked to the add vector layer button
+			 */
+			public function get map():Map
+			{
+				return _map;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set map(value:Map):void
+			{
+				this._map = value;
+				if(this._map)
+				{
+					this._map.addEventListener(I18NEvent.LOCALE_CHANGED, this.onMapLanguageChange);
+				}
+			}
+			
+			private function rollOverHandler(event:MouseEvent):void
+			{
+				this._alpha = 1.0;
+			}
+			
+			protected function rollOutHandler(event:MouseEvent):void
+			{
+				this._alpha = 0.5;			
+			}
+			
+		]]>
+	</fx:Script>			
+</s:Group>

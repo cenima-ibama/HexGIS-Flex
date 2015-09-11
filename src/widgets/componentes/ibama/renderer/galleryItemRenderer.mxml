@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false" creationComplete="creationCompleteHandler(event)">
+	
+	
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.utils.Base64Decoder;
+			
+			import widgets.componentes.ibama.feature.Gallery;
+			
+			
+			private var _gallery:Gallery;
+			private var _source:ByteArray;
+			[Bindable] private var _overImage:Boolean = false;
+			
+			
+			public function get gallery():Gallery
+			{
+				return _gallery;
+			}
+			
+			public function set gallery(value:Gallery):void
+			{
+				this._gallery = value;
+			}
+
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				var imageString:String = String(this.data);
+				//thumbnail.addEventListener(Event.COMPLETE, image_complete);
+				/* Converter base64 para imagem - Início */
+				var base64Dec:Base64Decoder = new Base64Decoder();
+				base64Dec.decode(imageString);
+				_source = base64Dec.toByteArray();
+				/* Converter base64 para imagem - Fim */
+				thumbnail.source = _source;
+				thumbnail.load();
+				//_imageAdded.text = "Mídia adicionada com sucesso!";
+			}
+			
+			protected function thumbnail_clickHandler(event:MouseEvent):void
+			{
+				if (this.gallery)
+				{
+					this.gallery.setFullImageSource(_source);
+				}
+			}
+			
+			protected function thumbnail_mouseOverHandler(event:MouseEvent):void
+			{
+				this._overImage = true;
+			}
+			
+			protected function thumbnail_mouseOutHandler(event:MouseEvent):void
+			{
+				this._overImage = false;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<s:Group width="100" height="100">
+		
+		<mx:Image id="thumbnail" click="thumbnail_clickHandler(event)"
+				  maintainAspectRatio="true" width="100" height="100"
+				  buttonMode="true" useHandCursor="true" 
+				  mouseOver="thumbnail_mouseOverHandler(event)"
+				 />
+		<s:BorderContainer id="shade" width="100" height="100"
+			backgroundColor="0x000000" alpha="0.7"
+			mouseOut="thumbnail_mouseOutHandler(event)"
+			includeInLayout="{_overImage}" visible="{_overImage}">
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="top"/>
+			</s:layout>
+			<s:Label textAlign="right" text="X"/>
+		</s:BorderContainer>
+	</s:Group>
+
+	
+</s:ItemRenderer>

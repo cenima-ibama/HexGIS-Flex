@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:CloseWindowBase  xmlns="*"
+					   xmlns:solutions="solutions.*"
+					   xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:os="http://openscales.org">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.containers.Grid;
+			import mx.controls.Alert;
+			import mx.events.ListEvent;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.style.Style;
+			import org.openscales.geometry.LineString;
+			import org.openscales.geometry.LinearRing;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.Polygon;
+			import org.openscales.geometry.basetypes.Bounds;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.proj4as.ProjProjection;
+			
+			import solutions.utils.StyleUtils;
+			
+			import widgets.componentes.ibama.event.EditingDisabledEvent;
+			
+			[Bindable]
+			private var _vertices:ArrayCollection;
+			
+			private var _camadaDesenho:VectorLayer;
+			
+			
+			override public function setFeature(value:Feature):void
+			{	
+				super.setFeature(value);
+				
+				setVertices();
+			}
+			
+			private function setVertices():void
+			{
+				var pol:Polygon;
+				var linear:LinearRing;
+				var lineString:LineString;
+				var point:org.openscales.geometry.Point;
+				var loc:Location;
+				var i:int;
+				
+				_vertices = new ArrayCollection();
+				
+				if (this._feature)
+				{
+					if (this._feature is IbamaPolygonFeature)
+					{
+						pol = (this._feature as IbamaPolygonFeature).polygon;
+
+						linear = (pol.componentByIndex(0) as LinearRing);
+						
+						for (i = 0; i < linear.componentsLength-1; i++)
+						{
+							point = linear.getPointAt(i);
+							
+							loc = new Location(point.x, point.y, this._feature.layer.map.projection);
+							loc = loc.reprojectTo(new ProjProjection("EPSG:4326"));
+							
+							_vertices.addItem(loc);
+						}
+					}
+					else if (this._feature is IbamaLineStringFeature)
+					{
+						lineString = (this._feature as IbamaLineStringFeature).lineString;
+						
+						for (i = 0; i < lineString.componentsLength; i++)
+						{
+							point = lineString.getPointAt(i);
+							
+							loc = new Location(point.x, point.y, this._feature.layer.map.projection);
+							loc = loc.reprojectTo(new ProjProjection("EPSG:4326"));
+							
+							_vertices.addItem(loc);
+						}
+					}
+				}
+			}
+			
+			override public function setMap(value:Map):void
+			{
+				super.setMap(value);
+				this._map.addEventListener(FeatureEvent.FEATURE_DELETING, onFeatureDeleted);
+				this._map.addEventListener(FeatureEvent.FEATURE_EDITED_END, onFeatureEdited);
+			}
+			
+			private function onFeatureDeleted(event:FeatureEvent):void
+			{
+				if (event.feature == this._feature)
+				{
+					this.closeWidget(new MouseEvent(MouseEvent.CLICK));
+				}
+			}
+						
+			public function onFeatureEdited(event:FeatureEvent):void
+			{		
+				if (this._feature == event.feature)
+				{
+					if (_camadaDesenho) _camadaDesenho.removeFeatures(_camadaDesenho.features);
+					
+					setVertices();
+				}
+			}
+			
+			protected function infoGrid_itemClickHandler(event:ListEvent):void
+			{
+				var pointFeat:PointFeature;
+				var point:org.openscales.geometry.Point;
+				var local:Location;
+				
+				if (!_camadaDesenho)
+				{
+					_camadaDesenho = new VectorLayer("PVP_camada_desenho_pontos");
+					_camadaDesenho.displayInLayerManager = false;
+					_camadaDesenho.projection = this._feature.layer.map.projection;
+					_camadaDesenho.maxExtent = this._feature.layer.map.maxExtent;
+					
+					this._feature.layer.map.addLayer(_camadaDesenho);
+				}
+				
+				if (_camadaDesenho.features.length > 0)
+				_camadaDesenho.removeFeatures(_camadaDesenho.features);
+				
+				local = _vertices.getItemAt(infoGrid.selectedIndex) as Location;
+				local = local.reprojectTo(this._feature.layer.map.projection);
+				
+				point = new org.openscales.geometry.Point(local.x, local.y);
+				point.projection = this._feature.layer.map.projection;
+				
+				pointFeat = new PointFeature(point, null, StyleUtils.getGridPointStyle());
+
+				_camadaDesenho.visible = true;
+				_camadaDesenho.addFeature(pointFeat);
+				
+				pointFeat.draw();
+				_camadaDesenho.redraw(true);
+			}
+			
+			override public function closeWidget(event:MouseEvent):void
+			{
+				if (_camadaDesenho)
+				{
+					this._feature.layer.map.removeLayer(this._camadaDesenho);
+				}
+				
+				super.closeWidget(event);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<mx:DataGrid id="infoGrid" width="400" height="200"
+				 styleName="estiloMxDataGrid"
+				 horizontalScrollPolicy="auto" alternatingItemColors="[#f9f2ee, #dddddd]" 
+				 dataProvider="{_vertices}" itemClick="infoGrid_itemClickHandler(event)" >
+		<mx:columns>
+			<mx:DataGridColumn dataField="x" headerText="X" width="200" textAlign="center"/>
+			
+			<mx:DataGridColumn dataField="y" headerText="Y" width="200" textAlign="center"/>
+		</mx:columns>
+	</mx:DataGrid>
+</solutions:CloseWindowBase>

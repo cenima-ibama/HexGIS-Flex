@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<os:IconButton xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:os="http://openscales.org"
+			   toolTip="{this.toolTitle}" initialize="init()"
+			   icon="{_btnPath}" alpha="{_alpha}"
+			   width="30" height="30" enabled="true"
+			   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import widgets.componentes.informacoes.click.NewWMSGetFeatureInfo;
+			import widgets.componentes.informacoes.drag.event.GetFeatureEvent;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.GetFeatureInfoEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.handler.Handler;
+			import org.openscales.core.handler.mouse.ClickHandler;
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import solutions.IBaseWidget;
+			import solutions.SiteContainer;
+			
+			
+			[Bindable]
+			public var toolTitle:String = "Clique sobre um ponto para obter os dados";
+			
+			[Bindable]
+			private var _alpha:Number=0.5;
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/click_icon30.png")]
+			private var _btnPath:Class;
+			
+			[Bindable]
+			private var _map:Map;
+			
+			[Bindable]
+			private var wmsGetFeatureInfo:NewWMSGetFeatureInfo;
+			
+			[Bindable]
+			private var _active:Boolean = false;
+			
+			private var infoDragWidgetX:Number;
+			
+			private var infoDragWidgetY:Number;
+			
+			private var _clickHandler:ClickHandler;
+						
+			private var info:IModuleInfo;
+			
+			private var pix:Pixel = null; //posição mouse click
+						
+			private var title:String;
+			
+			private var dadosRecebidos:Object;
+			
+			
+			private function init():void
+			{
+				wmsGetFeatureInfo = new NewWMSGetFeatureInfo();
+				wmsGetFeatureInfo.drillDown = true;
+				
+				_clickHandler = new ClickHandler();
+			}
+			
+			/* public function get layerName():String 
+			{
+				return this._layerName;
+			}
+			public function set layerName(name:String):void 
+			{
+				this._layerName = name;
+			} */
+			
+			public function get map():Map
+			{
+				return _map;
+			}
+			
+			public function set map(value:Map):void 
+			{
+				if (value)
+				{
+					_map = value;
+					wmsGetFeatureInfo.map = value;
+					
+					if (!_clickHandler)
+					{
+						_clickHandler = new ClickHandler();
+					}
+					_clickHandler.map = value;
+				}
+			}
+			
+			public function get active():Boolean 
+			{
+				return _active;
+			}
+			
+			public function set active(value:Boolean):void
+			{
+				if ((value) && (!this.active)) 
+				{					
+					activate();
+				}
+				else if ((!value) && (this.active)) 
+				{
+					desactivate();
+				}
+			}
+			
+			public function activate():void
+			{
+				_active = true;
+				
+				if (!wmsGetFeatureInfo.map) 
+				{
+					wmsGetFeatureInfo.map = this.map;
+				}
+				if (!_clickHandler.map) 
+				{
+					_clickHandler.map = this.map;
+				}
+				wmsGetFeatureInfo.active = true;
+				_clickHandler.active = true;
+				_clickHandler.click = this.getClickPosition;	
+				SiteContainer.addEventListener(GetFeatureInfoEvent.GET_FEATURE_INFO_DATA, handleData);	
+				_alpha = 1.0;
+			}
+			
+			public function desactivate():void
+			{
+				_active = false;
+				
+				if (wmsGetFeatureInfo.active)
+				{
+					wmsGetFeatureInfo.active = false;
+					_clickHandler.active = false;
+					SiteContainer.removeEventListener(GetFeatureInfoEvent.GET_FEATURE_INFO_DATA, handleData);	
+				}
+				_alpha = 0.5;
+			}
+			
+			private function getClickPosition(value:Pixel):void 
+			{
+				pix = value;
+			}
+			
+			private function handleData(event:GetFeatureInfoEvent):void
+			{
+				if (pix != null) 
+				{
+					var resultados:Vector.<Feature> = (event.data) as Vector.<Feature>;
+					
+					if (resultados.length > 0)
+					{
+						var feat:Feature = resultados[0];
+						title = "Informações: " + feat.name + "       ";
+					}
+					else
+					{
+						title = "Informações        ";
+					}
+					dadosRecebidos = event.data;
+					infoDragWidgetX = pix.x + 14;
+					infoDragWidgetY = pix.y - 10;
+					
+					var url:String = "widgets/ClickInfoDisplayWidget.swf";
+					info = ModuleManager.getModule(url);
+					info.addEventListener(ModuleEvent.READY, widgetReadyHandler);           
+					info.load();
+					this.cursorManager.setBusyCursor();   
+					
+				}
+				pix = null;
+			}
+			
+			private function widgetReadyHandler(event:ModuleEvent):void
+			{
+				var info:IModuleInfo = event.module;
+				
+				//var icon:String = configData.configWidgets[id].icon;
+				//var config:String = configData.configWidgets[id].config;
+				var widget:IBaseWidget = info.factory.create() as IBaseWidget;
+				//widget.setId(-1);
+				widget.setTitle(title);
+				//widget.setIcon(" ");
+				//widget.setConfig(config);
+				//widget.setConfigData(configData);
+				widget.setMap(map);
+				widget.setData(dadosRecebidos);
+				
+				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, false);
+				(widget as IFlexDisplayObject).x = infoDragWidgetX;
+				(widget as IFlexDisplayObject).y = infoDragWidgetY;
+				
+				callLater(removeBusyCursor);
+			}	
+			
+			private function removeBusyCursor():void
+			{
+				this.cursorManager.removeBusyCursor();
+			}
+			
+			private function itemRollOver(event:MouseEvent):void
+			{				
+				this.alpha = 1.0;
+			}
+			
+			private function itemRollOut(event:MouseEvent):void
+			{				
+				if (!this.active)
+				{
+					this.alpha = 0.5;
+				}
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+	
+</os:IconButton>

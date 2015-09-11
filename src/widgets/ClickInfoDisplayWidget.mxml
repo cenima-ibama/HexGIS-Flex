@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget  	xmlns="*"
+						xmlns:solutions="solutions.*"
+						xmlns:fx="http://ns.adobe.com/mxml/2009"
+						xmlns:mx="library://ns.adobe.com/flex/mx"
+						xmlns:s="library://ns.adobe.com/flex/spark"
+						xmlns:drawing="org.openscales.fx.control.drawing.*" 
+						xmlns:os="http://openscales.org"
+						xmlns:click="widgets.componentes.informacoes.click.*"
+						showEffect="{zoom}" creationComplete="configure()"
+						width = "{clickInfoDisplay.width + 30}" height = "{clickInfoDisplay.height + 100}">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:Zoom id="zoom" duration="500" zoomHeightFrom="0" zoomWidthFrom="0" originX="{this.x}" originY="{this.y}"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import widgets.componentes.informacoes.click.NewWMSGetFeatureInfo;
+			import widgets.componentes.informacoes.drag.event.GetFeatureEvent;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import solutions.SiteContainer;
+			
+			import widgets.componentes.graficos.ChartManager;
+			import widgets.componentes.informacoes.drag.event.TotalRegistrosEvent;
+			
+			import solutions.IBaseWidget;
+			import solutions.SiteContainer;
+			
+			
+			private var info:IModuleInfo;
+			
+			
+			[Bindable]
+			private var _dados:Object = null;
+			
+			[Bindable]
+			private var nResultados:String;
+
+			
+			override protected function configure():void
+			{
+				super.reducedHeight = 70;
+				super.configure();
+			}
+			
+			override public function activate():void
+			{
+				super.activate();
+				SiteContainer.addEventListener(TotalRegistrosEvent.TOTAL_REGISTROS, recebeTotal);
+			}
+			
+//			private function btnCameraClick():void
+//			{
+//				var url:String = "widgets/Iframe.swf";
+//				info = ModuleManager.getModule(url);
+//				info.addEventListener(ModuleEvent.READY, widgetReadyHandler);           
+//				info.load();
+//				this.cursorManager.setBusyCursor();   
+//			}
+//			
+//			private function widgetReadyHandler(event:ModuleEvent):void
+//			{
+//				var info:IModuleInfo = event.module;
+//				
+//				//var icon:String = configData.configWidgets[id].icon;
+//				//var config:String = configData.configWidgets[id].config;
+//				var widget:IBaseWidget = info.factory.create() as IBaseWidget;
+//				//widget.setId(-1);
+//				widget.setTitle(title);
+//				//widget.setIcon(" ");
+//				//widget.setConfig(config);
+//				//widget.setConfigData(configData);
+//				widget.setMap(map);
+//				//widget.setData(dadosRecebidos);
+//				
+//				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, false);
+//				//(widget as IFlexDisplayObject).x = 600;
+////				(widget as IFlexDisplayObject).y = 356;
+//				
+//				//callLater(removeBusyCursor);
+//			}	
+			
+			private function recebeTotal(event:TotalRegistrosEvent):void 
+			{
+				if (event.total.toString() == "0") 
+				{
+					super.reducedHeight = 70;
+					this.setMinMaxBtnVisible(false);
+					nResultados = "Nenhum registro recebido         ";
+					currentState = "minimized";
+				}
+				else
+				{
+					nResultados = "Total de registros: "+event.total.toString();
+				}
+				SiteContainer.removeEventListener(TotalRegistrosEvent.TOTAL_REGISTROS, recebeTotal);
+			}
+			
+			override public function setData(dadosFeature:Object):void 
+			{
+				_dados = dadosFeature;
+			}
+
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer id="container" styleName="widgetContentContainer">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" 
+							  paddingLeft="5" paddingTop="5" paddingBottom="5" paddingRight="5"/>
+		</s:layout>
+		
+		<!--<s:Button id="btnCamera" width="100"
+				  label="Video"
+				  click="btnCameraClick()" styleName="estiloWidgetContentMainButton"/>-->
+		
+		<click:ClickFeatureInfoGrid id="clickInfoDisplay" results="{_dados}" color="#000000"/>
+		
+	</s:BorderContainer>
+	
+	<solutions:controlBarContent>
+		
+		<s:BorderContainer borderAlpha="0" backgroundAlpha="0" width="40%" height="20">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle"/>
+			</s:layout>
+			
+			<mx:Label id="lblRegs" text="{nResultados}" styleName="estiloLabel"/>
+		</s:BorderContainer>
+		
+	</solutions:controlBarContent>
+	
+</solutions:BaseWidget>

@@ -1,0 +1,24 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+@namespace solutions "solutions.*";
+
+
+solutions|CloseWindowTemplate
+{
+	color: #777777; backgroundColor: #0c0c0c; backgroundAlpha: 0.75;
+	borderVisible: true; borderAlpha: 0.6; borderColor: #000000; cornerRadius: 1; borderWeight: 1;
+	contentBackgroundColor: #0c0c0c; contentBackgroundAlpha: 1.0; dropShadowVisible: true;
+	modalTransparency: 0.8; modalTransparencyColor: #000000;
+}
+/*modalTransparencyDuration: 100; modalTransparencyBlur: 0.5; */
+
+.closeBtnLabel
+{
+	color: #000000; fontWeight: bold;
+}
+
+.closeBtnLabelOver
+{
+	color: #777777; fontWeight: bold;
+}

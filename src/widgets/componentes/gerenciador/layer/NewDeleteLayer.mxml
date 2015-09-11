@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns="org.openscales.fx.control.layer.*"
+		 xmlns:os="org.openscales.fx.control.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.fxg.ButtonCloseOver;
+			import assets.fxg.ButtonCloseUp;
+			
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.Layer;
+			
+			/**
+			 * Tootip for delete layer button
+			 */
+			[Bindable]
+			public var tooltipDelete:String;
+			
+			private var _layer:Layer;
+			
+			[Embed(source="/assets/images/popups/deleteLayer.png")]
+			protected const BTN_DELETE:Class;
+			
+			[Embed(source="/assets/images/popups/deleteLayerOver.png")]
+			protected const BTN_DELETE_OVER:Class;
+			
+			[Bindable]
+			public var _btnDeleteLayer:Class = BTN_DELETE;
+			
+			[Bindable]
+			public var _btnDeleteLayerOver:Class = BTN_DELETE_OVER;
+			
+			
+			public function get layer():Layer
+			{
+				return _layer;
+			}
+			
+			/**
+			 * Configure the first display for this component when the layer is set
+			 * Set one or two arrows depending of the position of the current layer
+			 */ 
+			public function set layer(value:Layer):void
+			{				
+				if ((value != null) && (value.map != null))
+				{
+					this._layer = value;
+
+					deleteButton.visible = true;
+					
+					this._layer.map.addEventListener(I18NEvent.LOCALE_CHANGED, this.onMapLanguageChange);
+				}
+			}
+			
+			/**
+			 * Delete the layer on the map
+			 * @param event Click event
+			 */
+			public function deleteLayer(event:MouseEvent):void 
+			{
+				this._layer.map.removeLayer(this._layer);
+			}
+			
+			/**
+			 * @inherit
+			 */
+			private function onMapLanguageChange(event:I18NEvent):void 
+			{
+				this.tooltipDelete = Catalog.getLocalizationForKey('layercontrol.deletelayer');	
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	<os:IconButton id="deleteButton"
+				   toolTip="{this.tooltipDelete}"
+				   click="deleteLayer(event)"
+				   icon="{this._btnDeleteLayer}"
+				   iconOver="{this._btnDeleteLayerOver}"
+				   iconDown="{this._btnDeleteLayerOver}"
+				   width="16"
+				   height="16"/>
+	
+</s:Group>

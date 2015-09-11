@@ -1,0 +1,499 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>estilo1.css</title>
+<link rel="stylesheet" type="text/css" href="../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="CSSComment">/* CSS file */</span>
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">s </span><span class="CSSString">"library://ns.adobe.com/flex/spark"</span>; 
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">mx </span><span class="CSSString">"library://ns.adobe.com/flex/mx"</span>;
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">os </span><span class="CSSString">"http://openscales.org"</span>;
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">main </span><span class="CSSString">"*"</span>;
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">bs </span><span class="CSSString">"com.webmapsolutions.view.components.*"</span>;
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">gal </span><span class="CSSString">"ferramentas.galeria.*"</span>;
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">solutions </span><span class="CSSString">"solutions.*"</span>;
+<span class="CSS@namespace">@namespace</span> <span class="CSSSelector">zoomBox </span><span class="CSSString">"widgets.componentes.zoomBox.*"</span>;
+
+<span class="CSSComment">/*@font-face
+{
+}*/</span>
+
+<span class="CSSComment">/*main|WidgetPanel {
+    color: #b5cdda; backgroundColor: #99adb7; backgroundAlpha: 0.6;
+    borderVisible: true; borderAlpha: 0.6; borderColor: #99adb7; cornerRadius: 3; borderWeight: 1;
+    contentBackgroundColor: #dddddd; contentBackgroundAlpha: 1.0; dropShadowVisible: true;
+}*/</span>
+
+<span class="CSSComment">/**************Barra principal**************/</span>
+<span class="CSSSelector">.estiloBarra
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderStyle</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">solid</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#849fad</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.5</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">2</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloBarraMinimized
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">false</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderStyle</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">solid</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">2.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">2</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloTitle
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">fontFamily</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">Arial</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">bold</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontSize</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">20</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#22414a</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloSubtitle
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">fontFamily</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">Arial</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontSize</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">13</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#546269</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Widgets**************/</span>
+<span class="CSSSelector">solutions|WidgetTemplate 
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">3</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">solutions|CloseWindowTemplate
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">modalTransparency</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#a7b9c2</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyBlur</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">10</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.widgetContentContainer 
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span>  <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span>
+<span class="CSSComment">/*    contentBackgroundColor: #242e32; contentBackgroundAlpha: 0.0;*/</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloChartContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.25</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">2</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">0.7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">3</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloChartConfigContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">3</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.75</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloContainerListaOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#c5f1ec</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Menus**************/</span>
+<span class="CSSSelector">.estiloMenu
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderStyle</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">solid</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontSize</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">13</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">symbolColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">rollOverColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">selectionColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">textRollOverColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">textSelectedColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloMenuItensContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderStyle</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">inset</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">4</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">4</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/*backgroundColor: #242e32*/</span>
+
+<span class="CSSSelector">.estiloMenuItemRenderer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#b5cdda</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">normal</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloMenuItemRendererOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#b5cdda</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">bold</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Widgets content**************/</span>
+<span class="CSSSelector">.estiloBorderContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">alpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">4</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloGrupoLayerManager
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Alert**************/</span>
+<span class="CSSSelector">.estiloAlerta
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ff3b27</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.75</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ff0000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">modalTransparency</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyBlur</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">modalTransparencyColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyDuration</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">100</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloMsg
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#0066c5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.75</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#2478ea</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">modalTransparency</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyBlur</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">modalTransparencyColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyDuration</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">100</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSComment">/****************************/</span>
+
+
+<span class="CSSComment">/**************Data Grids**************/</span>
+<span class="CSSSelector">.estiloMxDataGrid
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">textAlign</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">left</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">variableRowHeight</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">textRollOverColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">textSelectedColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#FFFFFF</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#dddddd</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">rollOverColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#999999</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">selectionColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">0.75</span><span class="CSSDelimiters">;</span>    
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+<span class="CSSComment">/**************Container**************/</span>
+<span class="CSSSelector">.estiloInvisibleContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloCBCont
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloCBContRollOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloCBContSelected
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#334e76</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloErrorBox
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#b03737</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ff3b27</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.2</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">false</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">3</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ff0000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.2</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloStylingContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/****************************/</span>
+
+
+<span class="CSSComment">/**************PopUp Chart Fields**************/</span>
+<span class="CSSSelector">.estiloPopUpChart
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/****************************/</span>
+
+
+<span class="CSSComment">/**************List**************/</span>
+<span class="CSSSelector">.estiloListaLayerManager
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">false</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloListaExport
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#cccccc</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloListaMenu
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">rollOverColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloPontoLonLatListOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloPontoLonLatList
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloAttributesList
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.8</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#c1d0d8</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Botões**************/</span>
+<span class="CSSSelector">.estiloMenuButton
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">textRollOverColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#92c5ca</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloRadioButton
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#cccccc</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloWidgetContentButton
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#728188</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloWidgetContentMainButton
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> 
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#cccccc</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">useHandCursor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">buttonMode</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/*chromeColor: #728188;*/</span>
+
+<span class="CSSSelector">.estiloControlBarBtn
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">alpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloControlBarBtnOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">alpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloWidgetBtn
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloBtnMapasContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">false</span><span class="CSSDelimiters">;</span>    
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Text Input**************/</span>
+<span class="CSSSelector">.estiloTextInputInvisivel
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloTextInput
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#222222</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">focusAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">0.4</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">paddingLeft</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">paddingRight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#dddddd</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">focusColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#70b2ee</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloTextInputOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#0000ee</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">focusAlpha</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">0.4</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">paddingLeft</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">paddingRight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.7</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.5</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#dddddd</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">focusColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#70b2ee</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">s|TextInput:normalWithPrompt 
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#555555</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">alpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontStyle</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">italic</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">s|TextArea:normalWithPrompt 
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#555555</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">alpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontStyle</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">italic</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Drop Down List**************/</span>
+<span class="CSSSelector">.estiloDropDownList
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#bbbbbb</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.9</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#cccccc</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">textRollOverColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">textSelected</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">chromeColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#cccccc</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">rollOverColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#444444</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">selectionColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#666666</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Labels**************/</span>
+<span class="CSSSelector">.estiloLabel
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSComment">/*    color: #303b40;*/</span>
+    <span class="CSSComment">/*    color: #414a4f;*/</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">normal</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloLabelOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">normal</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloLabelSelectedFile
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#dddddd</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">normal</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloTitleLabel
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">bold</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloVideoLabelOver
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#bf0404</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">bold</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloDocLabelOver
+</span><span class="CSSDelimiters">{</span>
+<span class="CSSComment">/*    1f2a77*/</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#1225ae</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">bold</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloLabelError 
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ff0000</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">fontWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">normal</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+<span class="CSSSelector">.estiloTextoAjuda
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#242e32</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">fontSize</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">10</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/*color: #344b54*/</span>
+
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Contador**************/</span>
+<span class="CSSSelector">.estiloCounterContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">backgroundColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.6</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">5</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderVisible</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderStyle</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">solid</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">2.0</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+
+<span class="CSSComment">/**************Overview**************/</span>
+<span class="CSSSelector">.estiloOverviewContainer
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">cornerRadius</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">4</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderWeight</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">4</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#99adb7</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderStyle</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">inset</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">borderAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">backgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">contentBackgroundAlpha</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">1.0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">dropShadowVisible</span><span class="CSSDelimiters">:</span><span class="CSSProperty_Value">true</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+<span class="CSSComment">/**************Blur para o drag**************/</span>
+<span class="CSSSelector">zoomBox|BlurScreen
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">modalTransparency</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyBlur</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">0</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">modalTransparencyColor</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#ffffff</span><span class="CSSDelimiters">;</span> <span class="CSSProperty_Name">modalTransparencyDuration</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">100</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+<span class="CSSComment">/***********************************/</span>
+
+<span class="CSSSelector">global
+</span><span class="CSSDelimiters">{</span>
+    <span class="CSSProperty_Name">color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#000000</span><span class="CSSDelimiters">;</span>
+    <span class="CSSProperty_Name">chrome-color</span><span class="CSSDelimiters">:</span> <span class="CSSProperty_Value">#cccccc</span><span class="CSSDelimiters">;</span>
+<span class="CSSDelimiters">}</span>
+
+
+<span class="CSSComment">/*.estiloComboBox
+{
+color: #333333;
+chromeColor: #728188;
+rowCount: 5;
+contentBackgroundAlpha: 1;
+contentBackgroundColor: #747474;
+rollOverColor: #8f8f8f;
+selectionColor: #8f8f8f;
+}*/</span>
+<span class="CSSComment">/*    textRollOverColor: #cccccc;*/</span>
+<span class="CSSComment">/*    textSelectedColor: #cccccc;*/</span>
+
+<span class="CSSComment">/*.estiloLista 
+{
+borderAlpha: 0.7;
+borderColor: #cccccc;
+chromeColor: #cccccc;
+color: #efefef;
+contentBackgroundAlpha: 0;
+contentBackgroundColor: #cccccc;
+}*/</span>
+</pre></body>
+</html>

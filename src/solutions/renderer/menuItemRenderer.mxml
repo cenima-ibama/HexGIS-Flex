@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				useHandCursor="true" buttonMode="true"
+				rollOver="rollOverHandler(event)" rollOut="rollOutHandler(event)"
+				autoDrawBackground="false" height="33" width="100%">
+	
+	<fx:Declarations>
+		
+		<s:GlowFilter id="glow" color="#ffffff" quality="{BitmapFilterQuality.HIGH}" alpha="1.0" blurX="60" blurY="3" />
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.filters.BitmapFilterQuality;
+			
+			import mx.core.FlexGlobals;
+			
+			import solutions.event.AppEvent;
+			import solutions.SiteContainer;
+			
+			import widgets.componentes.seguranca.event.LogoutEvent;			
+			
+			protected function rollOverHandler(event:MouseEvent):void
+			{
+				//this.menuItemLabel.filters = [glow];
+				lbl.styleName = "estiloMenuItemRendererOver";
+			}
+			
+			protected function rollOutHandler(event:MouseEvent):void
+			{
+				//this.menuItemLabel.filters = [];
+				lbl.styleName = "estiloMenuItemRenderer";
+			}
+			
+			/**
+			 * @private
+			 * TODO: logic here need to be refactoried to remove the depandency on named menus.
+			 */						
+			private function menuItemClick():void
+			{
+				switch (data.action)
+				{
+					case "widget":
+					{
+						SiteContainer.dispatchEvent(new AppEvent(AppEvent.WIDGET_MENU_CLICKED, false, false, data.id));
+						break;
+					}
+						
+					case "link":
+					{
+						navigateToURL(new URLRequest(data.value), "_blank");
+						break;
+					}
+						
+					case "logout":
+					{
+						FlexGlobals.topLevelApplication.dispatchEvent(new LogoutEvent(LogoutEvent.LOGOUT));
+						break;
+					}
+						
+					default:
+					{
+						break;
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<s:layout>
+		<s:VerticalLayout verticalAlign="bottom" horizontalAlign="center"/>
+	</s:layout>
+	
+	<s:Group id="menuItemLabel" height="100%" width="100%" click="menuItemClick()">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="bottom" horizontalAlign="center"/>
+		</s:layout>
+		
+		<s:Rect height="100%" minWidth="7" maxWidth="10"/>
+		
+		<!--<s:Image source="{data.icon}" height="16" width="16"/>
+		
+		<s:Rect height="100%" width="5"/>-->
+		
+		<s:Label id="lbl" text="{data.label}" styleName="estiloMenuItemRenderer"/>
+		
+		<s:Rect height="100%" minWidth="7" maxWidth="10"/>
+	</s:Group>
+	
+	
+	<s:Line width="100%" >
+		<s:stroke>
+			<s:SolidColorStroke color="#99adb7" weight="1" caps="square"/>
+		</s:stroke>
+	</s:Line>
+	
+</s:ItemRenderer>

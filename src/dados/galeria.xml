@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<galeria>
+	<imagem titulo="Friends"
+            miniatura="dados/galeria/Friends.jpg"
+            grande="dados/galeria/Friends_full.jpg" />
+    
+    <imagem titulo="Arrow"
+            miniatura="dados/galeria/Arrow.jpg"
+            grande="dados/galeria/Arrow_full.jpg" />
+            
+    <imagem titulo="Once Upon a Time"
+            miniatura="dados/galeria/OUAT.jpg"
+            grande="dados/galeria/OUAT_full.jpg" />
+       
+    <imagem titulo="Firefly"
+            miniatura="dados/galeria/Firefly.jpg"
+            grande="dados/galeria/Firefly_full.jpg" />
+                 
+    <imagem titulo="Game of Thrones"
+            miniatura="dados/galeria/GoT.jpg"
+            grande="dados/galeria/GoT_full.jpg" />
+            
+    <imagem titulo="Fringe"
+            miniatura="dados/galeria/Fringe.jpg"
+            grande="dados/galeria/Fringe_full.jpg" />
+            
+    <imagem titulo="Dexter"
+            miniatura="dados/galeria/Dexter.jpg"
+            grande="dados/galeria/Dexter_full.jpg" />
+            
+    <imagem titulo="Louvre"
+            miniatura="dados/galeria/Louvre.jpg"
+            grande="dados/galeria/Louvre_full.jpg" />
+            
+    <imagem titulo="Da Vinci's Demons"
+            miniatura="dados/galeria/DaVinci.jpg"
+            grande="dados/galeria/DaVinci_full.jpg" />
+            
+    <imagem titulo="Bates Motel"
+            miniatura="dados/galeria/BatesMotel.jpg"
+            grande="dados/galeria/BatesMotel_full.jpg" />
+            
+    <imagem titulo="Homeland"
+            miniatura="dados/galeria/Homeland.jpg"
+            grande="dados/galeria/Homeland_full.jpg" />
+            
+    <imagem titulo="Breaking Bad"
+            miniatura="dados/galeria/BreakingBad.jpg"
+            grande="dados/galeria/BreakingBad_full.jpg" />
+            
+    <imagem titulo="Battlestar Galactica"
+            miniatura="dados/galeria/Battlestar.jpg"
+            grande="dados/galeria/Battlestar_full.jpg" />
+            
+    <imagem titulo="Tron: Uprising"
+            miniatura="dados/galeria/Tron.jpg"
+            grande="dados/galeria/Tron_full.jpg" />
+            
+    <imagem titulo="Boardwalk Empire"
+            miniatura="dados/galeria/Boardwalk.jpg"
+            grande="dados/galeria/Boardwalk_full.jpg" />
+            
+    <imagem titulo="Carnivále"
+            miniatura="dados/galeria/Carnivale.jpg"
+            grande="dados/galeria/Carnivale_full.jpg" />
+     
+    <imagem titulo="Girls"
+            miniatura="dados/galeria/Girls.jpg"
+            grande="dados/galeria/Girls_full.jpg" />
+            
+    <imagem titulo="Last Resort"
+            miniatura="dados/galeria/LastResort.jpg"
+            grande="dados/galeria/LastResort_full.jpg" />
+            
+    <imagem titulo="Mad Men"
+            miniatura="dados/galeria/MadMen.jpg"
+            grande="dados/galeria/MadMen_full.jpg" />  
+            
+    <imagem titulo="Parks and Recreation"
+            miniatura="dados/galeria/Parks.jpg"
+            grande="dados/galeria/Parks_full.jpg" />       
+</galeria>

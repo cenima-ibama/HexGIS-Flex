@@ -1,0 +1,230 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ToolsBase.as</title>
+<link rel="stylesheet" type="text/css" href="../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">solutions</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Controller</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ModelLocator</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">IdentifyTool</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">containers</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">TitleWindow</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">controls</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Image</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Application</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">UIComponent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">CloseEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MoveEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">managers</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">PopUpManager</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ogc</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">WFS</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Rectangle</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MouseEvent</span>;
+            
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ToolsBase</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">WidgetTemplate</span> 
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_model</span>:<span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_controller</span>:<span class="ActionScriptDefault_Text">Controller</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptComment">//Title Bar buttons
+</span>        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Embed</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"assets/images/popups/print/maximize.png"</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">]</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">maximize</span>:<span class="ActionScriptDefault_Text">Class</span>;
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Embed</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"assets/images/popups/print/minimize.png"</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">]</span>
+         <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">minimize</span>:<span class="ActionScriptDefault_Text">Class</span>; 
+         <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">maximizeBtn</span>:<span class="ActionScriptDefault_Text">Image</span>; 
+         <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">panelHeight</span>:<span class="ActionScriptDefault_Text">Number</span>; 
+         <span class="ActionScriptReserved">protected</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">isMinimised</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+             
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ToolsBase</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">alpha</span> <span class="ActionScriptOperator">=</span> 0.9;
+             <span class="ActionScriptComment">//this.showCloseButton = true; 
+</span>             <span class="ActionScriptComment">//this.addEventListener(CloseEvent.CLOSE, closeWindow);
+</span>             <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">styleName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"myPopUp"</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Handle Pop up Drag
+        **/</span>     
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">window_moveHandler</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>:<span class="ActionScriptDefault_Text">MoveEvent</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">window</span>:<span class="ActionScriptDefault_Text">UIComponent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">currentTarget</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">UIComponent</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">application</span>:<span class="ActionScriptDefault_Text">UIComponent</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Application</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">application</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">UIComponent</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bounds</span>:<span class="ActionScriptDefault_Text">Rectangle</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Rectangle</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptOperator">,</span> 0<span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">application</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">application</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">windowBounds</span>:<span class="ActionScriptDefault_Text">Rectangle</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getBounds</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">application</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">x</span>:<span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">y</span>:<span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">windowBounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">left</span> <span class="ActionScriptOperator">&lt;=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">left</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">left</span>;
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">windowBounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">right</span> <span class="ActionScriptOperator">&gt;=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">right</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">right</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span>;
+            <span class="ActionScriptReserved">else</span>
+                <span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">windowBounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">top</span> <span class="ActionScriptOperator">&lt;=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">top</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">top</span>;
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">windowBounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">bottom</span> <span class="ActionScriptOperator">&gt;=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">bottom</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">bottom</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span>;
+            <span class="ActionScriptReserved">else</span>
+                <span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span>;
+            <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">move</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span>;                
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * End Pop up Drag
+        **/</span>                           
+        <span class="ActionScriptComment">/*private function handleUp(e:Event):void{
+            this.stopDrag();
+        }            
+        /**
+         * Close Pop Up
+        **/</span>            
+        <span class="ActionScriptComment">/*protected function closeWindow(event:Event):void
+        {                
+             close(this);
+             _model.selectedtool = "Pan";
+        }*/</span>
+
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">close</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>:<span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+           <span class="ActionScriptDefault_Text">isMinimised</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+           <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">testarray</span>:<span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupholder</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getChildren</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+           <span class="ActionScriptComment">//If the item is minimised remove it from the vbox
+</span>           <span class="ActionScriptReserved">for each</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">item</span>:<span class="ActionScriptOperator">*</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">testarray</span><span class="ActionScriptBracket/Brace">)</span>
+             <span class="ActionScriptBracket/Brace">{</span>
+                  <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">item</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span>
+                  <span class="ActionScriptBracket/Brace">{</span>
+                     <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeMinimisedItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">isMinimised</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>                     
+                      <span class="ActionScriptReserved">break</span>;
+                  <span class="ActionScriptBracket/Brace">}</span>
+              <span class="ActionScriptBracket/Brace">}</span>
+          <span class="ActionScriptComment">//If the itemised is in main pane and full size
+</span>          <span class="ActionScriptComment">//simply close it  
+</span>           <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">isMinimised</span><span class="ActionScriptBracket/Brace">)</span>
+           <span class="ActionScriptBracket/Brace">{</span>
+                   <span class="ActionScriptDefault_Text">PopUpManager</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removePopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span>;  
+                   <span class="ActionScriptComment">//Reset model 
+</span>                <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">updateView</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">""</span><span class="ActionScriptBracket/Brace">)</span>;    
+                <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setOpenTool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>;    
+           <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//Remove this pop up tool
+</span>            <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">unloadArrayPopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;    
+            <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">unloadPopUpNameArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">id</span><span class="ActionScriptBracket/Brace">)</span>;    
+        <span class="ActionScriptBracket/Brace">}</span>        
+        
+         <span class="ActionScriptASDoc">/**
+         * Handlers for click and mouseovers
+         **/</span>
+         <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">onMaximizeClick</span> <span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">event</span>:<span class="ActionScriptDefault_Text">MouseEvent</span> <span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+               
+           <span class="ActionScriptComment">//Minimize panel
+</span>               <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptDefault_Text">panelHeight</span><span class="ActionScriptBracket/Brace">)</span>
+               <span class="ActionScriptBracket/Brace">{</span>
+                   <span class="ActionScriptDefault_Text">minimizePanel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+                   <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">source</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">maximize</span>;
+                   <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">toolTip</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"Maximize Window"</span>;
+               <span class="ActionScriptBracket/Brace">}</span>
+               <span class="ActionScriptComment">//Maximize panel
+</span>               <span class="ActionScriptReserved">else</span>
+               <span class="ActionScriptBracket/Brace">{</span>
+                   <span class="ActionScriptDefault_Text">maximizePanel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                   <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">source</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">minimize</span>;
+               <span class="ActionScriptBracket/Brace">}</span>
+         <span class="ActionScriptBracket/Brace">}</span>   
+
+         <span class="ActionScriptASDoc">/**
+         * Process maximise panel
+         **/</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">maximizePanel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">id</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptString">"layers"</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">minimisedAllPopUps</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">//Update active tool
+</span>                <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">updateView</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">id</span><span class="ActionScriptBracket/Brace">)</span>                
+            <span class="ActionScriptBracket/Brace">}</span>
+                    
+            <span class="ActionScriptComment">//Restore height
+</span>            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">panelHeight</span>;
+            <span class="ActionScriptComment">//Restore the pop up in main window
+</span>            <span class="ActionScriptDefault_Text">_controller</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">restorePopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">isMinimised</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">IdentifyTool</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">selectfeature</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">active</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+                
+                <span class="ActionScriptReserved">for each</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">layer</span>:<span class="ActionScriptOperator">*</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">layer</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">WFS</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">visible</span><span class="ActionScriptBracket/Brace">)</span>
+                        <span class="ActionScriptBracket/Brace">{</span>
+                            <span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">visible</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+                        <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Process minimise panel
+         **/</span>                        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">minimizePanel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span>:<span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+             <span class="ActionScriptDefault_Text">tool</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">=</span> 30;
+            <span class="ActionScriptComment">//Minimise and move to tools Vbox
+</span>            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupholder</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">isMinimised</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openTool</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>; 
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">IdentifyTool</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">selectfeature</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">active</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+                
+                <span class="ActionScriptReserved">for each</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">layer</span>:<span class="ActionScriptOperator">*</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">layer</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">WFS</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">visible</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Add drag pop up capabilities and minimise button to header
+        **/</span>            
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">createChildren</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">createChildren</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">maximizeBtn</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Image</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">source</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">minimize</span>;
+             <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">buttonMode</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">useHandCursor</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+            <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouseChildren</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;        
+            <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">=</span> 15;
+            <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">=</span> 15;
+            <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">toolTip</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"Minimize Window"</span>;
+            <span class="ActionScriptDefault_Text">maximizeBtn</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span> <span class="ActionScriptDefault_Text">MouseEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">CLICK</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">onMaximizeClick</span> <span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//this.titleBar.addChild( maximizeBtn );
+</span>                        
+            <span class="ActionScriptComment">//super.titleBar.addEventListener(MouseEvent.MOUSE_UP,handleUp);
+</span>            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">MoveEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">MOVE</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">window_moveHandler</span><span class="ActionScriptBracket/Brace">)</span>;
+           <span class="ActionScriptBracket/Brace">}</span>
+                                        
+        <span class="ActionScriptASDoc">/**
+         * Minimise/Maximise button
+         **/</span>
+        <span class="ActionScriptComment">/*override protected function layoutChrome(unscaledWidth:Number, unscaledHeight:Number):void  {
+            super.layoutChrome(unscaledWidth, unscaledHeight);
+             
+             maximizeBtn.move(this.width-43,2);
+         }*/</span>  
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

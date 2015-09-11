@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns="org.openscales.fx.control.layer.*"
+		 xmlns:os="org.openscales.fx.control.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.SliderEvent;
+			
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.events.LayerManagerEvent;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.fx.control.IconButton;
+			
+			import widgets.componentes.layerGroup.LayerGroup;
+			
+			/**
+			 * Indicates the current value of the layer alpha (in purcent).
+			 * This value is bind to the slider value.
+			 * 
+			 * @default 100
+			 */
+			[Bindable]
+			public var _alpha:Number = 100;
+			
+			/**
+			 * Indicates the current text display beside the slider.
+			 * This value is bind to the label text attribute.
+			 * 
+			 * @default 100%
+			 */
+			[Bindable]
+			public var _alphaLabel:String = "100 %";
+			
+			
+			private var _layerGroup:LayerGroup;
+			
+			public function get layerGroup():LayerGroup
+			{
+				return _layerGroup;
+			}
+			
+			/**
+			 * @inherit
+			 */
+			public function set layerGroup(value:LayerGroup):void
+			{
+				/* if(this._layerGroup && this._layerGroup.map) 
+				{
+					this._layerGroup.map.removeEventListener(LayerEvent.LAYER_OPACITY_CHANGED,layerChangeOpacity);
+				} */
+				this._layerGroup = value;
+				
+				if(!value)
+					return;
+				
+				
+				this._alpha=this._layerGroup.alpha*100;
+				this._alphaLabel=Math.round(this._alpha)+" %";
+				
+				//if(this._layerGroup.map)
+					//this._layerGroup.map.addEventListener(LayerEvent.LAYER_OPACITY_CHANGED,layerChangeOpacity);
+			}
+			
+			/**
+			 * Change the opacity of the layer
+			 *
+			 * @param event event send by the slider
+			 */
+			public function layerGroupOpacity(event:Event):void
+			{	
+				this._alpha = layerControlOpacity.value;
+				this._layerGroup.alpha = this._alpha/100;
+				this._alphaLabel = Math.round(this._alpha)+"%";
+			}
+			
+			
+			/**
+			 * Change the layer opacity when the slider value change
+			 */
+			/* public function layerChangeOpacity(event:LayerEvent):void 
+			{
+				if (this._layer == event.layer)
+					this._alpha = event.newOpacity*100;
+			} */
+		]]>
+	</fx:Script>
+	
+	
+	<s:SkinnableContainer height="20" width="100%" >
+		<s:layout>
+			<s:HorizontalLayout 
+				paddingLeft="2"
+				paddingBottom="2"
+				paddingRight="4"
+				paddingTop="2"
+				horizontalAlign="center"/>
+		</s:layout>
+		
+		<s:HSlider id="layerControlOpacity"
+				   height="11" width="100" minimum="0" maximum="100" 
+				   snapInterval="1"
+				   change="layerGroupOpacity(event)"
+				   showDataTip="false"
+				   value="{this._alpha}" />
+		<s:Label id="layerControlOpacityLabel" text="{this._alphaLabel}" />
+		
+	</s:SkinnableContainer>
+	
+</s:Group>

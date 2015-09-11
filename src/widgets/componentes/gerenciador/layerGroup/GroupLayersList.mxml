@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.fx.control.layer.MapSyncSort;
+			
+			import widgets.componentes.layerGroup.LayerGroup;
+			
+			
+			[Bindable]
+			public var tooltipDelete:String;
+			
+			private var _layerGroup:LayerGroup;
+			
+			[Bindable]
+			protected var _grpLayers:ArrayCollection = new ArrayCollection();
+
+			
+			public function get layerGroup():LayerGroup
+			{
+				return _layerGroup;
+			}
+			
+			/**
+			 * Configure the first display for this component when the layer is set
+			 * Set one or two arrows depending of the position of the current layer
+			 */ 
+			public function set layerGroup(value:LayerGroup):void
+			{				
+				if (value != null)
+				{
+					this._layerGroup= value;
+
+					if (_layerGroup.map)
+					{
+						_layerGroup.map.removeEventListener(LayerEvent.LAYER_CHANGED, refresh);
+					}
+					
+					refresh();
+				}
+			}
+			
+			public function refresh(event:Event = null):void
+			{	
+				if (this.layerGroup)
+				{
+					//var overlayArray:Vector.<Layer> = (this.map as HexMap).getNonGroupLayers();
+					var ac:ArrayCollection = new ArrayCollection();
+					
+					for each (var l:Layer in layerGroup.layers)
+					{
+						ac.addItem(l);
+					}
+					
+					_grpLayers.sort = null;
+					_grpLayers.refresh();
+					
+					_grpLayers = ac;
+					
+					_grpLayers.sort = new MapSyncSort(_layerGroup.map);
+					_grpLayers.refresh();
+					//_layers.filterFunction = shallDisplayLayer;
+					//_layers.refresh();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<s:BorderContainer styleName="estiloInvisibleContainer">
+		<s:List id="grpLayersList" width="100%"
+				dataProvider="{_grpLayers}"
+				styleName="estiloListaLayerManager"
+				dropEnabled="false" dragEnabled="false" dragMoveEnabled="false"
+				itemRenderer="widgets.componentes.gerenciador.layerGroup.renderer.GroupLayersListItemRenderer">
+			<s:layout>
+				<s:VerticalLayout gap="7"/>
+			</s:layout>
+		</s:List>
+	</s:BorderContainer>
+</s:Group>

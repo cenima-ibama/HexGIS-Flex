@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sol:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  			  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  			  xmlns:mx="library://ns.adobe.com/flex/mx" 
+					  xmlns:sol="solutions.*"
+					  xmlns:os="http://openscales.org"
+					  creationComplete="configure()" initialize="init()">
+
+		<fx:Style source="assets/styles/estilo1.css"/>
+		
+		<fx:Script>
+			<![CDATA[
+				import assets.skins.NewVerticalScrollBarSkin;
+				
+				import mx.collections.ArrayCollection;
+				import mx.controls.Alert;
+				import mx.events.CollectionEvent;
+				import mx.events.FlexEvent;
+				import mx.managers.PopUpManager;
+				import mx.rpc.events.FaultEvent;
+				import mx.rpc.events.ResultEvent;
+				
+				import org.openscales.core.layer.Layer;
+				import org.openscales.core.layer.ogc.WMS;
+				import org.openscales.core.layer.params.ogc.WMSParams;
+				import org.openscales.geometry.basetypes.Bounds;
+				import org.openscales.proj4as.ProjProjection;
+				
+				import solutions.event.AppEvent;
+				import solutions.SiteContainer;
+				
+				import widgets.componentes.alerta.Alerta;
+				import widgets.componentes.exportar.CheckBoxItemObject;
+				import widgets.componentes.wmsAuthKey.WMSAuthKey;
+				
+				[Bindable]
+				private var dpCamadas:ArrayCollection;
+				
+				[Bindable]
+				private var dpFormatos:ArrayCollection;
+				
+				[Bindable]
+				private var mapWidth:Number;
+				
+				private var _layerSelectedError:String = "Selecione pelo menos uma camada.";
+				
+				private var _projectionSelectedError:String = "Selecione um tipo de projeção.";
+				
+				private var _formatSelectedError:String = "Selecione um formato.";
+				
+				[Bindable]
+				private var dpProjecao:ArrayCollection = new ArrayCollection([
+					{label: "SIRGAS 2000 (EPSG:4674)", projecao: "EPSG:4674"},
+					{label: "SAD69 (EPSG:4618)", projecao: "EPSG:4618"},
+					{label: "WGS84 (EPSG:4326)", projecao: "EPSG:4326"},
+					{label: "GOOGLE (EPSG:900913)", projecao: "EPSG:900913"}
+				]);
+				
+				[Bindable]
+				private var _lblLstCamadasSelec:String;
+				
+				
+				//private var configXML:XML;
+				
+				override protected function init():void
+				{
+					// TODO Auto-generated method stub
+					super.init();
+					SiteContainer.addEventListener(AppEvent.WIDGET_CONFIG_LOADED, onResultOpenXML);
+				}
+				
+				
+				override protected function configure():void
+				{
+					super.configure();
+					
+					mapWidth = map.width;					
+					//SiteContainer.addEventListener(AppEvent.WIDGET_CONFIG_LOADED, onResultOpenXML);
+					//dataService.send();
+					//super.configLoad();
+					
+				}
+
+				
+				//-------------------------------------------------------------------------------
+				private function getLayerInfo():void
+				{
+					dpCamadas = new ArrayCollection();
+					dpCamadas.addEventListener(CollectionEvent.COLLECTION_CHANGE, dpCamadasChanged);
+					
+					var listaCamadas:Array = new Array();
+					
+					var fList:XMLList = configXML..formato;
+					var exportUrl:String;
+					
+					exportUrl = fList[0].@url.toString();
+					
+					for(var i:int=0; i < map.layers.length; i++ )
+					{
+						if ((map.layers[i] is WMS) && (!(map.layers[i] is WMSAuthKey)))
+						{ 
+							var obj:CheckBoxItemObject = new CheckBoxItemObject();
+							obj.name = map.layers[i].name;
+							obj.selecionado = false;
+							obj.extent = map.layers[i].extent;
+							obj.layerInfo = map.layers[i];
+							
+							var url_strings:Array;
+							url_strings = (obj.layerInfo.url as String).split("geoserver");
+														
+							if (exportUrl.indexOf(url_strings[0].toString()) != -1)
+							{
+								listaCamadas.push(obj);
+								//dpCamadas.addItem(obj);
+							}
+						}
+					}
+					//dpCamadas.source.sortOn("name");
+					listaCamadas.sortOn("name");
+					dpCamadas.source = listaCamadas;
+				}
+				
+				private function selectedOnly(item:Object, idx:uint, arr:Array):Boolean 
+				{
+					return item.selecionado;
+				} 
+				
+				
+				private function dpCamadasChanged(event:CollectionEvent):void
+				{
+					var auxArray:Array;
+					auxArray = dpCamadas.source.filter(selectedOnly);
+					
+					_lblLstCamadasSelec = auxArray.length.toString() + " camada(s) selecionada(s)";
+				}
+				
+				//-------------------------------------------------------------------------------------
+				private function btnExportarClick():void
+				{
+					var bbox:String;
+					var layer:String = "";
+					
+					var camadas:String = "";
+					var url:String;
+										
+					var alerta:Alerta = new Alerta();
+					
+					var isCamadaSelecionada:Boolean = false;
+					
+					for(var i:int=0;i<dpCamadas.length;i++)
+					{
+						if( dpCamadas[i].selecionado)
+						{
+							isCamadaSelecionada = true;
+							
+							if (cmbProjecao.selectedItem.projecao == "EPSG:900913") 
+							{
+								bbox = dpCamadas[i].layerInfo.extent.left + "," + dpCamadas[i].layerInfo.extent.bottom + "," + dpCamadas[i].layerInfo.extent.top + "," + dpCamadas[i].layerInfo.extent.right;
+							}
+							else 
+							{
+								var novoB:Bounds = dpCamadas[i].layerInfo.extent.reprojectTo(new ProjProjection("EPSG:4326"));
+								bbox = novoB.left + "," + novoB.bottom + "," + novoB.right + "," + novoB.top;
+							}
+							
+							layer = dpCamadas[i].layerInfo.layers;
+							camadas += (camadas == "" ? "" : ",")+layer;
+						}
+					}
+					
+					if (!isCamadaSelecionada)
+					{
+						alerta.exibirErro(_layerSelectedError);
+					}
+					else
+					{
+						url = cmbFormato.selectedItem.url.replace("{camadas}", camadas);
+						url = url.replace("{bbox}", bbox);
+						url = url.replace("{projecao}", cmbProjecao.selectedItem.projecao);
+						
+						fldUrl.text = url;
+						navigateToURL(new URLRequest(url),"_blank");
+					}					
+					
+				}
+				
+				
+				private function onResultOpenXML(event:AppEvent):void
+				{
+					//configXML = XML(event.result);
+					var fList:XMLList = configXML..formato;
+					var o:Object = new Object();
+					
+					dpFormatos = new ArrayCollection();
+					for (var i:int = 0; i < fList.length(); i++)
+					{
+						o = new Object();
+						o.extensao = fList[i].toString();
+						o.url = fList[i].@url.toString();
+						dpFormatos.addItem(o);
+					}
+					cmbFormato.dataProvider = dpFormatos;
+					cmbFormato.selectedIndex = 0;
+					
+					getLayerInfo();
+				}
+				
+				
+				private function limpaCamadasSelec(event:MouseEvent):void
+				{
+					if (dpCamadas)
+					{
+						var obj:CheckBoxItemObject;
+						
+						for each (obj in dpCamadas)
+						{
+							obj.selecionado = false;
+							//lstCamadas.
+						}
+					}
+				}
+				
+				
+				private function onFaultOpenXML(event:FaultEvent): void
+				{
+					Alert.show(event.fault.toString());
+				}
+				
+				
+				private function onListaCamadasCreationComplete():void
+				{					
+					lstCamadas.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+					lstCamadas.scroller.verticalScrollBar.setStyle("chromeColor", container.getStyle("backgroundColor"));
+				}
+				
+				
+				private function onFldUrlCreationComplete():void
+				{				
+					fldUrl.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+					fldUrl.scroller.verticalScrollBar.setStyle("chromeColor", fldUrl.getStyle("backgroundColor"));
+				}
+				
+			]]>
+		</fx:Script>	
+
+			
+	<s:BorderContainer id="container" height="400" width="350"
+					   visible="{!this._isReduced}" styleName="widgetContentContainer">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="10"
+							  paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10"/>
+		</s:layout>
+				
+			<s:Group width="100%">
+				<s:layout>
+					<s:VerticalLayout paddingBottom="5" verticalAlign="middle" horizontalAlign="left"/>
+				</s:layout>
+				<s:Label width="100%" textAlign="left" text="Selecione a(s) camada(s):" styleName="estiloLabel"/>
+				
+				<s:List id="lstCamadas" allowMultipleSelection="true"
+						 width="100%" creationComplete="onListaCamadasCreationComplete()"
+						 dataProvider="{dpCamadas}" styleName="estiloInvisibleContainer"
+						 itemRenderer="widgets.componentes.exportar.renderer.ExportListItemRenderer">
+					<s:layout>
+						<s:VerticalLayout requestedRowCount="6" horizontalAlign="left" gap="2"/>
+					</s:layout>
+				</s:List>
+
+				<s:Line width="100%" >
+					<s:stroke>
+						<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" 
+											weight="1" caps="square"/>
+					</s:stroke>
+				</s:Line>
+				
+				<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="right" gap="0">
+					<s:HGroup width="50%" verticalAlign="middle" horizontalAlign="left">
+						<s:Label text="{_lblLstCamadasSelec}"
+								 styleName="estiloTextoAjuda" />
+					</s:HGroup>
+					
+					<s:HGroup width="50%" verticalAlign="middle" horizontalAlign="right">
+						<s:Button label="Limpar" click="limpaCamadasSelec(event)" width="100"
+								  styleName="estiloWidgetContentButton"/>
+					</s:HGroup>
+				</s:HGroup>
+			</s:Group>
+		
+			<s:Group width="100%">
+				<s:layout>
+					<s:HorizontalLayout paddingBottom="5"/>
+				</s:layout>
+				
+				<s:Label text="Formato" width="30%" textAlign="left" styleName="estiloLabel"/>
+				<s:DropDownList id="cmbFormato" width="70%"
+								labelField="extensao"
+							 	dataProvider="{dpFormatos}" 
+							 	styleName="estiloDropDownList"/>
+			</s:Group>
+				
+			<s:Group width="100%">
+				<s:layout>
+					<s:HorizontalLayout paddingBottom="5"/>
+				</s:layout>
+				
+				<s:Label text="Projeção" width="30%" textAlign="left" styleName="estiloLabel"/>
+				<s:DropDownList id="cmbProjecao" width="70%"
+							 	labelField="label" selectedIndex="3"
+							 	dataProvider="{dpProjecao}" 
+							 	styleName="estiloDropDownList"/>
+			</s:Group>
+		
+			<s:Group width="100%">
+				<s:layout>
+					<s:HorizontalLayout paddingBottom="5"/>
+				</s:layout>
+				
+				<s:Label text="URL" width="30%" textAlign="left" styleName="estiloLabel"/>
+				<s:TextArea id="fldUrl" creationComplete="onFldUrlCreationComplete()" 
+							editable="false" maxChars="1000" color="#0000ee" 
+							width="70%" height="40" styleName="estiloTextInput"/>
+			</s:Group>
+						
+			<s:Group width="100%">
+				<s:layout>
+					<s:HorizontalLayout horizontalAlign="right"/>
+				</s:layout>
+				
+				<s:Rect width="30%"/>
+				<s:Button id="btnExportar" width="100"
+						  label="Exportar"
+						  click="btnExportarClick()" styleName="estiloWidgetContentMainButton"/>
+			</s:Group>
+						
+		</s:BorderContainer>
+
+	
+</sol:BaseWidget>

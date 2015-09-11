@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:openscales="http://openscales.org"
+		 xmlns:os="org.openscales.fx.control.*"
+		 >
+	
+	<s:states>
+		<s:State name="normal" />
+		<s:State name="popup" />
+	</s:states>
+	
+	<os:IconButton icon="{_btnImport}" 
+				   toolTip="{this.tooltipImport}" click="{this.importFeature(event)}"
+				   width="20" height="20" alpha="{_alpha}"
+				   rollOver="rollOverHandler(event)" rollOut="rollOutHandler(event)" />
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.layer.ogc.GML;
+			import org.openscales.core.layer.osm.OSM;
+			
+			import solutions.CloseWindowTemplate;
+			
+			import spark.components.TitleWindow;
+			import spark.layouts.VerticalLayout;
+			
+			[Bindable]
+			private var _alpha:Number = 0.5;
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/new/importFile_icon20.png")]
+			private var _btnImport:Class;
+			
+			private var form:NewImportFeatureForm;
+			/**
+			 * Tooltip that appears over Import button
+			 */
+			[Bindable]
+			private var tooltipImport:String = "Importar camada";
+			
+			private var _map:Map = null;
+			
+			/**
+			 * The title window (that display the form)
+			 */
+			public var myWindow:CloseWindowTemplate;
+			
+			private var _drawingMode:String;
+			
+			/**
+			 * Indicates for Drawing mode
+			 * multiple : tools are in the LayerSwitcher
+			 * unique : tools are in the DrawingToolbar
+			 */
+			[Bindable]
+			public function get drawingMode():String{
+				
+				return _drawingMode;
+			}
+			
+			public function set drawingMode(value:String):void{
+				_drawingMode = value;
+			}
+			
+			/**
+			 * Change the text values on Map Language changed
+			 * @param event The I18N event received
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				//this.tooltipImport = Catalog.getLocalizationForKey('drawing.import');
+			}
+			
+			/**
+			 * Close the PopUp window
+			 */
+			public function closePopUp(event:MouseEvent = null):void
+			{
+				// close the pop up file
+				PopUpManager.removePopUp(myWindow);
+			}
+			
+			/**
+			 * Called when the user click on the import button
+			 * Make the pop up visible
+			 * 
+			 * @param event The MouseEvent received
+			 */
+			public function importFeature(event:MouseEvent):void {
+				// Set the TitleWindow container properties.
+				if (!myWindow)
+				{
+					myWindow = new CloseWindowTemplate();
+				}
+				
+				myWindow.title = "Importar";
+				var vertical:VerticalLayout = new VerticalLayout();
+				vertical.paddingBottom = 0;
+				vertical.paddingTop = 0;
+				vertical.paddingLeft = 0;
+				vertical.paddingRight = 0;
+				vertical.verticalAlign = "middle";
+				vertical.horizontalAlign = "left";
+				vertical.gap = 0;
+				myWindow.layout = vertical;
+				myWindow.addEventListener(FlexEvent.CREATION_COMPLETE, this.onPopUpCreationComplete);
+				
+				// Call the method to add the Button control to the 
+				// TitleWindow container.
+
+				populateWindow();
+				
+				myWindow.width = 320;
+				myWindow.height = 350;
+				
+				// place at the center
+				//myWindow.x = (this.map.width/2)-(this.width/2);
+				//myWindow.y = (this.map.height/2)-(this.height/2);
+				
+				// Use the PopUpManager to display the TitleWindow container.
+				PopUpManager.addPopUp(myWindow as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(myWindow as IFlexDisplayObject);
+			}
+			
+			private function onPopUpCreationComplete(e:Event):void
+			{
+				//myWindow.closeButton.addEventListener(MouseEvent.CLICK, this.closePopUp);
+				form.inputName.setFocus();
+			}
+			
+			/**
+			 * Function that fill the popUp
+			 */
+			private function populateWindow():void 
+			{	
+				form = new NewImportFeatureForm();
+				form.importFeature = this;
+				myWindow.addElement(form); 
+			}
+			
+			/**
+			 * The layer linked to the import button
+			 */
+			public function get map():Map
+			{
+				return this._map;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set map(value:Map):void
+			{
+				this._map = value;
+				if(this._map)
+				{
+					this._map.addEventListener(I18NEvent.LOCALE_CHANGED, this.onMapLanguageChange);
+				}
+			}
+			
+			private function rollOverHandler(event:MouseEvent):void
+			{
+				this._alpha = 1.0;
+			}
+			
+			protected function rollOutHandler(event:MouseEvent):void
+			{
+				this._alpha = 0.5;			
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:Group>

@@ -1,0 +1,101 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ModelLocator.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">containers</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">VBox</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Map</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">LonLat</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">feature</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Feature</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">fx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">FxHandler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">fx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">feature</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">FxSelectFeaturesHandler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">solutions</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ToolsBase</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * 
+     * @author msheehan
+     * 
+     */</span>    
+    <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ModelLocator</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_instance</span>:<span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptComment">//map
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">map</span>:<span class="ActionScriptDefault_Text">Map</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mapclone</span>:<span class="ActionScriptDefault_Text">Object</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">initialmapcentre</span>:<span class="ActionScriptDefault_Text">LonLat</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">initialZoom</span>:<span class="ActionScriptDefault_Text">Number</span>;
+        <span class="ActionScriptComment">//header
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">logo</span>:<span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">title</span>:<span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">subtitle</span>:<span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">selectedtool</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"Pan"</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">headercolourtop</span>:<span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">headercolourbottom</span>:<span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptComment">//legend
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mapLegend</span>:<span class="ActionScriptDefault_Text">VBox</span>;
+        <span class="ActionScriptComment">//zoom
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">maxzoomlevel</span>:<span class="ActionScriptDefault_Text">Number</span>;
+        <span class="ActionScriptComment">//basic tools
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fullextent</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">layers</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">overview</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">draw</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">print</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">addresssearch</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">identify</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">help</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptComment">//search tools
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">searchtools</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">address</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">clearSearch</span>:<span class="ActionScriptDefault_Text">Function</span>;
+        <span class="ActionScriptComment">//advanced tools
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">advancedtools</span>:<span class="ActionScriptDefault_Text">Boolean</span>;    
+        <span class="ActionScriptComment">//Pop ups
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">selectedView</span>:<span class="ActionScriptDefault_Text">String</span>;    
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">openTool</span>:<span class="ActionScriptDefault_Text">ToolsBase</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">popupArray</span>:<span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">popupNameArray</span>:<span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">popupholder</span>:<span class="ActionScriptDefault_Text">VBox</span>;
+        <span class="ActionScriptComment">//Layers
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">layersArray</span>:<span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptComment">//Identify
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">selectfeature</span>:<span class="ActionScriptDefault_Text">FxSelectFeaturesHandler</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">wfsArray</span>:<span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">selectedFeaturearray</span>:<span class="ActionScriptDefault_Text">Array</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">feature</span>:<span class="ActionScriptDefault_Text">Feature</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">featureLayerName</span>:<span class="ActionScriptDefault_Text">String</span>;
+        <span class="ActionScriptComment">//draw
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">draghandler</span>:<span class="ActionScriptDefault_Text">FxHandler</span>;
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">disablepan</span>:<span class="ActionScriptDefault_Text">Boolean</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * ModelLocator constructor 
+         * 
+         */</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Returns instance of Model Locator 
+         * @return 
+         * 
+         */</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">ModelLocator</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_instance</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_instance</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_instance</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

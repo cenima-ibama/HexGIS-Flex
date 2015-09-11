@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%"
+		 creationComplete="onCreationComplete(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.charts.BubbleChart;
+			import mx.charts.series.BubbleSeries;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.IVisualElement;
+			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.feature.Feature;
+			
+			import solutions.utils.ChartUtils;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import widgets.componentes.graficos.ListItemValueObject;
+			import widgets.componentes.graficos.RadioButtonItemObject;
+			
+			
+			[Bindable]
+			private var _data:Object;
+			
+			[Bindable]
+			private var _mode:String;
+			
+			[Bindable]
+			private var _dateFieldVisible:Boolean = false;
+			
+			[Bindable]
+			private var _listaCamposX:Array;
+			
+			[Bindable]
+			private var _listaCamposY:Array;
+			
+			[Bindable]
+			private var _listaCamposRadius:Array;
+			
+			[Bindable]
+			private var _listaCamposDatas:Array;
+			
+			[Bindable]
+			private var bub:BubbleChart;
+
+			private var _dadosSelecionados:ArrayCollection;
+						
+			private var bubSeries:BubbleSeries;
+			
+			private var bubDisplayNameTemp:String;
+			
+			private var selecionouCampos:Boolean = false;
+			
+			
+			public function get data():Object
+			{
+				return this._data;
+			}
+			
+			public function set data(value:Object):void
+			{
+				var listaNumericos:Array;
+				var listaDatas:Array;
+				
+				if (value) 
+				{				
+					this._mode = value.modo;
+					
+					this._data = value.dados;
+										
+					listaNumericos = new Array();
+					
+					listaDatas = new Array();
+					listaDatas.push("-");
+					
+					var dadosRecebidos:Vector.<Feature> = this.data as Vector.<Feature>;
+					var numeroRegs:int = dadosRecebidos.length;
+					
+					if (numeroRegs > 0)
+					{
+						var attr:Object;
+						var feat:Feature = dadosRecebidos[0];
+						attr = (feat.attributes);
+						
+						for (var name:String in attr) 
+						{ 						
+							if(!isNaN(attr[name])){
+								listaNumericos.push(name);
+							}
+							
+							if ((name.search("data") > -1) || (name.search("date") > -1))
+							{
+								listaDatas.push(name);
+								_dateFieldVisible = true;
+							}
+						}
+						
+						preparaCamposNumericos(listaNumericos);
+						preparaCamposDatas(listaDatas);
+					}
+				}
+			}
+			
+			private function addChart():void
+			{
+				bub = new BubbleChart();
+				bub.percentHeight = 100;
+				bub.percentWidth = 100;
+				bub.showDataTips = true;
+				//bub.setStyle("maxRadius", 20);
+				
+				bubSeries = new BubbleSeries();
+				bubSeries.xField = "campoX";
+				bubSeries.yField = "campoY";
+				bubSeries.radiusField = "campoRaio";
+				bubSeries.setStyle("showDataEffect", seriesInterpolateShow);
+				
+				bub.series = [bubSeries];
+				
+				chartContainer.addElement(bub);
+				
+				ChartUtils.SetBubChartSeriesFills(bub.series);
+			}
+			
+			private function preparaCamposNumericos(lista:Array):void
+			{
+				var tamanho:int = lista.length;
+				var itemCamposNumericos:Object;
+				
+				lista.sort();
+				
+				if (_listaCamposX == null)
+				{
+					_listaCamposX = new Array();
+				}
+				else
+				{
+					_listaCamposX.slice(0);
+					_listaCamposX = null;
+				}
+				
+				if (_listaCamposY == null)
+				{
+					_listaCamposY = new Array();
+				}
+				else
+				{
+					_listaCamposY.slice(0);
+					_listaCamposY = null;
+				}
+				
+				if (_listaCamposRadius == null)
+				{
+					_listaCamposRadius = new Array();
+				}
+				else
+				{
+					_listaCamposRadius.slice(0);
+					_listaCamposRadius = null;
+				}
+				
+				for (var i:int=0; i<tamanho; i++)
+				{
+					itemCamposNumericos = new RadioButtonItemObject();
+					itemCamposNumericos.label = lista[i];
+					itemCamposNumericos.group = radioGroupBubX;
+					_listaCamposX.push(itemCamposNumericos);
+					
+					itemCamposNumericos = new RadioButtonItemObject();
+					itemCamposNumericos.label = lista[i];
+					itemCamposNumericos.group = radioGroupBubY;
+					_listaCamposY.push(itemCamposNumericos);
+					
+					itemCamposNumericos = new RadioButtonItemObject();
+					itemCamposNumericos.label = lista[i];
+					itemCamposNumericos.group = radioGroupBubRadius;
+					_listaCamposRadius.push(itemCamposNumericos);
+				}
+			}
+			
+			private function preparaCamposDatas(lista:Array):void
+			{
+				_listaCamposDatas = lista;
+			}
+			
+			
+			private function selecionaDados(x:String, y:String, radius:String, data:String=null):void
+			{
+				if (this._data) 
+				{
+					if (!_dadosSelecionados)
+					{
+						_dadosSelecionados = new ArrayCollection();
+					}
+					_dadosSelecionados.removeAll();
+					
+					var dadosRecebidos:Vector.<Feature> = this._data as Vector.<Feature>;
+					var numeroRegs:int = dadosRecebidos.length;
+					
+					if (numeroRegs > 0)
+					{
+						var auxObject:Object;
+						var attr:Object;
+						
+						for (var i:int=0; i<numeroRegs; i++)
+						{
+							var feat:Feature = dadosRecebidos[i];
+							
+							attr = (feat.attributes);
+							
+							auxObject = new Object();
+							
+							if (attr[x])
+							{
+								auxObject["campoX"] = attr[x];
+							}
+							else
+							{
+								auxObject["campoX"] = 0.0;
+							}
+							
+							if (attr[y])
+							{
+								auxObject["campoY"] = attr[y];
+							}
+							else
+							{
+								auxObject["campoY"] = 0.0;
+							}
+							
+							if (attr[radius])
+							{
+								auxObject["campoRaio"] = attr[radius];
+							}
+							else
+							{
+								auxObject["campoRaio"] = 0.0;
+							}
+														
+							_dadosSelecionados.addItem(auxObject);
+						}
+						
+						selecionouCampos = true;
+					}
+					
+					bubDisplayNameTemp = x+"/"+y+"/"+radius;
+					
+					//selecionouCampos = true;
+				}
+			}
+			
+			private function verificaCampos():void
+			{
+				var xOK:Boolean = false;
+				var yOK:Boolean = false;
+				var radiusOK:Boolean = false;
+				
+				var xSelecionado:String;
+				var ySelecionado:String;
+				var radiusSelecionado:String;
+				var dataSelecionada:String;
+				
+				dataSelecionada = "-";
+				
+				if (radioGroupBubX.selectedValue != null)
+				{						
+					xSelecionado = radioGroupBubX.selectedValue as String;
+					
+					xOK = true;
+				}
+				
+				if (radioGroupBubY.selectedValue != null)
+				{						
+					ySelecionado = radioGroupBubY.selectedValue as String;
+					
+					yOK = true;
+				}
+				
+				if (radioGroupBubRadius.selectedValue != null)
+				{						
+					radiusSelecionado = radioGroupBubRadius.selectedValue as String;
+					
+					radiusOK = true;
+				}
+				
+				/* if (_dateFieldVisible)
+				{
+					dataSelecionada = comboBoxData.selectedLabel;
+				} */
+				
+				if (xOK && yOK && radiusOK)
+				{
+					selecionaDados(xSelecionado, ySelecionado, radiusSelecionado, dataSelecionada);
+				}
+
+			}
+			
+			protected function onCreationComplete(event:FlexEvent):void
+			{
+				addChart();
+			}
+			
+			protected function geraGrafico(event:MouseEvent):void
+			{
+				verificaCampos();
+				
+				var auxLabel:String;
+				
+				var numCateg:int;
+				
+				if (selecionouCampos)
+				{
+					numCateg =  _dadosSelecionados.length;
+
+					if (numCateg == 1)
+					{
+						auxLabel = "1 categoria, 3 séries de dados";
+					}
+					else
+					{
+						auxLabel =  numCateg.toString() + " categorias, 3 séries de dados";
+					}
+					
+					((this.owner as IVisualElement).owner as Object).lblRegs.text = auxLabel;
+					
+					if (_dadosSelecionados)
+					{
+						bubSeries.displayName = bubDisplayNameTemp;
+						bub.dataProvider = _dadosSelecionados;
+					}
+					
+					selecionouCampos = false;
+				}
+			}
+			
+			protected function popUpAnchorCreationCompleteHandler(event:FlexEvent):void
+			{
+				(event.currentTarget as BorderContainer).styleName = "estiloPopUpChart";
+			}
+			
+			private function rollOverConfigContainer(event:MouseEvent):void
+			{
+				popupX.displayPopUp = false;
+				popupY.displayPopUp = false;
+				popupRadius.displayPopUp = false;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+		<s:RadioButtonGroup id="radioGroupBubX" />
+		<s:RadioButtonGroup id="radioGroupBubY" />
+		<s:RadioButtonGroup id="radioGroupBubRadius" />
+		
+		
+		<mx:ArrayCollection id="camposX" source="{_listaCamposX}"/>
+		<mx:ArrayCollection id="camposY" source="{_listaCamposY}"/>
+		<mx:ArrayCollection id="camposRadius" source="{_listaCamposRadius}"/>
+		
+		
+		<mx:SeriesInterpolate id="seriesInterpolateShow" duration="1000"/>
+		<mx:SeriesSlide id="seriesSlideShow" duration="1000" direction="up" />
+	</fx:Declarations>
+	
+	
+	<s:Group width="100%" height="100%" rollOver="rollOverConfigContainer(event)">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" gap="10"/>
+		</s:layout>
+	
+		<s:BorderContainer id="configContainer" width="18%" height="100%"
+						   styleName="estiloChartConfigContainer">
+			<s:layout>
+				<s:VerticalLayout verticalAlign="top" horizontalAlign="center" gap="15"
+								  paddingBottom="15" paddingLeft="7" paddingRight="7" paddingTop="15"/>
+			</s:layout>
+			
+			<s:Label text="Selecione os campos:" styleName="estiloLabel" width="100%"/>
+			
+			<s:Group width="100%" height="80%">
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" verticalAlign="top" gap="20"/>
+				</s:layout>
+	
+				
+				<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left" verticalAlign="top" gap="0"/>
+					</s:layout>
+					
+					<s:Button width="100%" label="X" styleName="estiloWidgetContentMainButton"
+							  skinClass="assets.skins.ButtonAsDropDownListButtonSkin"
+							  click="{popupX.displayPopUp = !popupX.displayPopUp}"/>
+					
+					<s:PopUpAnchor id="popupX" left="0" bottom="0"
+								   popUpPosition="below" popUpWidthMatchesAnchorWidth="false">
+						
+						<s:BorderContainer rollOut="{popupX.displayPopUp = false}" 
+										   creationComplete="popUpAnchorCreationCompleteHandler(event)">
+							<s:layout>
+								<s:HorizontalLayout paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+							</s:layout>
+							
+							<s:Scroller left="0" top="0" right="0" bottom="0" focusEnabled="false"
+										minViewportInset="1" verticalScrollPolicy="auto">
+								<s:DataGroup dataProvider="{camposX}" 
+											 itemRenderer="widgets.componentes.graficos.renderer.RadioButtonItemRenderer">
+									<s:layout>
+										<s:TileLayout horizontalGap="5" verticalGap="5" 
+													  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+													  requestedColumnCount="3" requestedRowCount="5" columnWidth="200" /> 
+									</s:layout>
+								</s:DataGroup>
+							</s:Scroller>
+						</s:BorderContainer>
+					</s:PopUpAnchor>
+					
+				</s:BorderContainer>
+				
+				
+				<s:BorderContainer width="100%" styleName="invisibleContainer">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left" verticalAlign="top" gap="0"/>
+					</s:layout>
+					
+					<s:Button width="100%" label="Y" styleName="estiloWidgetContentMainButton"
+							  skinClass="assets.skins.ButtonAsDropDownListButtonSkin"
+							  click="{popupY.displayPopUp = !popupY.displayPopUp}"/>
+					
+					<s:PopUpAnchor id="popupY" left="0" bottom="0"
+								   popUpPosition="below" popUpWidthMatchesAnchorWidth="false">
+						<s:BorderContainer rollOut="{popupY.displayPopUp = false}"
+										   creationComplete="popUpAnchorCreationCompleteHandler(event)">
+							<s:layout>
+								<s:HorizontalLayout paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+							</s:layout>
+							
+							<s:Scroller left="0" top="0" right="0" bottom="0" focusEnabled="false"
+										minViewportInset="1" verticalScrollPolicy="auto">
+								<s:DataGroup dataProvider="{camposY}" 
+											 itemRenderer="widgets.componentes.graficos.renderer.RadioButtonItemRenderer">
+									<s:layout>
+										<s:TileLayout horizontalGap="5" verticalGap="5" 
+													  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+													  requestedColumnCount="3" requestedRowCount="5" columnWidth="200" /> 
+									</s:layout>
+								</s:DataGroup>
+							</s:Scroller>
+						</s:BorderContainer>
+					</s:PopUpAnchor>
+					
+				</s:BorderContainer>
+				
+				
+				<s:BorderContainer width="100%" styleName="invisibleContainer">
+					<s:layout>
+						<s:VerticalLayout horizontalAlign="left" verticalAlign="top" gap="0"/>
+					</s:layout>
+					
+					<s:Button width="100%" label="Raio" styleName="estiloWidgetContentMainButton"
+							  skinClass="assets.skins.ButtonAsDropDownListButtonSkin"
+							  click="{popupRadius.displayPopUp = !popupRadius.displayPopUp}"/>
+					
+					<s:PopUpAnchor id="popupRadius" left="0" bottom="0" 
+								   popUpPosition="below" popUpWidthMatchesAnchorWidth="false" >
+						<s:BorderContainer rollOut="{popupY.displayPopUp = false}" 
+										   creationComplete="popUpAnchorCreationCompleteHandler(event)">
+							<s:layout>
+								<s:HorizontalLayout paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="2"/>
+							</s:layout>
+							
+							<s:Scroller left="0" top="0" right="0" bottom="0" focusEnabled="false" 
+										minViewportInset="1" verticalScrollPolicy="auto">
+								<s:DataGroup dataProvider="{camposRadius}" 
+											 itemRenderer="widgets.componentes.graficos.renderer.RadioButtonItemRenderer">
+									<s:layout>
+										<s:TileLayout horizontalGap="5" verticalGap="5" 
+													  paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+													  requestedColumnCount="3" requestedRowCount="5" columnWidth="200" /> 
+									</s:layout>
+								</s:DataGroup>
+							</s:Scroller>
+						</s:BorderContainer>
+					</s:PopUpAnchor>
+					
+				</s:BorderContainer>
+				
+			</s:Group>
+			
+			<s:Group width="100%" height="20%">
+				<s:layout>
+					<s:VerticalLayout horizontalAlign="center" verticalAlign="bottom" gap="35"/>
+				</s:layout>
+				
+				<s:Button width="100%" label="Gerar Gráfico" styleName="estiloWidgetContentMainButton" click="geraGrafico(event)"/>
+				
+			</s:Group>
+			
+		</s:BorderContainer>
+		
+		
+		<s:BorderContainer width="82%" height="100%" styleName="estiloChartContainer">
+			<s:layout>
+				<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center" gap="0"
+									paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+			</s:layout>
+			
+			<s:Group width="100%" height="100%" id="chartContainer"/>
+			
+			<mx:Legend dataProvider="{bub}" height="100%"/>
+		</s:BorderContainer>
+		
+	</s:Group>
+	
+</s:Group>

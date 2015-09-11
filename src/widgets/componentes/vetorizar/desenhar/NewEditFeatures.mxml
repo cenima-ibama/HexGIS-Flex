@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<os:IconButton xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:os="org.openscales.fx.control.*"
+			   implements="org.openscales.core.control.IControl"
+			   toolTip="{this.tooltip}"
+			   icon="{_btnEdit}" alpha="{_alpha}"
+			   width="20" height="20"
+			   click="onClick()" enabled="{active}">
+	
+	<!-- rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"-->
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.control.IControl;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.LabelFeature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.handler.IHandler;
+			import org.openscales.core.handler.feature.SelectFeaturesHandler;
+			import org.openscales.core.handler.feature.draw.FeatureLayerEditionHandler;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.style.Style;
+			import org.openscales.fx.control.drawing.popup.EditLabel;
+			import org.openscales.fx.control.layer.LayerManager;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import widgets.componentes.vetorizar.desenhar.handler.NewFeatureLayerEditionHandler;
+			import widgets.componentes.vetorizar.desenhar.handler.NewSelectFeaturesHandler;
+			
+			[Bindable]
+			private var _alpha:Number = 0.5;
+			
+			[Bindable]
+			private var tooltip:String = Catalog.getLocalizationForKey('drawing.edit');
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/black/8.png")]
+			private var _btnEdit:Class;
+			
+			private var _active:Boolean = true;
+			private var _handler:NewFeatureLayerEditionHandler = null;
+			private var _previousHandler:FeatureLayerEditionHandler = null;
+			private var _selectFeaturesHandler:NewSelectFeaturesHandler;
+			private var _previousSelectFeaturesHandler:SelectFeaturesHandler = null;
+			private var _virtualStyle:Style;
+			private var _map:Map;
+			private var _target:VectorLayer;
+			private var _isClick:Boolean = false;
+			private var _drawingMode:String;
+			
+			/**
+			 * Indicates for Drawing mode
+			 * multiple : tools are in the LayerSwitcher
+			 * unique : tools are in the DrawingToolbar
+			 */
+			[Bindable]
+			public function get drawingMode():String
+			{
+				return _drawingMode;
+			}
+			
+			public function set drawingMode(value:String):void
+			{
+				_drawingMode = value;
+			}
+			
+			/**
+			 * Flag for activating and deactivating the component
+			 * @default true;
+			 */
+			[Bindable]
+			public function get active():Boolean
+			{
+				return _active;
+			}
+			public function set active(value:Boolean):void
+			{
+				_active = value;
+				
+				if(this._handler && !_active)
+				{
+					_handler.active = false;
+				}
+			}
+			
+			/**
+			 * Drawing style of the virtual points
+			 */
+			public function get virtualStyle():Style
+			{
+				return this._virtualStyle;
+			}
+			public function set virtualStyle(value:Style):void
+			{
+				this._virtualStyle = value;
+			}
+			
+			/**
+			 * Map controled by this control
+			 */
+			public function get map():Map
+			{
+				return this._map;
+			}
+			public function set map(value:Map):void
+			{
+				if(this._map) 
+				{
+					this._map.removeEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.removeEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.removeEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.removeEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.removeEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.removeEventListener(FeatureEvent.FEATURE_SELECTED, onFeatureSelected);
+					this._map.removeEventListener(FeatureEvent.FEATURE_UNSELECTED, onFeatureUnselected);
+					this._map.removeEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, onChangeActiveLayer);
+					this._map.removeEventListener(I18NEvent.LOCALE_CHANGED, onMapLanguageChange);
+				}
+				
+				this._map = value;
+				
+				if(this._map) 
+				{
+					this._map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.addEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.addEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.addEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.addEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, onChangeActiveHandler);
+					this._map.addEventListener(FeatureEvent.FEATURE_SELECTED, onFeatureSelected);
+					this._map.addEventListener(FeatureEvent.FEATURE_UNSELECTED, onFeatureUnselected);
+					this._map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, onChangeActiveLayer);
+					this._map.addEventListener(I18NEvent.LOCALE_CHANGED, onMapLanguageChange);
+				}
+			}
+			
+			/**
+			 * Position (x,y) of the handler
+			 */
+			public function get position():Pixel
+			{
+				return new Pixel(x,y);
+			}
+			
+			public function set position(value:Pixel):void
+			{
+				if (value)
+				{
+					x = value.x;
+					y = value.y;
+				}
+			}
+			
+			/**
+			 * Layer the features will be edited 
+			 */
+			public function get target():VectorLayer
+			{
+				return this._target;
+			}
+			public function set target(value:VectorLayer):void
+			{
+				this._target = value;
+			}
+			
+			/**
+			 * To activate the handler
+			 */
+			private function activate():void
+			{
+				for each (var ih:IHandler in this.map.controls)
+				{
+					if((ih is SelectFeaturesHandler) && (ih != this._selectFeaturesHandler))
+					{
+						// Store the existing SelectFeaturesHandler
+						this._previousSelectFeaturesHandler = (ih as SelectFeaturesHandler);
+						(ih as SelectFeaturesHandler).map = null;
+						this.map.removeControl(ih);
+					}
+					if(ih is FeatureLayerEditionHandler)
+					{
+						// Store the existing FeatureLayerEditionHandler
+						this._previousHandler = (ih as FeatureLayerEditionHandler);
+						(ih as FeatureLayerEditionHandler).map = null;
+						this.map.removeControl(ih);
+					}
+				}
+				// Add a new SelectFeaturesHandler
+				this._selectFeaturesHandler = new NewSelectFeaturesHandler(this.map,true,true,false,false);
+				this._selectFeaturesHandler.layers[0] = this.target;
+				this._selectFeaturesHandler.clickOut = false;
+				this._selectFeaturesHandler.toggle = false;
+				
+				// Add a new FeatureLayerEditionHandler
+				this._handler = new NewFeatureLayerEditionHandler(this.map,this.target,true);
+				this._handler.virtualStyle = this._virtualStyle;
+				
+				_alpha = 1;
+			}
+			
+			/**
+			 * To disactivate the handler
+			 */
+			private function disactivate():void
+			{
+				var evt:DrawingEvent = new DrawingEvent(DrawingEvent.EDIT_HANDLER_DESACTIVATED);
+				evt.layer = this.target;
+				this.map.dispatchEvent(evt);
+				
+				// Manage the new FeatureLayerEditionHandler
+				_handler.active = false;
+				this._handler.map = null;
+				this.map.removeControl(this._handler);
+				
+				// Add the previous FeatureLayerEditionHandler
+				if(this._previousHandler)
+				{
+					this._previousHandler.map = this.map;
+				}
+				
+				// Manage the new SelectFeaturesHandler
+				this._selectFeaturesHandler.clearSelection();
+				this._selectFeaturesHandler.map = null;
+				this.map.removeControl(this._selectFeaturesHandler);
+				
+				// Add the previous SelectFeaturesHandler
+				if(this._previousSelectFeaturesHandler)
+				{
+					this._previousSelectFeaturesHandler.map = this.map;
+				}
+				
+				_alpha = 0.5;
+			}
+			
+			
+			/* private function itemRollOver(event:MouseEvent):void
+			{
+				_alpha = 1.0;
+			}
+			
+			private function itemRollOut(event:MouseEvent):void
+			{				
+				if (!this.active)
+				{
+					_alpha = 0.5;
+				}
+			} */
+			
+			/**
+			 * On button click, dispatch a DrawingEvent.EDIT_HANDLER_ACTIVATED event
+			 */
+			public function onClick():void
+			{
+				if(!this.target)
+					return;
+				
+				// Disactive this component
+				var evt:DrawingEvent;
+				if(this._handler && this._handler.active)
+				{
+					disactivate();
+					return;
+				}
+				
+				// Disactive others drawing tools components
+				this._isClick = true;
+				evt = new DrawingEvent(DrawingEvent.EDIT_HANDLER_ACTIVATED);
+				evt.activeHandler = this.id;
+				evt.layer = this.target;
+				this.map.dispatchEvent(evt);
+				
+				// Disactive mesure tools components
+				evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_HANDLER);
+				evt.activeHandler = null;
+				this.map.dispatchEvent(evt);
+				
+				// Active this component
+				activate();
+			}
+			
+			/**
+			 * Check the handler when a DrawingEvent.DRAW_HANDLER_ACTIVATED or
+			 * DrawingEvent.EDIT_HANDLER_ACTIVATED or DrawingEvent.MOVE_HANDLER_ACTIVATED
+			 * or DrawingEvent.SELECT_HANDLER_ACTIVATED event occured
+			 */
+			public function onChangeActiveHandler(evt:DrawingEvent=null):void
+			{				
+				if(this._handler && this._handler.active && !this._isClick)
+					disactivate();
+				else
+					this._isClick = false;
+			}
+			
+			/**
+			 * Update the target on active layer changed
+			 */
+			private function onChangeActiveLayer(evt:DrawingEvent):void{
+				
+				if(this.drawingMode == 'unique')
+				{
+					if(this._handler && this._handler.active)
+					{
+						disactivate();
+						this._map.mouseNavigationEnabled = true;
+						this._map.panNavigationEnabled = true;
+						this._map.zoomNavigationEnabled = true;
+						this._map.keyboardNavigationEnabled = true;
+					}
+					
+					this.target = evt.layer;
+					
+					if(!evt.layer || !evt.layer.editable) 
+					{
+						this.buttonMode = false;
+						this.useHandCursor = false;
+						this.toolTip = Catalog.getLocalizationForKey('drawing.selectDrawingLayer');
+					} 
+					else 
+					{
+						this.buttonMode = true;
+						this.useHandCursor = true;
+						this.toolTip = Catalog.getLocalizationForKey('drawing.edit');
+					}
+				}
+			}
+			
+			/**
+			 * Update the features to edit when a FeatureEvent.FEATURE_SELECTED 
+			 * event occured
+			 */
+			private function onFeatureSelected(evt:FeatureEvent):void
+			{
+				if(this._handler && this._handler.active)
+					_handler.editionModeStop();
+				
+				if(this._selectFeaturesHandler)
+					_handler.featuresToEdit = this._selectFeaturesHandler.selectedFeatures;
+				
+				if(this._handler && this._handler.active)
+					_handler.editionModeStart();
+			}
+			
+			/**
+			 * Update the features to edit when a
+			 * FeatureEvent.FEATURE_UNSELECTED event occured
+			 */
+			private function onFeatureUnselected(evt:FeatureEvent):void
+			{
+				if(this._handler && this._handler.active)
+					_handler.editionModeStop();
+				if(this._selectFeaturesHandler)
+					_handler.featuresToEdit = this._selectFeaturesHandler.selectedFeatures;
+				
+				if(this._handler && this._handler.active)
+					_handler.editionModeStart();
+			}
+			
+			/**
+			 * Update texts on map language changed
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void
+			{
+				this.tooltip = Catalog.getLocalizationForKey('drawing.edit');
+			}
+			
+			// Unused functions
+			public function draw():void
+			{
+				this.invalidateDisplayList();
+			}
+			
+			public function destroy():void
+			{
+			}
+			
+			
+		]]>
+	</fx:Script>			
+</os:IconButton>

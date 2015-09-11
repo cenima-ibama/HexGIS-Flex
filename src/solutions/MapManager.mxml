@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:os="http://openscales.org"
+		 xmlns:North="http://www.calhouncounty.org"
+		 xmlns:_contador="widgets.componentes._contador.*"
+		 xmlns:vg="ferramentas.visaogeral.*"
+		 xmlns:_zoomBox="widgets.componentes._zoomBox.*"
+		 xmlns:_overview="widgets.componentes._overview.*"
+		 width="100%" height="100%" creationComplete="init(event)">
+	
+	<fx:Declarations>
+		
+		<s:HTTPService id="camadasXml" 
+					   resultFormat = "e4x"
+					   url="dados/camadas_ibama.xml" 
+					   fault="camadasXmlFaultHandler(event)"
+					   result="camadasXmlResultHandler(event)"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.XMLListCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import org.calhoun.county.esri.ags.controls.NorthArrow;
+			import org.openscales.core.basetypes.Resolution;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.handler.keyboard.KeyboardHandler;
+			import org.openscales.core.handler.mouse.ClickHandler;
+			import org.openscales.core.handler.mouse.DragHandler;
+			import org.openscales.core.handler.mouse.WheelHandler;
+			import org.openscales.core.layer.Bing;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.ogc.WFS;
+			import org.openscales.core.layer.ogc.WMS;
+			import org.openscales.core.layer.osm.Mapnik;
+			import org.openscales.core.style.Style;
+			import org.openscales.fx.control.FxSpinner;
+			import org.openscales.fx.control.MousePosition;
+			import org.openscales.fx.control.ScaleLine;
+			import org.openscales.fx.control.Zoom;
+			import org.openscales.geometry.basetypes.Bounds;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.proj4as.ProjProjection;
+			
+			import solutions.event.AppEvent;
+			
+			import spark.components.Group;
+			
+			import widgets.componentes.botaoMapas.BotaoAlternaMapaBase;
+			import widgets.componentes.extensao.ExtensaoTotal;
+			import widgets.componentes.informacoes.InfoCaller;
+			import widgets.componentes.layerGroup.LayerGroup;
+			import widgets.componentes.mapa.FxHexMap;
+			import widgets.componentes.mapa.HexMap;
+			import widgets.componentes.overview.NewFxOverviewMapRatio;
+			import widgets.componentes.wmsAuthKey.WMSAuthKey;
+			import widgets.componentes.zoomBox.ZoomBox;
+			
+			
+			[Bindable]
+			private var baseMap:FxHexMap;
+			
+			[Bindable]
+			private var _listaCamadas:XMLListCollection;
+			
+			[Bindable]
+			private var _listaGruposCamadas:XMLListCollection;
+						
+			private var _dragHandler:DragHandler;
+			
+			private var _wheelHandler:WheelHandler;
+			
+			private var mousePosition:MousePosition
+			
+			private var spinner:FxSpinner;
+			
+			private var _clickHandler:ClickHandler;
+			
+			private var _keyHandle:KeyboardHandler;
+			
+			private var _scaleLine:ScaleLine;
+			
+			private var _zoom:Zoom;
+			
+			private var _zoomBox:ZoomBox;
+			
+			private var _extensaoTotal:ExtensaoTotal;
+			
+			private var _northArrow:NorthArrow;
+			
+			//private var _contador:Contador;
+			
+			private var _overview:NewFxOverviewMapRatio;
+			
+//			private var _marcadagua:MarcadAguaHex;
+			
+			private var _infoCaller:InfoCaller;
+			
+			private var _botaoAlternaMapas:BotaoAlternaMapaBase;
+			
+			private var _timer:Timer;
+			
+			
+			public function init(event:FlexEvent):void
+			{
+				SiteContainer.addEventListener(AppEvent.CONFIG_LOADED, config);				
+			}
+						
+			private function config(event:AppEvent):void
+			{
+				adicionaMapa();
+				
+				//Adiciona camadas base ao mapa
+				adicionaCamadasBaseMapa();
+				
+				//Adiciona controles ao mapa
+				adicionaControlesMapa();
+				
+				//Adiciona camadas do arquivo xml
+				camadasXml.send();
+			}
+			
+			private function adicionaMapa():void
+			{
+				baseMap = new FxHexMap();
+				//baseMap.map.size = new Size(FlexGlobals.topLevelApplication.width, FlexGlobals.topLevelApplication.height);
+				baseMap.percentHeight = 100;
+				baseMap.percentWidth = 100;
+				baseMap.map.projection = new ProjProjection("EPSG:900913");
+				//baseMap.map.maxResolution = new Resolution(11157.322536946767, baseMap.map.projection);
+				/* baseMap.map.maxResolution = new Resolution(26543.0339, baseMap.map.projection);
+				baseMap.map.minResolution = new Resolution(0.01 , baseMap.map.projection); */
+				baseMap.map.maxResolution = new Resolution(39135.7584765625, baseMap.map.projection);
+				baseMap.map.minResolution = new Resolution(0.29858214169740677, baseMap.map.projection);
+				//baseMap.map.maxExtent = new Bounds(-180,-90,180,90);
+				
+				setInitialPosition();
+				
+				this.addElement(this.baseMap);
+				
+				SiteContainer.dispatchEvent(new AppEvent(AppEvent.MAP_LOADED, false, false, baseMap.map));
+			}
+			
+			public function setInitialPosition():void
+			{
+				if ((baseMap) && (baseMap.map))
+				{
+					//baseMap.map.center = new Location(-53.88266,-15.79325);
+					baseMap.map.center = new Location(-5844273.2658333, -1522495.5843913, baseMap.map.projection);
+					baseMap.map.resolution = new Resolution(9783.939619140625, baseMap.map.projection);
+				}
+			}
+			
+			private function adicionaControlesMapa():void
+			{
+				_dragHandler = new DragHandler(baseMap.map, true);
+				
+				_wheelHandler = new WheelHandler(baseMap.map, true);
+				
+				_clickHandler = new ClickHandler(baseMap.map, true, true);
+				
+				_keyHandle = new KeyboardHandler(baseMap.map, true);
+				
+				mousePosition = new MousePosition();
+				mousePosition.right = 250;
+//				mousePosition.bottom = -30;
+				mousePosition.bottom = 0;
+				mousePosition.map = baseMap.map;
+				
+				spinner = new FxSpinner();
+				spinner.x = this.width/2;
+				spinner.y = this.height/2;
+				
+				_scaleLine = new ScaleLine();
+				_scaleLine.left = 90;
+				_scaleLine.bottom = 5;
+				_scaleLine.map = baseMap.map;
+				
+				_zoom = new Zoom();
+				_zoom.left = -60;
+				_zoom.top = 140;
+				_zoom.map = baseMap.map;
+				_zoom.toolTipZoomIn = "Aproximar";
+				_zoom.toolTipZoomOut = "Afastar";
+				_zoom.useHandCursor = true;
+				
+				_zoomBox = new ZoomBox();
+				_zoomBox.left = _zoom.left + 138;
+				_zoomBox.top = _zoom.top;
+				_zoomBox.map = baseMap.map;
+				_zoomBox.toolTip = "Desenhe uma área para aproximar";
+				
+				_extensaoTotal = new ExtensaoTotal();
+				_extensaoTotal.left = _zoomBox.left + 33;
+				_extensaoTotal.top = _zoom.top;
+				_extensaoTotal.map = baseMap.map;
+				_extensaoTotal.toolTip = "Extender o mapa à sua resolução máxima";
+				
+//				_marcadagua = new MarcadAguaHex();
+//				/*_marcadagua.right = 15;
+//				_marcadagua.top = _zoom.top; */
+//				_marcadagua.left = 20;
+//				_marcadagua.top = _zoom.top + 190;
+//				_marcadagua.toolTip = "Powered by HEX";
+				
+				_infoCaller = new InfoCaller();
+				/*_infoCaller.right = 15;
+				_infoCaller.top = _zoom.top; */
+				_infoCaller.left = 20;
+				_infoCaller.top = _zoom.top + 190;
+				_infoCaller.map = baseMap.map;
+				_infoCaller.toolTip = "Informações";
+				
+				_botaoAlternaMapas = new BotaoAlternaMapaBase();
+				_botaoAlternaMapas.map = baseMap.map;
+				_botaoAlternaMapas.left = 20;
+				_botaoAlternaMapas.top = _zoom.top + 140;
+				
+				_northArrow = new NorthArrow();
+				_northArrow.northText = '"';
+				_northArrow.northColor = "#666666";
+				_northArrow.northSize = "80";
+				_northArrow.left = 40;
+				_northArrow.bottom = 0;
+				_northArrow.enabled = true;
+				
+				/* _contador = new Contador();
+				_contador.bottom = -10;
+				_contador.right = mousePosition.right + mousePosition.width + _contador.width + 30;
+				 */
+				
+				_overview = new NewFxOverviewMapRatio();
+				_overview.bottom = 30;
+				_overview.right = 40;
+				_overview.width = 180;
+				_overview.height = 180;
+				_overview.ratio = 1.7;
+				_overview.map = baseMap.map;
+				_overview.setStyle("chromeColor", "#99adb7");
+				
+				this.addElement(spinner);
+				
+				/* _timer = new Timer(200, 1);
+				_timer.addEventListener(TimerEvent.TIMER, addOV);
+				_timer.start(); */
+				
+				_timer = new Timer(500, 1);
+				_timer.addEventListener(TimerEvent.TIMER, adicionaControles);
+				_timer.start(); 
+				
+				//Adiciona camadas _overview
+				adicionaCamadasOverview();
+				
+			}
+			
+			private function adicionaControles(even:TimerEvent):void
+			{
+				_timer.stop(); 
+				
+				this.addElement(_overview);
+				this.addElement(mousePosition);
+				//this.addElement(_contador);
+				this.addElement(_scaleLine);
+				this.addElement(_northArrow);
+//				this.addElement(_marcadagua);
+				this.addElement(_infoCaller);
+				this.addElement(_botaoAlternaMapas);
+				this.addElement(_zoom);
+				this.addElement(_zoomBox);
+				this.addElement(_extensaoTotal);
+			}
+			
+			private function addOV(even:TimerEvent):void
+			{
+				this.addElement(_overview);
+				
+				_timer = new Timer(150 , 1);
+				_timer.addEventListener(TimerEvent.TIMER, addMP);
+				_timer.start();
+			}
+			
+			private function addMP(event:TimerEvent):void
+			{		
+				this.addElement(mousePosition);
+				//this.addElement(_contador);
+				
+				_timer = new Timer(125, 1);
+				_timer.addEventListener(TimerEvent.TIMER, addSL);
+				_timer.start();
+			}
+			
+			private function addSL(event:TimerEvent):void
+			{				
+				this.addElement(_scaleLine);
+				
+				_timer = new Timer(125, 1);
+				_timer.addEventListener(TimerEvent.TIMER, addNA);
+				_timer.start();
+				
+			}
+			
+			private function addNA(event:TimerEvent):void
+			{				
+				this.addElement(_northArrow);
+				
+				_timer = new Timer(100, 1);
+				_timer.addEventListener(TimerEvent.TIMER, addBM);
+				_timer.start();
+			}
+			
+			private function addBM(event:TimerEvent):void
+			{
+//				this.addElement(_marcadagua);
+				this.addElement(_infoCaller);
+//				this.addElement(_botaoAlternaMapas); 
+				
+				_timer = new Timer(75, 1);
+				_timer.addEventListener(TimerEvent.TIMER, addZM);
+				_timer.start();
+			}
+			
+			private function addZM(event:TimerEvent):void
+			{
+				this.addElement(_zoom);
+				
+				_timer = new Timer(50, 1);
+				_timer.addEventListener(TimerEvent.TIMER, addEX);
+				_timer.start();
+			}
+			
+			private function addEX(event:TimerEvent):void
+			{
+				this.addElement(_zoomBox);
+				this.addElement(_extensaoTotal);
+				
+				/* _timer = new Timer(200, 1);
+				_timer.addEventListener(TimerEvent.TIMER, addEX);
+				_timer.start(); */
+			}
+			
+			
+			private function adicionaCamadasBaseMapa():void
+			{
+				var mapnik:Mapnik;
+				mapnik = new Mapnik("Mapa Base (OSM)", "Mapa Base (OSM)");
+				mapnik.projection = baseMap.projection;
+				mapnik.visible = false;
+				
+				var bingAerial:Bing;
+				bingAerial = new Bing("Ar3-LKk-acyISMevsF2bqH70h21mzr_FN9AhHfi7pS26F5hMH1DmpI7PBK1VCLBk", "Aerial");
+				bingAerial.projection = baseMap.projection;
+				bingAerial.visible = false;
+				bingAerial.buffer = 2;
+				
+				var bingRoad:Bing;
+				bingRoad = new Bing("Ar3-LKk-acyISMevsF2bqH70h21mzr_FN9AhHfi7pS26F5hMH1DmpI7PBK1VCLBk", "Road");
+				bingRoad.projection = baseMap.projection;
+				bingRoad.visible = true;
+				//bingRoad.buffer = 2;
+				
+				/*var nasa:WMS = new WMS("Nasa", "http://openscales.org/geoserver/ows", "bluemarble", "", "image/png");
+				nasa.projection = baseMap.projection;
+				nasa.version = "1.1.1";
+				nasa.maxExtent = new Bounds(-180,-90,180,90);
+				nasa.transparent = true;
+				nasa.visible = false; 
+				nasa.tiled = true;*/
+				
+				var toppStates:WMS = new WMS("Topp States", "http://openscales.org/geoserver/wms", "topp:states", "", "image/png");
+				toppStates.projection = baseMap.projection;
+				toppStates.version = "1.1.1";
+				toppStates.maxExtent = new Bounds(-180,-90,180,90);
+				toppStates.transparent = true;
+				toppStates.visible = true;
+				
+				baseMap.map.addLayer(mapnik);
+				baseMap.map.addLayer(bingAerial);
+				baseMap.map.addLayer(bingRoad);
+				/*baseMap.map.addLayer(nasa);
+				
+				var tmsExample:RapidEyeTMS = new RapidEyeTMS("TMS RapidEye", "http://geo1.ibama.gov.br/geo/rapideye/mosaic", "");
+				tmsExample.origin = baseMap.map.center;
+				tmsExample.visible = false;
+				tmsExample.displayInLayerManager = true;
+				baseMap.map.addLayer(tmsExample);*/
+			}
+			
+			private function adicionaCamadasOverview(event:LayerEvent=null):void
+			{
+				var mapLayer:Layer;
+				var auxLayer:Object;
+				
+				for(var i:uint=0; i<baseMap.map.layers.length; i++) 
+				{
+					mapLayer = baseMap.map.layers[i]; 
+					
+					auxLayer = new Object();
+					auxLayer = mapLayer;
+					
+					/* if (mapLayer is WMS)
+					{							
+						var overviewWMSLayer:WMS = new WMS("overview_"+auxLayer.identifier, auxLayer.url, auxLayer.layers, "", auxLayer.format);
+						overviewWMSLayer.visible = auxLayer.visible;
+						overviewWMSLayer.projection = _overview.projection;
+						
+						_overview.layer = overviewWMSLayer;
+					} else */
+					if (mapLayer is Bing)
+					{							
+						var overviewBingLayer:Bing = new Bing(auxLayer.key, auxLayer.imagerySet);
+						overviewBingLayer.identifier = "overview_Bing "+auxLayer.imagerySet+i.toString();
+						overviewBingLayer.visible = auxLayer.visible;
+						mapLayer.name = "Bing "+auxLayer.imagerySet;
+						mapLayer.identifier = "Bing "+auxLayer.imagerySet+i.toString();
+						
+						_overview.layer = overviewBingLayer;
+					}
+					else if (mapLayer is Mapnik)
+					{
+						var overviewMapnikLayer:Mapnik = new Mapnik("overview_"+auxLayer.identifier);
+						overviewMapnikLayer.visible = auxLayer.visible;
+						overviewMapnikLayer.projection = _overview.projection;
+						
+						_overview.layer = overviewMapnikLayer;
+					}
+				} 
+			}
+			
+			protected function camadasXmlResultHandler(event:ResultEvent):void 
+			{				
+				var xml:XML = event.result as XML;
+				
+				_listaCamadas = new XMLListCollection(xml.camada);				
+				_listaGruposCamadas =  new XMLListCollection(xml.grupo);
+							
+				adicionaCamadasGrupos(xml.*);
+				
+//				adicionaCamadasBD();
+			}
+			
+			private function adicionaCamadasBD():void
+			{
+				var _Pontos_DB:WMS = new WMS("Pontos", "http://siscom.ibama.gov.br/geo-srv/csr/wms", "csr:ponto", "", "image/png");
+				_Pontos_DB.projection = baseMap.projection;
+				_Pontos_DB.version = "1.1.0";
+				_Pontos_DB.maxExtent = new Bounds(-180,-90,180,90);
+				_Pontos_DB.transparent = true;
+				_Pontos_DB.visible = true;
+				
+				var _Linhas_DB:WMS = new WMS("Linhas", "http://siscom.ibama.gov.br/geo-srv/csr/wms", "csr:linha", "", "image/png");
+				_Linhas_DB.projection = baseMap.projection;
+				_Linhas_DB.version = "1.1.0";
+				_Linhas_DB.maxExtent = new Bounds(-180,-90,180,90);
+				_Linhas_DB.transparent = true;
+				_Linhas_DB.visible = true;
+				
+				var _Poligonos_DB:WMS = new WMS("Polígonos", "http://siscom.ibama.gov.br/geo-srv/csr/wms", "csr:poligono", "", "image/png");
+				_Poligonos_DB.projection = baseMap.projection;
+				_Poligonos_DB.version = "1.1.0";
+				_Poligonos_DB.maxExtent = new Bounds(-180,-90,180,90);
+				_Poligonos_DB.transparent = true;
+				_Poligonos_DB.visible = true;
+				
+				baseMap.map.addLayer(_Poligonos_DB, true);
+				baseMap.map.addLayer(_Linhas_DB, true);
+				baseMap.map.addLayer(_Pontos_DB, true);
+			}
+			
+			private function adicionaCamadasGrupos(xml:XMLList):void
+			{
+				for each (var node:Object in xml)
+				{
+					if (_listaCamadas.contains(node))
+					{
+						adicionaCamada(node);
+					}
+					else if (_listaGruposCamadas.contains(node))
+					{
+						adicionaGrupo(node);
+					}
+				}
+			}
+			
+			private function adicionaCamada(l:Object):void
+			{
+				var camadaWMSAuthKey:WMSAuthKey;
+				var camadaWMS:WMS;
+				var camadaWFS:WFS;
+				var listaBounds:Array;
+								
+				/* for (var i:int = 0; i < listaCamadas.length; i++)
+				{
+				*/
+				/* if ((listaCamadas[i].url == "http://painel:painel@10.1.8.29:8080/geoserver/cemam/wms") &&
+				((listaCamadas[i].layers == "cemam:alerta")))
+				{ */
+				if ((l.url == "http://painel:painel@10.1.8.29:8080/geoserver/cemam/wms") &&
+					((l.layers == "cemam:alerta")))
+				{
+					camadaWMSAuthKey = new WMSAuthKey(l.name, l.url, l.layers);
+					camadaWMSAuthKey.projection = baseMap.map.projection;
+					camadaWMSAuthKey.format = l.format;
+					
+					listaBounds = new Array();
+					
+					listaBounds = l.maxExtent.split(",");
+					
+					if (listaBounds.length == 4) 
+					{
+						camadaWMSAuthKey.maxExtent = new Bounds (Number(listaBounds[0]), Number(listaBounds[1]), Number(listaBounds[2]), Number(listaBounds[3]));
+					}
+					else 
+					{
+						camadaWMSAuthKey.maxExtent = new Bounds (-180,-90,180,90);
+					} 
+					
+					camadaWMSAuthKey.version = l.version;
+					camadaWMSAuthKey.visible = String(l.visible) == "true" ? true : false;
+					camadaWMSAuthKey.transparent = Boolean(l.transparent);
+					camadaWMSAuthKey.tiled = Boolean(l.tiled);
+					
+					baseMap.map.addLayer(camadaWMSAuthKey, true);
+				}
+				else
+				{
+					if(l.type.toLowerCase() == "wms")
+					{
+						camadaWMS = new WMS(l.name, l.url, l.layers);
+						camadaWMS.projection = baseMap.map.projection;
+						camadaWMS.format = l.format;
+						
+						listaBounds = new Array();
+						
+						listaBounds = l.maxExtent.split(",");
+						
+						if (listaBounds.length == 4)
+						{
+							camadaWMS.maxExtent = new Bounds(Number(listaBounds[0]), Number(listaBounds[1]), Number(listaBounds[2]), Number(listaBounds[3]));
+						}
+						else 
+						{
+							camadaWMS.maxExtent = new Bounds(-180,-90,180,90);
+						} 
+						
+						camadaWMS.version = l.version;
+						camadaWMS.visible = String(l.visible) == "true" ? true : false;
+						camadaWMS.transparent = Boolean(l.transparent);
+						camadaWMS.tiled = Boolean(l.tiled);
+						
+						baseMap.map.addLayer(camadaWMS, true);
+					}
+					else if (l.type.toLowerCase() == "wfs")
+					{
+						camadaWFS = new WFS(l.name, l.url, l.layers, l.version);
+						camadaWFS.projection = baseMap.map.projection;
+//						camadaWFS.format = l.format;
+						
+						listaBounds = new Array();
+						
+						listaBounds = l.maxExtent.split(",");
+						
+						if (listaBounds.length == 4)
+						{
+							camadaWFS.maxExtent = new Bounds(Number(listaBounds[0]), Number(listaBounds[1]), Number(listaBounds[2]), Number(listaBounds[3]));
+						}
+						else 
+						{
+							camadaWFS.maxExtent = new Bounds(-180,-90,180,90);
+						} 
+						
+						camadaWFS.useCapabilities = true;
+						camadaWFS.style =  Style.getDefaultSurfaceStyle();
+						camadaWFS.visible = String(l.visible) == "true" ? true : false;
+//						camadaWFS.transparent = Boolean(l.transparent);
+//						camadaWFS.tiled = Boolean(l.tiled);
+						
+						baseMap.map.addLayer(camadaWFS, true);
+					}
+				}
+			}
+			
+			private function adicionaGrupo(gl:Object):void
+			{
+				var grupoWMS:LayerGroup;
+				var camadaWMSAuthKey:WMSAuthKey;
+				var camadaWMS:WMS;
+				var listaBounds:Array;
+				var listaCamadasWMS:XMLListCollection;
+				
+				/* for (var j:int = 0; j < gl.camada.length; j++)
+				{	 */				
+					grupoWMS = new LayerGroup(gl.@name, baseMap.map);
+					grupoWMS.visible = Boolean(gl.@visible as String);
+					
+					listaCamadasWMS = new XMLListCollection(gl.camada);
+					
+					for (var i:int = 0; i < listaCamadasWMS.length; i++)
+					{						
+						if ((listaCamadasWMS[i].url == "http://painel:painel@10.1.8.29:8080/geoserver/cemam/wms") &&
+							((listaCamadasWMS[i].layers == "cemam:alerta")))
+						{
+							camadaWMSAuthKey = new WMSAuthKey(listaCamadasWMS[i].name, listaCamadasWMS[i].url, listaCamadasWMS[i].layers);
+							camadaWMSAuthKey.projection = baseMap.map.projection;
+							camadaWMSAuthKey.format = listaCamadasWMS[i].format;
+							
+							listaBounds = new Array();
+							
+							listaBounds = (listaCamadasWMS[i].maxExtent).split(",");
+							
+							if (listaBounds.length == 4) 
+							{
+								camadaWMSAuthKey.maxExtent = new Bounds (Number(listaBounds[0]), Number(listaBounds[1]), Number(listaBounds[2]), Number(listaBounds[3]));
+							}
+							else 
+							{
+								camadaWMSAuthKey.maxExtent = new Bounds (-180,-90,180,90);
+							} 
+							
+							camadaWMSAuthKey.version = listaCamadasWMS[i].version;
+							camadaWMSAuthKey.visible = Boolean(listaCamadasWMS[i].visible as String);
+							camadaWMSAuthKey.transparent = Boolean(listaCamadasWMS[i].transparent);
+							camadaWMSAuthKey.tiled = Boolean(listaCamadasWMS[i].tile);
+							
+							grupoWMS.addLayer(camadaWMSAuthKey);
+						}
+						else
+						{
+							camadaWMS = new WMS(listaCamadasWMS[i].name, listaCamadasWMS[i].url, listaCamadasWMS[i].layers);
+							camadaWMS.projection = baseMap.map.projection;
+							camadaWMS.format = listaCamadasWMS[i].format;
+							
+							listaBounds = new Array();
+							listaBounds = (listaCamadasWMS[i].maxExtent).split(",");
+							
+							/*if (listaBounds.length == 4)
+							{
+								camadaWMS.maxExtent = new Bounds(Number(listaBounds[0]), Number(listaBounds[1]), Number(listaBounds[2]), Number(listaBounds[3]));
+							}
+							else 
+							{
+								camadaWMS.maxExtent = new Bounds(-180,-90,180,90);
+							} */
+							
+							/*listaBounds = new Array();
+							listaBounds = (listaCamadasWMS[i].bbox).split(",");*/
+							
+							camadaWMS.version = listaCamadasWMS[i].version;
+							camadaWMS.visible = Boolean(listaCamadasWMS[i].visible as String);
+							camadaWMS.transparent = Boolean(listaCamadasWMS[i].transparent);
+							camadaWMS.tiled = Boolean(listaCamadasWMS[i].tiled);
+							/*camadaWMS.height = 430;
+							camadaWMS.width = 512;*/
+							
+							grupoWMS.addLayer(camadaWMS);
+						}
+					}
+					(baseMap.map as HexMap).addLayerGroup(grupoWMS);
+				//}
+			}
+
+			protected function camadasXmlFaultHandler(event:FaultEvent):void
+			{
+				adicionaCamadasBD();
+			}
+			
+		]]>
+	</fx:Script>
+	
+
+</s:Group>

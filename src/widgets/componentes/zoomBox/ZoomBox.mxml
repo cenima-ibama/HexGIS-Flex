@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- ZoomBox control, allow the user to draw a zoom extent --> 
+<Control xmlns="org.openscales.fx.control.*"
+		xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="24" height="24">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.CursorManager;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.cursor.CrosshairCursor;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.ZoomBoxEvent;
+			import org.openscales.core.handler.Handler;
+			import org.openscales.core.handler.mouse.DragHandler;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.geometry.basetypes.Bounds;
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import solutions.event.AppEvent;
+			import solutions.SiteContainer;
+			
+			import spark.skins.spark.ButtonSkin;
+			
+			import widgets.componentes.informacoes.click.event.ClickActivatedEvent;
+			import widgets.componentes.informacoes.drag.event.DragActivatedEvent;
+			import widgets.componentes.zoomBox.ZoomBoxHandler;
+			
+			
+			private var _selected:Boolean = false;
+			
+			[Bindable]
+			private var _style:Object = "default";
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/zoom_box_icon.swf")]
+			private var _icon:Class;
+			
+			[Bindable]
+			private var _toolTip:String = Catalog.getLocalizationForKey("zoombox.tooltip");;
+			
+			/**
+			 * Handler of ZoomBox
+			 */
+			private var _zoomBoxHandler:ZoomBoxHandler = new ZoomBoxHandler();
+			
+			/**
+			 * ID of the cursor used during the drawing of the zoom-box.
+			 */
+			private var zoomBoxCursorID:int = CursorManager.NO_CURSOR;
+			
+			/**
+			 * @inherit
+			 */
+			override public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				this._toolTip = Catalog.getLocalizationForKey("zoombox.tooltip");
+			}
+			
+			/**
+			 * @inherit
+			 */
+			override public function set map(value:Map):void
+			{
+				super.map = value;
+				if (this._map != null) 
+				{
+					this._zoomBoxHandler.map = this._map;
+				}
+			}
+			
+			/**
+			 * @inherit
+			 */
+			override public function activate():void 
+			{
+				super.activate();
+				
+				// add listener to the map
+				if(this._map)
+				{
+					SiteContainer.addEventListener(AppEvent.WIDGET_LOADED, disabled);
+					SiteContainer.addEventListener(DragActivatedEvent.INFO_DRAG_ATIVADO, disabled);
+					SiteContainer.addEventListener(ClickActivatedEvent.INFO_CLICK_ATIVADO, disabled);
+					this._map.addEventListener(ZoomBoxEvent.END, disabled);
+				
+					//listeners para ativacao dos icones da camada de vetorizacao
+					this._map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, disabled);
+					this._map.addEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, disabled);
+					this._map.addEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, disabled);
+					this._map.addEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, disabled);
+					this._map.addEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, disabled);
+					this._map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, disabled);
+					this._map.addEventListener(FeatureEvent.FEATURE_SELECT, disabled);
+				}
+			}
+			
+			/**
+			 * @inherit
+			 */
+			override public function desactivate():void 
+			{
+				super.desactivate();
+				
+				// remove listener to the map
+				if(this._map)
+				{
+					SiteContainer.removeEventListener(AppEvent.WIDGET_LOADED, disabled);
+					SiteContainer.removeEventListener(DragActivatedEvent.INFO_DRAG_ATIVADO, disabled);
+					SiteContainer.removeEventListener(ClickActivatedEvent.INFO_CLICK_ATIVADO, disabled);
+					this._map.removeEventListener(ZoomBoxEvent.END, disabled);
+					this._map.removeEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, disabled);
+				}
+			}
+			
+			/**
+			 * When the user click on the button ZoomBox
+			 */
+			private function onSelectZoomBox(event:Event):void 
+			{
+				if (_selected == false) 
+				{
+					_selected = true;
+					//_zoomBoxHandler.deactiveDrag();
+					_zoomBoxHandler.active = true;
+					// Change to the specific cursor
+					zoomBoxCursorID = CursorManager.setCursor(CrosshairCursor);
+					this.map.dispatchEvent(new ZoomBoxActivatedEvent(ZoomBoxActivatedEvent.ZOOMBOX_SELECIONADO)); 
+				}
+				else
+				{
+					//_zoomBoxHandler.activeDrag();
+					_zoomBoxHandler.active = false;
+					_selected = false;
+					// Remove the specific cursor
+					CursorManager.removeCursor((zoomBoxCursorID > 0) ? zoomBoxCursorID : CursorManager.currentCursorID);
+					zoomBoxCursorID = CursorManager.NO_CURSOR;
+				}
+			}
+			
+			private function disabled(event:Event):void 
+			{
+				_zoomBoxHandler.active = false;
+				_selected = false;
+				// Remove the specific cursor
+				CursorManager.removeCursor((zoomBoxCursorID > 0) ? zoomBoxCursorID : CursorManager.currentCursorID);
+				zoomBoxCursorID = CursorManager.NO_CURSOR;
+			}
+			
+			override public function set styleName(value:Object):void 
+			{
+				super.styleName = value;
+				this._style = value;
+			}
+			
+			public function set icon(value:Class):void 
+			{
+				this._icon = value;
+			}
+			
+			public override function set toolTip(value:String):void
+			{
+				this._toolTip = value;
+			}
+		]]>
+	</fx:Script>
+	
+	<IconButton id="zoombox"
+				width="{this.width}"
+				height="{this.height}"
+				toolTip="{this._toolTip}"
+				icon="{_icon}"
+				useHandCursor="true"
+				buttonMode="true"
+				click="onSelectZoomBox(event)" />
+	
+</Control>

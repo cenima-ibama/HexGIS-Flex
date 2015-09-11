@@ -1,0 +1,312 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ChartUtils.as</title>
+<link rel="stylesheet" type="text/css" href="../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">solutions</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">charts</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">chartClasses</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Series</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">charts</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">AreaSeries</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">charts</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">BarSeries</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">charts</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ColumnSeries</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">charts</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">LineSeries</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">charts</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">PieSeries</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">controls</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Alert</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">GradientEntry</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">LinearGradient</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">graphics</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SolidColorStroke</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ChartUtils</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">ChartUtils</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">/* var red:uint = 0xfe3f3f;
+        var yellow:uint = 0xfefe3f;
+        var green:uint = 0x3ffe3f;
+        var indigo:uint = 0x3ffefe;
+        var blue:uint = 0x3f3ffe;
+        var violet:uint = 0xfe3ffe;
+        var white:uint = 0xffffff;;
+        var black:uint = 0x000000;; */</span>
+        
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SetColBarLinAreChartSeriesFills</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">chartSeries</span>:<span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">tipo</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>        
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">nIntervalos</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 7;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">series</span>:<span class="ActionScriptDefault_Text">Series</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">nSeries</span>:<span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">chartSeries</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span>:<span class="ActionScriptDefault_Text">uint</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">j</span>:<span class="ActionScriptDefault_Text">uint</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">incr</span>:<span class="ActionScriptDefault_Text">uint</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">red</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xcc0000;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">yellow</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xcccc00;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">green</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x00cc00;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">indigo</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x00cccc;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">blue</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x0000cc;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">violet</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xcc00cc;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">white</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xffffff;;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">black</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x000000;;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">initialColorAr</span>:<span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">red</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">yellow</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">green</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">indigo</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">blue</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">violet</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">white</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">black</span><span class="ActionScriptBracket/Brace">]</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_fillAlpha</span>:<span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 0.65;
+            <span class="ActionScriptComment">//var fillAlphaGradient:Number = fillAlpha + 0.15;
+</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_fill</span>:<span class="ActionScriptDefault_Text">LinearGradient</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ge</span>:<span class="ActionScriptDefault_Text">GradientEntry</span>;
+            <span class="ActionScriptComment">//var ge2:GradientEntry;
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_stroke</span>:<span class="ActionScriptDefault_Text">SolidColorStroke</span>;
+                        
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">resto</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">nSeries</span><span class="ActionScriptOperator">%</span><span class="ActionScriptDefault_Text">nIntervalos</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">nIteracoes</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">nSeries</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">nIntervalos</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">iteracoes</span>:<span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;    
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sinal</span>:<span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">meio</span>:<span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">meio_aux</span>:<span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">indice</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0;
+            
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">nIntervalos</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIteracoes</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptOperator">%</span>2 <span class="ActionScriptOperator">==</span> 0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">meio_aux</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptOperator">/</span>2<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">-</span>1;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">meio_aux</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptOperator">/</span>2<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptDefault_Text">meio</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">meio_aux</span>;
+            
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">resto</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">indice</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">meio_aux</span><span class="ActionScriptOperator">+</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sinal</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">indice</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">indice</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">indice</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptDefault_Text">sinal</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sinal</span><span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptDefault_Text">meio_aux</span> <span class="ActionScriptOperator">-=</span> <span class="ActionScriptDefault_Text">sinal</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i</span>;
+            <span class="ActionScriptBracket/Brace">}</span> 
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">k</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0;
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">incr</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">else</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">incr</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span> 
+                <span class="ActionScriptDefault_Text">incr</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">incr</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">+</span> 1<span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>; <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">series</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">chartSeries</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">k</span><span class="ActionScriptBracket/Brace">]</span>;
+                    <span class="ActionScriptDefault_Text">k</span><span class="ActionScriptOperator">++</span>;
+                    
+                    <span class="ActionScriptDefault_Text">_fill</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">LinearGradient</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">_ge</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">GradientEntry</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">,</span> 0.0<span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_fillAlpha</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptComment">//ge2 = new GradientEntry(initialColorAr[i] - 0x001c1c, 0.95, fillAlphaGradient);
+</span>                    <span class="ActionScriptDefault_Text">_fill</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">entries</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">_ge</span><span class="ActionScriptBracket/Brace">]</span>;
+                        
+                    <span class="ActionScriptComment">/*
+                    *
+                    */</span>
+                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tipo</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"Colunas"</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">||</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tipo</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"Barras"</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"fill"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_fill</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tipo</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"Linhas"</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">_stroke</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SolidColorStroke</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">,</span> 3.0<span class="ActionScriptOperator">,</span> 0.7<span class="ActionScriptBracket/Brace">)</span>;
+
+                        <span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"lineStroke"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_stroke</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptComment">//Alert.show(_stroke.color.toString());
+</span>                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tipo</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"Áreas"</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">_stroke</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SolidColorStroke</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">,</span> 1.0<span class="ActionScriptOperator">,</span> 0.8<span class="ActionScriptBracket/Brace">)</span>;
+                        
+                        <span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"areaStroke"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_stroke</span><span class="ActionScriptBracket/Brace">)</span>;
+                        <span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"areaFill"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_fill</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    
+                    <span class="ActionScriptComment">/*
+                    *
+                    */</span>
+                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">incr</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptReserved">else</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-=</span> <span class="ActionScriptDefault_Text">incr</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SetPieChartSeriesFills</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">chartSeries</span>:<span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">nDados</span>:<span class="ActionScriptDefault_Text">int</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>        
+            <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">nIntervalos</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 7;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">series</span>:<span class="ActionScriptDefault_Text">Series</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span>:<span class="ActionScriptDefault_Text">uint</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">j</span>:<span class="ActionScriptDefault_Text">uint</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">incr</span>:<span class="ActionScriptDefault_Text">uint</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">red</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xcc0000;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">yellow</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xcccc00;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">green</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x00cc00;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">indigo</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x00cccc;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">blue</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x0000cc;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">violet</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xcc00cc;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">white</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0xffffff;;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">black</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x000000;;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">initialColorAr</span>:<span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">red</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">yellow</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">green</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">indigo</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">blue</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">violet</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">white</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">black</span><span class="ActionScriptBracket/Brace">]</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_fillAlpha</span>:<span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptOperator">=</span> 0.65;
+            <span class="ActionScriptComment">//var fillAlphaGradient:Number = fillAlpha + 0.15;
+</span>            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_fill</span>:<span class="ActionScriptDefault_Text">LinearGradient</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ge</span>:<span class="ActionScriptDefault_Text">GradientEntry</span>;
+            <span class="ActionScriptComment">//var ge2:GradientEntry;
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_stroke</span>:<span class="ActionScriptDefault_Text">SolidColorStroke</span>;
+                        
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">resto</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">nDados</span><span class="ActionScriptOperator">%</span><span class="ActionScriptDefault_Text">nIntervalos</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">nIteracoes</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">nDados</span><span class="ActionScriptOperator">/</span><span class="ActionScriptDefault_Text">nIntervalos</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">iteracoes</span>:<span class="ActionScriptDefault_Text">Array</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;    
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">sinal</span>:<span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">meio</span>:<span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">meio_aux</span>:<span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">indice</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_fills</span>:<span class="ActionScriptDefault_Text">Array</span>;
+            
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">nIntervalos</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIteracoes</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptOperator">%</span>2 <span class="ActionScriptOperator">==</span> 0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">meio_aux</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptOperator">/</span>2<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">-</span>1;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">meio_aux</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptOperator">/</span>2<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptDefault_Text">meio</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">meio_aux</span>;
+            
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">resto</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">indice</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">meio_aux</span><span class="ActionScriptOperator">+</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">sinal</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">indice</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">indice</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">nIntervalos</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">indice</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">++</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptDefault_Text">sinal</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">sinal</span><span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">-</span>1<span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptDefault_Text">meio_aux</span> <span class="ActionScriptOperator">-=</span> <span class="ActionScriptDefault_Text">sinal</span><span class="ActionScriptOperator">*</span><span class="ActionScriptDefault_Text">i</span>;
+            <span class="ActionScriptBracket/Brace">}</span> 
+
+            <span class="ActionScriptDefault_Text">series</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">chartSeries</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>;
+                        
+            <span class="ActionScriptDefault_Text">_fills</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">=</span>0; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">&lt;</span><span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">incr</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">else</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">incr</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span> 
+                <span class="ActionScriptDefault_Text">incr</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">incr</span><span class="ActionScriptOperator">/</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">+</span> 1<span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">=</span> 0; <span class="ActionScriptDefault_Text">j</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">iteracoes</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span>; <span class="ActionScriptDefault_Text">j</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>                    
+                    <span class="ActionScriptDefault_Text">_fill</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">LinearGradient</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">_ge</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">GradientEntry</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">,</span> 0.0<span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_fillAlpha</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptComment">//ge2 = new GradientEntry(initialColorAr[i] - 0x001c1c, 0.95, fillAlphaGradient);
+</span>                    <span class="ActionScriptDefault_Text">_fill</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">entries</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">_ge</span><span class="ActionScriptBracket/Brace">]</span>;
+                    
+                    <span class="ActionScriptDefault_Text">_fills</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_fill</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+                    <span class="ActionScriptComment">/*
+                    *
+                    */</span>
+                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">+</span>1<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">incr</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptReserved">else</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">initialColorAr</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptOperator">-=</span> <span class="ActionScriptDefault_Text">incr</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"fills"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_fills</span><span class="ActionScriptBracket/Brace">)</span>;    
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">SetBubChartSeriesFills</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">chartSeries</span>:<span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>        
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">series</span>:<span class="ActionScriptDefault_Text">Series</span>;
+
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">blue</span>:<span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptOperator">=</span> 0x0000cc;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_fill</span>:<span class="ActionScriptDefault_Text">LinearGradient</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_ge</span>:<span class="ActionScriptDefault_Text">GradientEntry</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_stroke</span>:<span class="ActionScriptDefault_Text">SolidColorStroke</span>;
+        
+            
+            <span class="ActionScriptDefault_Text">_fill</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">LinearGradient</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">_ge</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">GradientEntry</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">blue</span><span class="ActionScriptOperator">,</span> 0.0<span class="ActionScriptOperator">,</span> 0.5<span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">_fill</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">entries</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">_ge</span><span class="ActionScriptBracket/Brace">]</span>;
+            
+            <span class="ActionScriptDefault_Text">_stroke</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">SolidColorStroke</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">blue</span><span class="ActionScriptOperator">,</span> 1.0<span class="ActionScriptOperator">,</span> 0.8<span class="ActionScriptBracket/Brace">)</span>;
+                
+            <span class="ActionScriptDefault_Text">series</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">chartSeries</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span>;
+            <span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"stroke"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_stroke</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">series</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">setStyle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"fill"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_fill</span><span class="ActionScriptBracket/Brace">)</span>;
+                    
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

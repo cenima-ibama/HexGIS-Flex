@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:CloseWindowBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:solutions="solutions.*" 
+					  showEffect="{fadeIn}" hideEffect="{fadeOut}"
+					  height="300" width="350">
+	
+	<fx:Style source="assets/styles/estiloAboutWindow.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			//import assets.skins.AboutWindowSkin;
+			
+			protected function labelLink_clickHandler(event:MouseEvent):void
+			{
+				var url:URLRequest = new URLRequest("http://www.hexgis.com");
+				navigateToURL(url, "_blank");
+				
+				labelLink.styleName = "estiloLabel";
+			}
+			
+			
+			protected function labelLink_rollOverHandler(event:MouseEvent):void
+			{
+				labelLink.styleName = "estiloLabelOver";
+			}
+			
+			
+			protected function labelLink_rollOutHandler(event:MouseEvent):void
+			{
+				labelLink.styleName = "estiloLabel";
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="500" />
+		
+		<s:Fade id="fadeOut" alphaFrom="1.0" alphaTo="0.0" duration="500" />
+	</fx:Declarations>
+	
+	<solutions:layout>
+		<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" gap="20"/>
+	</solutions:layout>
+		
+	<s:Label id="labelLink" styleName="estiloLabel"
+			 text="www.hexgis.com" click="labelLink_clickHandler(event)"
+			 rollOver="labelLink_rollOverHandler(event)" rollOut="labelLink_rollOutHandler(event)"/>
+	
+	<s:Label text="Free Flex Framework" styleName="estiloLabel"/>	
+	
+	<s:Label text="Versão 1.0.1" styleName="estiloLabel"/>
+	
+</solutions:CloseWindowBase>

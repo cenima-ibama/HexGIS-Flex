@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:CloseWindowBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:solutions="solutions.*" 
+			styleName="popUpWindow" >
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+			
+	<fx:Script>
+		<![CDATA[
+			import mx.containers.Canvas;
+			import mx.managers.PopUpManager;
+			import mx.printing.FlexPrintJob;
+			import mx.printing.FlexPrintJobScaleType;
+			
+			import spark.components.DataRenderer;
+		
+		protected var _mapCanvas:DataRenderer;
+		
+		public function set mapLayout(val:DataRenderer):void
+		{
+			// Add a canvas that will be printed
+			_mapCanvas = val;
+			
+			outerBox.addChild(_mapCanvas);
+		}
+				
+		private function sendToPrinter():void
+		{
+			// Create an instance of the FlexPrintJob class.
+			var myPrintJob:FlexPrintJob = new FlexPrintJob();
+			myPrintJob.printAsBitmap=false;
+		
+			// Start the print job.
+			if (myPrintJob.start())
+			{
+				try                   
+				{
+					// Add the panel to print.
+					myPrintJob.addObject(_mapCanvas, FlexPrintJobScaleType.SHOW_ALL);
+				}
+				catch (error:Error)
+				{
+				}
+				// Send the job to the printer.
+				myPrintJob.send();
+			} 
+		}		
+		]]>
+	</fx:Script>	
+	<mx:VBox id="outerBox" borderStyle="none" 
+			horizontalAlign="left"
+			paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	</mx:VBox>
+	<mx:HBox width="100%" verticalAlign="middle" horizontalAlign="center" paddingBottom="0">
+		<mx:Button label="Print" 
+				click="sendToPrinter()"/>
+	</mx:HBox>
+</solutions:CloseWindowBase>

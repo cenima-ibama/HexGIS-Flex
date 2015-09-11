@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<os:IconButton xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:os="org.openscales.fx.control.*"
+			   implements="org.openscales.core.control.IControl"
+			   toolTip="{this.tooltip}"
+			   icon="{_btnPath}" alpha="{_alpha}"
+			   width="20" height="20"
+			   click="onClick()" enabled="{active}">
+	
+	<!--rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"-->
+	
+	<fx:Script>
+		<![CDATA[
+			import org.openscales.core.Map;
+			import org.openscales.core.control.IControl;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.handler.IHandler;
+			import org.openscales.core.handler.feature.draw.AbstractDrawHandler;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.style.Style;
+			import org.openscales.fx.control.layer.LayerManager;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import widgets.VetorizarWidget;
+			import widgets.componentes.vetorizar.desenhar.handler.NewDrawShapeHandler;
+			
+			[Bindable]
+			private var _alpha:Number = 0.5;
+			
+			[Bindable]
+			private var tooltip:String = Catalog.getLocalizationForKey('drawing.shape');
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/black/5.png")]
+			private var _btnPath:Class;
+			
+			private var _active:Boolean = true;
+			private var _handler:AbstractDrawHandler = new NewDrawShapeHandler();
+			private var _isClick:Boolean = false;
+			private var _drawingMode:String;
+			
+			[Bindable]
+			private var _widget:VetorizarWidget;
+			
+			
+			/**
+			 * Indicates for Drawing mode
+			 * multiple : tools are in the LayerSwitcher
+			 * unique : tools are in the DrawingToolbar
+			 */
+			[Bindable]
+			public function get drawingMode():String{
+				
+				return _drawingMode;
+			}
+			
+			public function set drawingMode(value:String):void{
+				_drawingMode = value;
+			}
+			
+			public function get widget():VetorizarWidget
+			{
+				return this._widget;
+			}
+			
+			public function set widget(value:VetorizarWidget):void
+			{
+				this._widget = value;
+			}
+			
+			/**
+			 * Flag for activating and deactivating the component
+			 * @default true;
+			 */
+			[Bindable]
+			public function get active():Boolean
+			{
+				return _active;
+			}
+			public function set active(value:Boolean):void
+			{
+				_active = value;
+				if(! _active){
+					_handler.active = false;
+				}
+			}
+			
+			/**
+			 * Drawing style of the path
+			 */
+			public function get style():Style
+			{		
+				return (this._handler as NewDrawShapeHandler).style;
+			}
+			public function set style(value:Style):void
+			{	
+				(this._handler as NewDrawShapeHandler).style = value;
+			}
+			
+			/**
+			 * Map controled by this control
+			 */
+			public function get map():Map
+			{
+				return _handler.map;
+			}
+			public function set map(value:Map):void
+			{
+				_handler.map = value;
+				_handler.map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, onChangeActiveHandler);
+				_handler.map.addEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, onChangeActiveHandler);
+				_handler.map.addEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, onChangeActiveHandler);
+				_handler.map.addEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, onChangeActiveHandler);
+				_handler.map.addEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, onChangeActiveHandler);
+				_handler.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, onChangeActiveLayer);
+				_handler.map.addEventListener(I18NEvent.LOCALE_CHANGED, onMapLanguageChange);
+			}
+			
+			/**
+			 * Position (x,y) of the handler
+			 */
+			public function get position():Pixel
+			{	
+				return new Pixel(x,y);
+			}
+			public function set position(value:Pixel):void
+			{	
+				if(value)
+				{
+					x = value.x;
+					y = value.y;
+				}
+			}
+			
+			/**
+			 * Layer the features will be drawn on
+			 */
+			[Bindable]
+			public function get target():VectorLayer
+			{	
+				return _handler.drawLayer;
+			}
+			public function set target(value:VectorLayer):void
+			{
+				this.disactivate();
+				_handler.drawLayer = value;
+			}
+			
+			/**
+			 * To activate or disactivate the handler
+			 */
+			public function activate():void
+			{	
+				_handler.active = true;
+				_alpha = 1;
+				_handler.map.doubleclickZoomEnabled = false;
+				
+				if (this.widget)
+				{
+					(_handler as NewDrawShapeHandler).widget = this.widget;
+					this.widget.mode = "line";
+				}
+			}
+			public function disactivate():void
+			{	
+				_handler.active = false;
+				_alpha = 0.5;
+				
+				if (this.widget)
+				{
+					this.widget.mode = "";
+				}
+			}
+			
+			private function itemRollOver(event:MouseEvent):void
+			{
+				_alpha = 1.0;
+			}
+			
+			private function itemRollOut(event:MouseEvent):void
+			{				
+				if (!this._handler.active)
+				{
+					_alpha = 0.5;
+				}
+			}
+			
+			
+			/**
+			 * On button click, dispatch a DrawingEvent.DRAW_HANDLER_ACTIVATED event
+			 */
+			public function onClick():void
+			{	
+				if(!this.target)
+					return;
+				
+				// Disactive this component
+				var evt:DrawingEvent;
+				if(this._handler.active)
+				{
+					if(!(this._handler as NewDrawShapeHandler).newFeature)
+						(this._handler as NewDrawShapeHandler).endShape();
+					disactivate();
+					_handler.map.doubleclickZoomEnabled = true;
+					return;
+				}
+				
+				// Disactive others drawing tools components
+				this._isClick = true;
+				evt = new DrawingEvent(DrawingEvent.DRAW_HANDLER_ACTIVATED);
+				evt.activeHandler = this.id;
+				evt.layer = this.target;
+				_handler.map.dispatchEvent(evt);
+				
+				// Disactive mesure tools components
+				evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_HANDLER);
+				evt.activeHandler = null;
+				_handler.map.dispatchEvent(evt);
+				
+				// Active this component
+				activate();
+			}
+			
+			/**
+			 * Check the handler when a DrawingEvent.DRAW_HANDLER_ACTIVATED or
+			 * DrawingEvent.EDIT_HANDLER_ACTIVATED or DrawingEvent.MOVE_HANDLER_ACTIVATED
+			 * or DrawingEvent.SELECT_HANDLER_ACTIVATED event occured
+			 */
+			public function onChangeActiveHandler(evt:DrawingEvent=null):void
+			{				
+				if(this._handler.active && !this._isClick)
+				{
+					if(!(this._handler as NewDrawShapeHandler).newFeature)
+						(this._handler as NewDrawShapeHandler).endShape();
+					disactivate();
+				}
+				else
+					this._isClick = false;
+			}
+			
+			/**
+			 * Update the target on active layer changed
+			 */
+			private function onChangeActiveLayer(evt:DrawingEvent):void
+			{	
+				if(this.drawingMode == 'unique')
+				{
+					if(this._handler.active)
+					{
+						if(!(this._handler as NewDrawShapeHandler).newFeature)
+							(this._handler as NewDrawShapeHandler).endShape();
+						disactivate();
+						_handler.map.mouseNavigationEnabled = true;
+						_handler.map.panNavigationEnabled = true;
+						_handler.map.zoomNavigationEnabled = true;
+						_handler.map.keyboardNavigationEnabled = true;
+					}
+					this.target = evt.layer;
+					
+					if(!evt.layer || !evt.layer.editable)
+					{
+						this.buttonMode = false;
+						this.useHandCursor = false;
+						this.toolTip = Catalog.getLocalizationForKey('drawing.selectDrawingLayer');
+					} 
+					else
+					{
+						this.buttonMode = true;
+						this.useHandCursor = true;
+						this.toolTip = Catalog.getLocalizationForKey('drawing.path');
+					}
+				}
+				
+				
+			}
+			
+			/**
+			 * Update texts on map language changed
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void
+			{
+				this.tooltip = Catalog.getLocalizationForKey('drawing.path');
+			}
+			
+			// Unused functions
+			public function draw():void
+			{	
+				this.invalidateDisplayList();
+			}
+			
+			public function destroy():void
+			{}
+			
+		]]>
+	</fx:Script>			
+</os:IconButton>

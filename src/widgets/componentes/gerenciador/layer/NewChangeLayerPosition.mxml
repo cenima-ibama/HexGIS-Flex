@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns="org.openscales.fx.control.layer.*"
+		 xmlns:os="org.openscales.fx.control.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.fxg.DownArrowDown;
+			import assets.fxg.DownArrowOver;
+			import assets.fxg.DownArrowUp;
+			import assets.fxg.UpArrowDown;
+			import assets.fxg.UpArrowOver;
+			import assets.fxg.UpArrowUp;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.Layer;
+			//import componentes.camadas.NewLayerManager;
+			
+			import widgets.LayerManagerWidget;
+			
+			
+			[Embed(source="/assets/images/popups/downArrow.png")]
+			protected const BTN_LAYER_DOWN:Class;
+			
+			[Embed(source="/assets/images/popups/downArrowOver.png")]
+			protected const BTN_LAYER_DOWN_OVER:Class;
+			
+			[Embed(source="/assets/images/popups/upArrow.png")]
+			protected const BTN_LAYER_UP:Class;
+			
+			[Embed(source="/assets/images/popups/upArrowOver.png")]
+			protected const BTN_LAYER_UP_OVER:Class;
+			
+			[Bindable]
+			public var _btnLayerDown:Class = BTN_LAYER_DOWN;
+			
+			[Bindable]
+			public var _btnLayerDownOver:Class = BTN_LAYER_DOWN_OVER;
+			
+			[Bindable]
+			public var _btnLayerUp:Class = BTN_LAYER_UP;
+			
+			[Bindable]
+			public var _btnLayerUpOver:Class = BTN_LAYER_UP_OVER;
+			
+			/**
+			 * Tooltip for move front button
+			 */
+			[Bindable]
+			public var tooltipMoveFront:String = "Mover para cima";
+			/**
+			 * Tooltip for move back button
+			 */
+			[Bindable]
+			public var tooltipMoveBack:String = "Mover para baixo";
+			
+			private var _layer:Layer;
+			
+			//private var _layerManager:NewLayerManager;
+			private var _layerManager:LayerManagerWidget;
+			
+			public function get layer():Layer
+			{
+				return _layer;
+			}
+			
+			/**
+			 * Configure the first display for this component when the layer is set
+			 * Set one or two arrows depending of the position of the current layer
+			 */ 
+			public function set layer(value:Layer):void
+			{
+				this._layer = value;
+				
+				this.updateArrowsDisplay();
+				
+				if(_layer && _layer.map)
+				{			
+					this._layer.map.addEventListener(LayerEvent.LAYER_REMOVED, updateArrowsDisplay);
+					this._layer.map.addEventListener(LayerEvent.LAYER_ADDED, updateArrowsDisplay);
+					this._layer.map.addEventListener(LayerEvent.LAYER_CHANGED, updateArrowsDisplay);
+					this._layer.map.addEventListener(LayerEvent.LAYER_CHANGED_ORDER, updateArrowsDisplay);
+					this._layer.map.addEventListener(LayerEvent.LAYER_PROJECTION_CHANGED, updateArrowsDisplay);
+					this._layer.map.addEventListener(I18NEvent.LOCALE_CHANGED, onMapLanguageChange);
+				}
+			}
+			public function get layerManager():LayerManagerWidget
+			{
+				return _layerManager;
+			}
+			
+			public function set layerManager(value:LayerManagerWidget):void{
+				
+				_layerManager = value;
+				this.updateArrowsDisplay();
+			}
+			
+			/**
+			 * @inherit
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				this.tooltipMoveFront = "Mover para cima";
+				this.tooltipMoveBack = "Mover para baixo";		
+			}
+			
+			/**
+			 * Update the display of arrows according to the position of the layer
+			 */
+			public function updateArrowsDisplay(event:LayerEvent = null):void
+			{
+				if(layerSwitcherArrowUp && layerSwitcherArrowDown) 
+				{
+					if(_layerManager && _layer && _layerManager.layers.length > 1)
+					{
+						
+						switch(_layerManager.layers.getItemIndex(_layer))
+						{
+							// the layer is at the bottom of the list, we hide the arrowDown						
+							case  _layerManager.layers.length-1:
+							{
+								this.layerSwitcherArrowUp.enabled = true;
+								this.layerSwitcherArrowDown.enabled = false;
+								break;
+							}
+							case 0:
+							{
+								this.layerSwitcherArrowUp.enabled = false;
+								this.layerSwitcherArrowDown.enabled = true;
+								break;
+							}
+							default:
+							{
+								this.layerSwitcherArrowUp.enabled = true;
+								this.layerSwitcherArrowDown.enabled = true;
+							}
+								
+						}
+					}
+					else
+					{
+						this.layerSwitcherArrowUp.enabled = false;
+						this.layerSwitcherArrowDown.enabled = false;
+					}
+				}
+			}
+			
+			/**
+			 * Move the current Layer up on the map
+			 */
+			public function upLayer(event:MouseEvent):void 
+			{
+				if(_layerManager)
+				{
+					_layerManager.moveLayerForward(_layer);
+				}
+				else{
+					this._layer.map.changeLayerIndexByDelta(this._layer,+1);
+				}
+			}
+			
+			/**
+			 * Move the current Layer down on the map
+			 */
+			public function downLayer(event:MouseEvent):void {
+				if(_layerManager)
+				{
+					_layerManager.moveLayerBack(_layer);
+				}
+				else
+				{
+					this._layer.map.changeLayerIndexByDelta(this._layer,-1);
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<s:SkinnableContainer>
+		<s:layout>
+			<s:VerticalLayout gap="0" verticalAlign="middle" />
+		</s:layout>
+		<os:IconButton id="layerSwitcherArrowUp"
+					   toolTip="{this.tooltipMoveFront}"
+					   click="upLayer(event)"
+					   icon="{this._btnLayerUp}"
+					   iconOver="{this._btnLayerUpOver}"
+					   iconDown="{this._btnLayerUpOver}"
+					   width="10"
+					   height="10" 
+					   enabled="false"/>
+		
+		<os:IconButton id="layerSwitcherArrowDown"
+					   toolTip="{this.tooltipMoveBack}"
+					   click="downLayer(event)"
+					   icon="{this._btnLayerDown}"
+					   iconOver="{this._btnLayerDownOver}"
+					   iconDown="{this._btnLayerDownOver}"
+					   width="10"
+					   height="10"
+					   enabled="false"/>
+	</s:SkinnableContainer>
+</s:Group>

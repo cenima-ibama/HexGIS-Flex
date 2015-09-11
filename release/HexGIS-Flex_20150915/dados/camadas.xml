@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<camadas>
+	<!--<url>http://10.1.8.103:8080/geoserver/hex/wms</url> -->
+	
+	<camada>
+		<name>Biomas</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:biomas</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<!--<camada>
+		<name>Obras</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:projeto</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>-->
+	
+	<camada>
+		<name>Municípios</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:municipios_ibge</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Terras Indígenas</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:terras_indigenas</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>UCs de Uso Sustentável</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:ucs_uso_sustentavel</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>UCs de Proteção Integral</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:ucs_protecao_integral</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+
+	<!--<camada>
+		<name>Embargos</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:embargo_poligonos</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada> -->
+	
+	<camada>
+		<name>Rodovias Federais</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:rodovias_federais</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Capitais</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:capitais</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<camada>
+		<name>Assentamentos</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:assentamentos</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+
+	<camada>
+		<name>Imóveis</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:imovel_certificado</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<!-- <camada>
+		<name>Regionais</name>
+		<url>http://siscom.ibama.gov.br/geoserver/cemam/wms</url>
+		<layers>cemam:tmpx</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>	
+	
+	<camada>
+		<name>Regionais</name>
+		<url>http://10.1.8.29:8080/geoserver/cemam/wms</url>
+		<layers>cemam:tmpx1</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>true</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>-->
+	
+	<grupo name="RapidEye" visible="false">
+	 	<camada>
+			<name>Mosaico Região Norte</name>
+			<url>http://geocatalogos.sccon.com.br:80/erdas-apollo/coverage/MMA_MOSAICO_QL_NORTE_ENTREGA_4</url>
+			<layers>mosaico_total_norte_v2_rec</layers>
+			<format>image/png</format>
+			<maxExtent>-180,-90,180,90</maxExtent>
+			<version>1.1.0</version>
+			<transparent>true</transparent>
+			<tiled>true</tiled>
+	 	</camada>
+	
+		<camada>
+			<name>Mosaico Região Nordeste</name>
+			<url>http://geocatalogos.sccon.com.br:80/erdas-apollo/coverage/MMA_MOSAICO_QL_NORDESTE_ENTREGA_3</url>
+			<layers>nordeste_total_13_12</layers>
+			<format>image/png</format>
+			<maxExtent>-180,-90,180,90</maxExtent>
+			<version>1.1.0</version>
+			<transparent>true</transparent>
+			<tiled>true</tiled>
+ 		</camada>
+ 		
+ 		<camada>
+			<name>Mosaico Região Centro-Oeste</name>
+			<url>http://geocatalogos.sccon.com.br:80/erdas-apollo/coverage/MMA_MOSAICO_QL_CENTRO_OESTE_ENTREGA_3</url>
+			<layers>mosaico_centroeste_entrega_1_v2_t</layers>
+			<format>image/png</format>
+			<maxExtent>-180,-90,180,90</maxExtent>
+			<version>1.1.0</version>
+			<transparent>true</transparent>
+			<tiled>true</tiled>
+ 		</camada>
+ 		
+ 		<camada>
+			<name>Mosaico Região Sul</name>
+			<url>http://geocatalogos.sccon.com.br:80/erdas-apollo/coverage/MMA_MOSAICO_QL_SUL_ENTREGA_3</url>
+			<layers>mosaico_sul_entrega_1_v3_11_12_rec</layers>
+			<format>image/png</format>
+			<maxExtent>-180,-90,180,90</maxExtent>
+			<version>1.1.0</version>
+			<transparent>true</transparent>
+			<tiled>true</tiled>
+ 		</camada>
+ 		
+ 		<camada>
+			<name>Mosaico Região Sudeste</name>
+			<url>http://geocatalogos.sccon.com.br:80/erdas-apollo/coverage/MMA_MOSAICO_QL_SUDESTE_ENTREGA_3</url>
+			<layers>mosaico_sudeste_entrega_1_v3_11_12_rec</layers>
+			<format>image/png</format>
+			<maxExtent>-180,-90,180,90</maxExtent>
+			<version>1.1.0</version>
+			<transparent>true</transparent>
+			<tiled>true</tiled>
+ 		</camada>
+	</grupo>
+	
+	<camada>
+		<name>Estados</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:estados_ibge</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>true</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+	
+	<!-- <camada>
+		<name>Pontos (tmp_gpx_pon)</name>
+		<url>http://siscom.ibama.gov.br/geo-srv/cemam/wms</url>
+		<layers>cemam:tmp_gpx_pon</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>	
+	
+	<camada>
+		<name>Linhas (tmp_gpx_lin)</name>
+		<url>http://siscom.ibama.gov.br/geo-srv/cemam/wms</url>
+		<layers>cemam:tmp_gpx_lin</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>	
+	
+	<camada>
+		<name>Polígonos (tmp_gpx_pol)</name>
+		<url>http://siscom.ibama.gov.br/geo-srv/cemam/wms</url>
+		<layers>cemam:tmp_gpx_pol</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada> -->
+ 
+	<!-- <camada> 
+		<name>Hidro Polígonos</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:hidrografia_poligono</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>	
+
+	<camada>
+		<name>Hidro Perene</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:hidro_perene</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada> 
+	
+	<camada>
+		<name>Hidro Intermitente</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:hidro_intermitente</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>
+		
+	<camada>
+		<name>Embargos Polígono</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:embargo_poligonos</layers>
+		<projection>EPSG:900913</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada> -->
+	
+	<!-- <camada>
+		<name>Deter 2011</name>
+		<url>http://www.hexinformatica.com.br/geoserver/hex/wms</url>
+		<layers>hex:deter_2011_authkey</layers>
+		<projection>EPSG:4326</projection>
+		<format>image/png</format>
+		<maxExtent>-180,-90,180,90</maxExtent>
+		<version>1.1.1</version>
+		<visible>false</visible>
+		<transparent>true</transparent>
+		<tiled>true</tiled>
+	</camada>-->
+		
+</camadas>

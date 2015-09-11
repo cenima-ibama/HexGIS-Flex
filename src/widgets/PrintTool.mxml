@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sol:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						xmlns:sol="solutions.*"
+						xmlns:os="http://openscales.org"
+						width="250" height="230"
+						creationComplete="configLoad()" initialize="init()">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import flash.display.Sprite;
+			import flash.printing.PrintJob;
+			
+			import mx.containers.Canvas;
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			import mx.printing.FlexPrintJob;
+			import mx.printing.FlexPrintJobScaleType;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			import mx.utils.ObjectUtil;
+			
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.ogc.WMS;
+			import org.openscales.core.layer.params.ogc.WMSParams;
+			import org.openscales.geometry.basetypes.Bounds;
+			import org.openscales.proj4as.ProjProjection;
+			
+			import solutions.CloseWindowBase;
+			
+			import spark.components.DataRenderer;
+			
+			import widgets.componentes.printpreview.PrintPreview;
+			import widgets.componentes.printpreview.layouts.A5_Landscape;
+			import widgets.componentes.printpreview.layouts.A5_Portrait;
+			import widgets.componentes.printpreview.utils.BasicPrint;
+			import widgets.componentes.printpreview.utils.ObjectTranslator;
+			
+			//protected var configXML:XML;
+			[Bindable]
+			private var titleLabel:String;
+			[Bindable]
+			private var atitle:String;			
+			[Bindable]
+			private var subtitleLabel:String;
+			[Bindable]
+			private var subtitle:String;
+			[Bindable]
+			private var copyright:String;
+			
+			protected var myBasicPrint:BasicPrint;
+						 
+			override protected function init():void
+			{
+				//Store window height
+				//panelHeight = this.height;
+				super.init();
+				configLoad();
+			}
+			
+			/**
+			 * Load configuration
+			 **/
+			private function configLoad():void
+			{
+					var configService:HTTPService = new HTTPService();
+					configService.url = "widgets/PrintWidget.xml";
+					configService.resultFormat = "e4x";
+					configService.addEventListener(ResultEvent.RESULT, configResult);
+					configService.addEventListener(FaultEvent.FAULT, configFault);	
+					configService.send();
+			}	
+
+			/**
+			 * Config fault
+			 **/			
+			private function configFault(event:mx.rpc.events.FaultEvent):void
+			{
+				var sInfo:String = "Error: ";
+				sInfo += "Event Target: " + event.target + "\n\n";
+				sInfo += "Event Type: " + event.type + "\n\n";
+				sInfo += "Fault Code: " + event.fault.faultCode + "\n\n";
+				sInfo += "Fault Info: " + event.fault.faultString;
+				trace(sInfo);
+			}
+					
+			/**
+			 * Config result
+			 **/ 
+			private function configResult(event:ResultEvent):void
+			{
+				try
+				{	
+					configXML = event.result as XML;
+					
+					atitle = configXML.title;
+					subtitle = configXML.subtitle;
+					copyright = configXML.copyright;					
+				}
+				catch (error:Error)
+				{
+					trace("A problem occured while parsing the widget configuration file. " + error.message);
+				}
+			}		
+						
+			/**
+			 * Print Portrait
+			 **/
+            private function portraitPrintPreview():void
+			{
+				
+				
+//				myBasicPrint =  new BasicPrint(map);
+//				myBasicPrint.PrintScreen();
+				
+				//Create instance of our map layout
+				var mapLayout:A5_Portrait = new A5_Portrait();
+				mapLayout.initialize();
+				mapLayout.map = map;//mapclone;
+				mapLayout.dateTxt.text = txtSubtitle.text;
+				mapLayout.titleTxt.text = txtTitle.text;
+				
+				// Create the popup and set its map layout 
+				var popup:PrintPreview =  new PrintPreview();
+				
+				PopUpManager.addPopUp(popup as CloseWindowBase, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(popup as CloseWindowBase);
+				callLater(setMapLayout,[popup,mapLayout]);
+			} 
+
+			/**
+			 * Print Landscape
+			 **/			
+			private function landscapePrintPreview():void
+			{
+				//Create instance of our map layout
+				var mapLayout:A5_Landscape = new A5_Landscape();
+				mapLayout.initialize();
+				mapLayout.map = map;//mapclone;
+				mapLayout.dateTxt.text = txtSubtitle.text;
+				mapLayout.titleTxt.text = txtTitle.text;
+				
+				// Create the popup and set its map layout 
+				var popup:PrintPreview =  new PrintPreview();
+				
+				PopUpManager.addPopUp(popup as CloseWindowBase, FlexGlobals.topLevelApplication as DisplayObject, true);
+				PopUpManager.centerPopUp(popup as CloseWindowBase);
+				
+				callLater(setMapLayout,[popup,mapLayout]);
+			} 
+			
+			private function setMapLayout(popup:PrintPreview, _mapLayout:DataRenderer):void
+			{
+				popup.mapLayout = _mapLayout;
+			}
+						
+//			/**
+//			 * Export PDF
+//			 **/
+//			private function exportMapPDF():void
+//			{
+//				/*var myPDF:PDF = new PDF (Orientation.PORTRAIT, Unit.POINT,new Size([_model.map.width, _model.map.height],"map",[_model.map.width, _model.map.height],[_model.map.width, _model.map.height]));
+//				myPDF.addPage();
+//				myPDF.addImage(_model.map);
+//				myPDF.save(Method.REMOTE, "http://flexmappers.com/createPDF.php", Download.ATTACHMENT, stripSpaces(txtTitle.text));*/
+//			}	
+
+			/**
+			 * StripSpaces from text
+			 **/			
+			private function stripSpaces (str:String):String 
+			{
+				var newString:String = "";
+				for (var j:int=0; j<str.length; j++) {
+					if (str.charAt(j)!=" ") {
+						newString += str.charAt(j);
+						}
+				}
+				return newString;
+			}						
+		]]>
+	</fx:Script>
+		<mx:ViewStack id="viewStack" width="100%" height="100%" creationPolicy="all">
+			<mx:VBox width="100%" height="100%">
+				<mx:Form id="frmPrint" verticalScrollPolicy="off" width="100%" height="100%">
+					<mx:FormItem label="{titleLabel}" styleName="WidgetText" width="100%">
+						<s:TextInput id="txtTitle" width="100%" prompt="{atitle}"/>
+					</mx:FormItem>
+					<mx:FormItem label="{subtitleLabel}" styleName="WidgetText" width="100%">
+						<s:TextInput id="txtSubtitle" width="100%" prompt="{subtitle}"/>
+					</mx:FormItem>
+					<mx:HBox horizontalAlign="center" width="100%" paddingTop="10">						
+						<mx:HBox>
+							<mx:VBox horizontalAlign="center">
+								<mx:Image source="assets/images/popups/print/printpreview.png" click="portraitPrintPreview()" buttonMode="true" toolTip="Print Preview Portrait"/>
+								<mx:Label text="Portrait" color="#000000"/>
+							</mx:VBox>
+							<mx:VBox horizontalAlign="center">
+								<mx:Image source="assets/images/popups/print/printpreview.png" click="landscapePrintPreview()" buttonMode="true" toolTip="Print Preview Landscape"/>
+								<mx:Label text="Landscape" color="#000000"/>
+							</mx:VBox>							
+						</mx:HBox>
+					</mx:HBox>
+				</mx:Form>
+			</mx:VBox>
+		</mx:ViewStack>
+	
+</sol:BaseWidget>

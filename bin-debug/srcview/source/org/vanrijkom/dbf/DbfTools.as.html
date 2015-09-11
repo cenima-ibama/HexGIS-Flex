@@ -1,0 +1,91 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>DbfTools.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* ************************************************************************ */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/*  DBF (XBase File Reader)                                                 */</span>
+<span class="ActionScriptComment">/*  Copyright (c)2007 Edwin van Rijkom                                        */</span>
+<span class="ActionScriptComment">/*  http://www.vanrijkom.org                                                */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* This library is free software; you can redistribute it and/or            */</span>
+<span class="ActionScriptComment">/* modify it under the terms of the GNU Lesser General Public                */</span>
+<span class="ActionScriptComment">/* License as published by the Free Software Foundation; either                */</span>
+<span class="ActionScriptComment">/* version 2.1 of the License, or (at your option) any later version.        */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* ************************************************************************ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">dbf</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">controls</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Alert</span>;
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">dbf</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DbfHeader</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">dbf</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DbfRecord</span>;
+
+<span class="ActionScriptASDoc">/**
+ * The DbfTools class bundles a utility functions used by the remainder of
+ * the DBF library.
+ * @author Edwin van Rijkom
+ * 
+ */</span>    
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">DbfTools</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptASDoc">/**
+     * Read a zero terminated ANSI string from a ByteArray.
+     * @param src ByteArray instance to read from.
+     * @return 
+     * 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">readZeroTermANSIString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span>: <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span>: <span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">r</span>: <span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span>;
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">b</span>: <span class="ActionScriptDefault_Text">int</span>;
+        <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">b</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">String</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">fromCharCode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">b</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">r</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**
+     * Read a fixed length ANSI string from a ByteArray.
+     * @param src ByteArray instance to read from.
+     * @param length Number of character to read.
+     * @return 
+     * 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">readANSIString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span>: <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">length</span>: <span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span>: <span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">r</span>: <span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span>;
+        <span class="ActionScriptReserved">while</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">length</span><span class="ActionScriptOperator">--</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">r</span><span class="ActionScriptOperator">+=</span> <span class="ActionScriptDefault_Text">String</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">fromCharCode</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">r</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptASDoc">/**
+     * Read a DBF record from a DBF file.
+     * @param src ByteArray instance to read from.
+     * @param header DbfHeader instance previously read from the ByteArray.
+     * @param index Index of the record to read.
+     * @return 
+     * @see DbfHeader
+     * 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getRecord</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span>: <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">header</span>: <span class="ActionScriptDefault_Text">DbfHeader</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">index</span>: <span class="ActionScriptDefault_Text">uint</span><span class="ActionScriptBracket/Brace">)</span>: <span class="ActionScriptDefault_Text">DbfRecord</span> <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">index</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">header</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">recordCount</span><span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptReserved">throw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DbfError</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">""</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">DbfError</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ERROR_OUTOFBOUNDS</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+
+        <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">header</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">recordsOffset</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">index</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">header</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">recordSize</span>;
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DbfRecord</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">header</span><span class="ActionScriptBracket/Brace">)</span>;
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptComment">// package</span></pre></body>
+</html>

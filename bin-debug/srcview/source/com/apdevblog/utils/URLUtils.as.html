@@ -1,0 +1,113 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>URLUtils.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">com</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">apdevblog</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span> 
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">external</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ExternalInterface</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">net</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">URLRequest</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">net</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">navigateToURL</span>;    
+    <span class="ActionScriptASDoc">/**
+     * Collection of URL util functions.
+     * 
+     * ActionScript 3.0 / Flash 9
+     *
+     * @package    com.apdevblog.utils
+     * @author     Philipp Kyeck / phil@apdevblog.com
+     * @copyright  2008 apdevblog.com
+     * @version    SVN: $Id: URLUtils.as 17 2008-04-08 09:13:30Z phil $
+     *
+     * based on script by
+     * @author Sergey Kovalyov
+     * @see http://skovalyov.blogspot.com/2007/01/how-to-prevent-pop-up-blocking-in.html
+     * 
+     * and based on script by
+     * @author Jason the Saj
+     * @see http://thesaj.wordpress.com/2008/02/12/the-nightmare-that-is-_blank-part-ii-help
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">URLUtils</span>    
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">WINDOW_OPEN_FUNCTION</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"window.open"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Open a new browser window and prevent browser from blocking it.
+         * 
+         * @param url        url to be opened
+         * @param window     window target
+         * @param features   additional features for window.open function
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">openWindow</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">window</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"_blank"</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">features</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">browserName</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">getBrowserName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">getBrowserName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"Firefox"</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//ExternalInterface.call(WINDOW_OPEN_FUNCTION, url, window, features);
+</span>                <span class="ActionScriptDefault_Text">ExternalInterface</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">call</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">'window.open'</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">url</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">features</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//If IE, 
+</span>            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browserName</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"IE"</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//ExternalInterface.call("function setWMWindow() {window.open('" + url + "');}");
+</span>                <span class="ActionScriptDefault_Text">navigateToURL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">URLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//If Safari 
+</span>            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browserName</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"Safari"</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>              
+                <span class="ActionScriptDefault_Text">navigateToURL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">URLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//If Opera 
+</span>            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browserName</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"Opera"</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>    
+                <span class="ActionScriptDefault_Text">navigateToURL</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">URLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptBracket/Brace">)</span>; 
+            <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptComment">//Otherwise, use Flash's native 'navigateToURL()' function to pop-window. 
+</span>                <span class="ActionScriptComment">//This is necessary because Safari 3 no longer works with the above ExternalInterface work-a-round.
+</span>            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">ExternalInterface</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">call</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">'window.open'</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">url</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">window</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">features</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * return current browser name.
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getBrowserName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">browser</span>:<span class="ActionScriptDefault_Text">String</span>;
+            
+            <span class="ActionScriptComment">//Uses external interface to reach out to browser and grab browser useragent info.
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">browserAgent</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ExternalInterface</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">call</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"function getBrowser(){return navigator.userAgent;}"</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">//Determines brand of browser using a find index. If not found indexOf returns (-1).
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browserAgent</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">browserAgent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">indexOf</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"Firefox"</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&gt;=</span> 0<span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">browser</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"Firefox"</span>;
+            <span class="ActionScriptBracket/Brace">}</span> 
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browserAgent</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">browserAgent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">indexOf</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"Safari"</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&gt;=</span> 0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">browser</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"Safari"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>             
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browserAgent</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">browserAgent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">indexOf</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"MSIE"</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&gt;=</span> 0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">browser</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"IE"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>         
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browserAgent</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptDefault_Text">browserAgent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">indexOf</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptString">"Opera"</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&gt;=</span> 0<span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">browser</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"Opera"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span> 
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">browser</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"Undefined"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">browser</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

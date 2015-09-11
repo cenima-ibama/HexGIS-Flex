@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				autoDrawBackground="false" minHeight="30" width="100%"
+				rollOver="lblRollOver()" rollOut="lblRollOut(event)" 
+				dataChange="dataChangeHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			private function lblRollOver():void
+			{
+				cbCont.styleName = "estiloCBContRollOver";
+			}
+			
+			protected function lblRollOut(event:MouseEvent):void
+			{
+				cbCont.styleName = "estiloCBCont";
+			}
+			
+			protected function dataChangeHandler(evt:Event):void 
+			{
+				rdBtn.label = data.label;
+				rdBtn.value = data.label;
+				rdBtn.group = data.group;
+			} 
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer styleName="estiloInvisibleContainer" width="100%" minHeight="30">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"
+								gap="0" paddingRight="2"/>
+		</s:layout>
+		
+		<s:BorderContainer id="cbCont" styleName="estiloCBCont" width="100%" minHeight="30">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" gap="0"/>
+			</s:layout>
+			<s:Rect width="10"/>
+			<s:RadioButton id="rdBtn" width="100%"/>
+			<s:Rect width="10"/>
+		</s:BorderContainer>
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

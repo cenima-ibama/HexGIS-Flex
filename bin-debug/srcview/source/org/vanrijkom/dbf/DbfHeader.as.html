@@ -1,0 +1,147 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>DbfHeader.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* ************************************************************************ */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/*  DBF (XBase File Reader)                                                 */</span>
+<span class="ActionScriptComment">/*  Copyright (c)2007 Edwin van Rijkom                                        */</span>
+<span class="ActionScriptComment">/*  http://www.vanrijkom.org                                                */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* This library is free software; you can redistribute it and/or            */</span>
+<span class="ActionScriptComment">/* modify it under the terms of the GNU Lesser General Public                */</span>
+<span class="ActionScriptComment">/* License as published by the Free Software Foundation; either                */</span>
+<span class="ActionScriptComment">/* version 2.1 of the License, or (at your option) any later version.        */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* This library is distributed in the hope that it will be useful,            */</span>
+<span class="ActionScriptComment">/* but WITHOUT ANY WARRANTY; without even the implied warranty of            */</span>
+<span class="ActionScriptComment">/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU        */</span>
+<span class="ActionScriptComment">/* Lesser General Public License or the LICENSE file for more details.        */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* ************************************************************************ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">dbf</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ByteArray</span>;
+<span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Endian</span>;
+
+<span class="ActionScriptASDoc">/**
+ * The DbfHeader class parses a DBF file loaded to a ByteArray
+ * @author Edwin van Rijkom
+ * 
+ */</span>
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">DbfHeader</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptASDoc">/**
+     * File length
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fileLength</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * File version
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">version</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * Date of last update, Year.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">updateYear</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * Date of last update, Month. 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">updateMonth</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * Data of last update, Day. 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">updateDay</span>: <span class="ActionScriptDefault_Text">int</span>;
+    <span class="ActionScriptASDoc">/**
+     * Number of records on file. 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">recordCount</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    <span class="ActionScriptASDoc">/**
+     * Header structure size. 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">headerSize</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    <span class="ActionScriptASDoc">/**
+     * Size of each record.
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">recordSize</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    <span class="ActionScriptASDoc">/**
+     * Incomplete transaction flag 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">incompleteTransaction</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    <span class="ActionScriptASDoc">/**
+     * Encrypted flag.
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">encrypted</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    <span class="ActionScriptASDoc">/**
+     * DBase IV MDX flag. 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mdx</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    <span class="ActionScriptASDoc">/**
+     * Language driver.
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">language</span>: <span class="ActionScriptDefault_Text">uint</span>;
+    
+    <span class="ActionScriptASDoc">/**
+     * Array of DbfFields describing the fields found
+     * in each record. 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">fields</span>: <span class="ActionScriptDefault_Text">Array</span>;
+        
+    <span class="ActionScriptReserved">private</span>  <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_recordsOffset</span>: <span class="ActionScriptDefault_Text">uint</span>;
+                
+    <span class="ActionScriptASDoc">/**
+     * Constructor
+     * @param src
+     * @return 
+     * 
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">DbfHeader</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span>: <span class="ActionScriptDefault_Text">ByteArray</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptComment">// endian:
+</span>        <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">endian</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">Endian</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">LITTLE_ENDIAN</span>;    
+        
+        <span class="ActionScriptDefault_Text">version</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">updateYear</span> <span class="ActionScriptOperator">=</span> 1900<span class="ActionScriptOperator">+</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">updateMonth</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">updateDay</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">recordCount</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedInt</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">headerSize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedShort</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">recordSize</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedShort</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptComment">//skip 2:
+</span>        <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">+=</span> 2;
+        
+        <span class="ActionScriptDefault_Text">incompleteTransaction</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">encrypted</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptComment">// skip 12:
+</span>        <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">+=</span> 12;
+        
+        <span class="ActionScriptDefault_Text">mdx</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptDefault_Text">language</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readUnsignedByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptComment">// skip 2;
+</span>        <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span> <span class="ActionScriptOperator">+=</span> 2;
+        
+        <span class="ActionScriptComment">// iterate field descriptors:
+</span>        <span class="ActionScriptDefault_Text">fields</span> <span class="ActionScriptOperator">=</span> [];
+        <span class="ActionScriptReserved">while</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">readByte</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">!=</span> 0X0D<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">src</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">position</span><span class="ActionScriptOperator">--</span>;
+            <span class="ActionScriptDefault_Text">fields</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">DbfField</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">src</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptDefault_Text">_recordsOffset</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">headerSize</span><span class="ActionScriptOperator">+</span>1;                    
+    <span class="ActionScriptBracket/Brace">}</span>
+    
+    <span class="ActionScriptReserved">internal</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">recordsOffset</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>: <span class="ActionScriptDefault_Text">uint</span> <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_recordsOffset</span>;
+    <span class="ActionScriptBracket/Brace">}</span>    
+<span class="ActionScriptBracket/Brace">}</span>            
+
+<span class="ActionScriptBracket/Brace">}</span>  <span class="ActionScriptComment">// package</span></pre></body>
+</html>

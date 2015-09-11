@@ -1,0 +1,1013 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<solutions:CloseWindowBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						   xmlns:s="library://ns.adobe.com/flex/spark" 
+						   xmlns:mx="library://ns.adobe.com/flex/mx" 
+						   xmlns:solutions="solutions.*" 
+						   xmlns:data="widgets.componentes.data.*"
+						   creationComplete="onCreationCompleteHandler(event)">
+	
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.ComboBox;
+			import mx.controls.DataGrid;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.Base64Encoder;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.utils.Util;
+			import org.openscales.geometry.LinearRing;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.Polygon;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			import org.openscales.proj4as.ProjProjection;
+			
+			import spark.components.Scroller;
+			import spark.components.TitleWindow;
+			import spark.components.gridClasses.GridColumn;
+			import spark.events.IndexChangeEvent;
+			
+			import widgets.componentes.ibama.event.EditingDisabledEvent;
+			
+			
+			[Bindable] private var _width:int = 380;
+			
+			[Bindable] private var _height:int = 287;
+			
+			[Bindable] private var _loginUser:String;
+			[Bindable] private var _nomeOperacao:String;
+			[Bindable] private var _dataObservacao:String;
+			[Bindable] private var _idAgente:String;
+			[Bindable] private var _condicao:String;
+			[Bindable] private var _numeroTEI:String;
+			[Bindable] private var _serieTEI:String;
+			[Bindable] private var _numeroAI:String;
+			[Bindable] private var _serieAI:String;
+			[Bindable] private var _fonte:String;
+			[Bindable] private var _nomeImovel:String;
+			[Bindable] private var _caminhoFoto:String;
+			[Bindable] private var _observacao:String;
+			[Bindable] private var _tipo:String;
+			[Bindable] private var _areaHa:String;
+			[Bindable] private var _xCentroide:String;
+			[Bindable] private var _yCentroide:String;
+			[Bindable] private var _xCentroideDMS:String;
+			[Bindable] private var _yCentroideDMS:String;
+			
+			[Bindable] private var _alterou:Boolean;
+			[Bindable] private var _isLogged:Boolean;
+			
+			private var _verticesPanel:IModuleInfo;
+			private var _picturesPanel:IModuleInfo;
+			
+			private var _arrayTiposPontos:ArrayCollection = new ArrayCollection([
+				{nome: 'Desmatamento', valor: 0},
+				{nome: 'Queimada', valor: 1},
+				{nome: 'Degradação', valor: 2},
+				{nome: 'Carvoaria', valor: 3},
+				{nome: 'Outro', valor: 9}
+			]);
+			
+			[Bindable] private var _dataComboCondicao:ArrayCollection = new ArrayCollection([
+				{nome: 'Embargada', valor: 0},
+				{nome: 'Não-Embargada', valor: 1}
+			]);
+			
+			[Bindable] private var _dataComboFonte:ArrayCollection  = new ArrayCollection([
+				{nome: 'DETER', valor: 0},
+				{nome: 'Denúncia', valor: 1},
+				{nome: 'Campo', valor: 2},
+				{nome: 'AGEO', valor: 3},
+				{nome: 'INDICAR', valor: 4},
+				{nome: 'PRODES', valor: 5},
+				{nome: 'PMDBBS', valor: 6},
+				{nome: 'AWIFS', valor: 7},
+				{nome: 'Outro', valor: 8}
+			]);
+
+			[Bindable] private var _dataComboTipo:ArrayCollection;
+			
+			private var widgetVertices:CloseWindowBase;
+			private var widgetPics:CloseWindowBase;	
+			
+			[Bindable] private var _operacaoWS:String;
+			[Bindable] private var _dataObsWS:String;
+			[Bindable] private var _idAgenteWS:String;
+			[Bindable] private var _condicaoWS:int = 0;
+			[Bindable] private var _numTEIWS:int = 0;
+			[Bindable] private var _serieTEIWS:String;
+			[Bindable] private var _numAIWS:int = 0;
+			[Bindable] private var _serieAIWS:String;
+			[Bindable] private var _idDesWS:int = 0;
+			[Bindable] private var _imovelWS:String;
+			[Bindable] private var _tipoWS:int = 0;
+			[Bindable] private var _obsWS:String;
+			[Bindable] private var _objIDWS:String ;
+			[Bindable] private var _indexWS:int = 0;
+			private var _vazio:String = "' '";
+			
+			
+			protected function onCreationCompleteHandler(event:FlexEvent):void
+			{
+				this._map.addEventListener(FeatureEvent.FEATURE_EDITED_END, onFeatureEdited);
+				this._map.addEventListener(FeatureEvent.FEATURE_DELETING, onFeatureDeleted);	
+				this._map.addEventListener(EditingDisabledEvent.ATTRIBUTES_EDITING_DISABLED, onFeatureEditingDisabled);
+			}
+			
+			private function onFeatureEdited(event:FeatureEvent):void
+			{
+				this._areaHa = _feature.attributes.area_ha;
+
+				this._xCentroide = _feature.attributes.x_centroide;
+				this._yCentroide = _feature.attributes.y_centroide;
+				this._xCentroideDMS = (_feature.attributes.x_centroide < 0) ? Util.degToDMS(Math.abs(_feature.attributes.x_centroide))+" W" : Util.degToDMS(Math.abs(_feature.attributes.x_centroide))+" E";
+				this._yCentroideDMS = (_feature.attributes.y_centroide < 0) ? Util.degToDMS(Math.abs(_feature.attributes.y_centroide))+" S" : Util.degToDMS(Math.abs(_feature.attributes.y_centroide))+" N";
+			}
+			
+			private function onFeatureEditingDisabled(event:EditingDisabledEvent):void
+			{
+				if (event.feature == this._feature)
+				{
+					this.closeWidget(new MouseEvent(MouseEvent.CLICK));
+				}
+			}
+			
+			private function onFeatureDeleted(event:FeatureEvent):void
+			{
+				if (event.feature == this._feature)
+				{
+					this.closeWidget(new MouseEvent(MouseEvent.CLICK));
+				}
+			}
+			
+			override public function setFeature(value:Feature):void
+			{				
+				_feature = value;
+				
+				if (_feature is IbamaPolygonFeature)
+				{					
+					this.dataComboTipo = this._arrayTiposPontos;
+					
+					this._isLogged = (_feature as IbamaPolygonFeature).logged;
+										
+					setAtributos(_feature);
+					
+					if (_feature.attributes.hasOwnProperty("fid"))
+					{
+						this.currentState = "exibicao";
+					}
+				}
+			}
+			
+			private function setAtributos(f:Feature):void
+			{		
+				if (f is IbamaPolygonFeature)
+				{
+					this._loginUser = f.attributes.cpf;
+					
+					this._nomeOperacao = f.attributes.operacao;
+					
+					if (f.attributes.data == null)
+					{
+						this._dataObservacao = '';
+					}
+					else
+					{
+						if ((String(f.attributes.data).length > 0) && (f.attributes.data != "0"))
+						{
+							this._dataObservacao = String(f.attributes.data).substr(0, 6) + "20" + String(f.attributes.data).substr(6, 8) ;
+						}
+					}
+					
+					this._idAgente = f.attributes.id_agente;
+					this._condicao = getNameFromValue(this.dataComboCondicao, f.attributes.condicao);
+					this._numeroTEI = f.attributes.num_tei;
+					this._serieTEI = f.attributes.serie_tei;
+					this._numeroAI = f.attributes.num_ai;
+					this._serieAI = f.attributes.serie_ai;
+					this._fonte = getNameFromValue(this.dataComboFonte, f.attributes.id_des);
+					this._nomeImovel = f.attributes.imovel;
+					//this._caminhoFoto = f.attributes.foto;
+					this._observacao = f.attributes.obs;
+					this._tipo = getNameFromValue(this.dataComboTipo, f.attributes.tipo);
+					this._areaHa = f.attributes.area_ha;
+					this._xCentroide = f.attributes.x_centroide;
+					this._yCentroide = f.attributes.y_centroide;
+					this._xCentroideDMS = (_feature.attributes.x_centroide < 0) ? Util.degToDMS(Math.abs(_feature.attributes.x_centroide))+" W" : Util.degToDMS(Math.abs(_feature.attributes.x_centroide))+" E";
+					this._yCentroideDMS = (_feature.attributes.y_centroide < 0) ? Util.degToDMS(Math.abs(_feature.attributes.y_centroide))+" S" : Util.degToDMS(Math.abs(_feature.attributes.y_centroide))+" N";
+				}
+			}
+			
+			private function getNameFromValue(array:ArrayCollection, valor:int):String
+			{
+				var i:int;
+				var aux:Object = new Object();
+				var achou:Boolean;
+				
+				for (i=0; (i < array.length) && !achou; i++)
+				{
+					aux = array.getItemAt(i);
+					
+					if (aux.valor == valor)
+					{
+						achou = true;
+					}
+				}
+				
+				return aux.nome;
+			}
+			
+			override public function closeWidget(event:MouseEvent):void
+			{
+				if (_feature)
+				{					
+					if (_feature is IbamaPolygonFeature)
+					{
+						(_feature as IbamaPolygonFeature).resetaPopup();
+					}
+				}
+				
+				if (widgetVertices)
+				{
+					widgetVertices.closeWidget(event);
+				}
+				
+				super.closeWidget(event);
+			}
+			
+			protected function scroller_creationCompleteHandler(event:FlexEvent):void
+			{				
+				(event.currentTarget as Scroller).verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				(event.currentTarget as Scroller).verticalScrollBar.setStyle("chromeColor", this.getStyle("backgroundColor"));
+			}
+			
+			protected function textArea_creationCompleteHandler(event:FlexEvent):void
+			{
+				(event.currentTarget as TextArea).scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				(event.currentTarget as TextArea).scroller.verticalScrollBar.setStyle("chromeColor", (event.currentTarget as TextArea).getStyle("backgroundColor"));
+			}
+			
+			protected function buttonSalvar_clickHandler(event:MouseEvent):void
+			{
+				var _anoUltimosDig:String;
+
+				_alterou = false;
+				
+				if (this._feature is IbamaPolygonFeature)
+				{					
+					if ((_feature.attributes.operacao != nomeOp_textInput.text) && (nomeOp_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.operacao = nomeOp_textInput.text;
+					}
+					
+					if ((_feature.attributes.data != dataObs_dateField.text) && (dataObs_dateField.selectedDate != null))
+					{
+						_alterou = true;
+						
+						_anoUltimosDig = dataObs_dateField.text.substr(8, 10);
+						this._feature.attributes.data = dataObs_dateField.text.substring(0, 6);
+						this._feature.attributes.data = this._feature.attributes.data + _anoUltimosDig;
+					}
+					
+					if ((_feature.attributes.id_agente != idAgente_textInput.text) && (idAgente_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.id_agente = idAgente_textInput.text;
+					}
+					
+					/* if (_feature.attributes.condicao != cond_comboBox.selectedItem.valor)
+					{
+						_alterou = true;
+						_feature.attributes.condicao = cond_comboBox.selectedItem.valor;
+					} */
+					
+					if ((_feature.attributes.num_tei != int(numTEI_textInput.text)) && (numTEI_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.num_tei = int(numTEI_textInput.text);
+					}
+					
+					if ((_feature.attributes.serie_tei != serieTEI_textInput.text) && (serieTEI_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.serie_tei = serieTEI_textInput.text;
+					}
+					
+					if ((_feature.attributes.num_ai != int(numAI_textInput.text)) && (numAI_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.num_ai = int(numAI_textInput.text);
+					}
+					
+					if ((_feature.attributes.serie_ai != serieAI_textInput.text) && (serieAI_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.serie_ai = serieAI_textInput.text;
+					}
+					
+					if (_feature.attributes.id_des != fonte_comboBox.selectedItem.valor)
+					{
+						_alterou = true;
+						_feature.attributes.id_des = fonte_comboBox.selectedItem.valor;
+					}
+					
+					if ((_feature.attributes.imovel != nomeImovel_textInput.text) && (nomeImovel_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.imovel = nomeImovel_textInput.text;
+					}
+					
+					if (_feature.attributes.tipo != tipo_comboBox.selectedItem.valor)
+					{
+						_alterou = true;
+						_feature.attributes.tipo = tipo_comboBox.selectedItem.valor;
+					}
+					
+					/* if ((_feature.attributes.foto != pathFoto_textInput.text) && (pathFoto_textInput.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.foto = pathFoto_textInput.text;
+					} */
+					
+					if ((_feature.attributes.obs != obs_textArea.text) && (obs_textArea.text.length > 0))
+					{
+						_alterou = true;
+						_feature.attributes.obs = obs_textArea.text;
+					}
+				}
+
+				if ((_alterou) && (this._feature.attributes.fid > 0))
+				{
+					////Alert.show(this._feature.attributes.data);
+					setAtributosWS();					
+					ws.updateFeatureAttributes.send();
+					
+					//this._map.dispatchEvent(new FeatureEvent(FeatureEvent.FEATURE_EDITED_END, this._feature));
+				}
+				else
+				{
+					setAtributos(this._feature);
+					currentState = "exibicao";
+				}
+			}
+			
+			private function setAtributosWS():void
+			{
+				this._objIDWS = this._feature.attributes.fid;
+				//Alert.show(this._objIDWS);
+				
+				if (this._feature.attributes.operacao.length > 0)
+				{
+					this._operacaoWS = "'"+this._feature.attributes.operacao+"'";
+				}
+				else
+				{
+					this._operacaoWS = _vazio;
+				}
+				//Alert.show(this._operacaoWS);
+				
+				if (this._feature.attributes.data.length > 0)
+				{
+					this._dataObsWS = "'"+this._feature.attributes.data+"'";
+				}
+				else
+				{
+					this._dataObsWS = _vazio;
+				}
+				//Alert.show(this._dataObsWS);
+				
+				if (this._feature.attributes.id_agente.length > 0)
+				{
+					this._idAgenteWS = "'"+this._feature.attributes.id_agente+"'";
+				}
+				else
+				{
+					this._idAgenteWS = _vazio;
+				}
+				//Alert.show(this._idAgenteWS);
+				
+				this._condicaoWS = int(this._feature.attributes.condicao);
+				this._numTEIWS = int(this._feature.attributes.num_tei);
+				
+				if (this._feature.attributes.serie_tei.length > 0)
+				{
+					this._serieTEIWS = "'"+this._feature.attributes.serie_tei+"'";
+				}
+				else
+				{
+					this._serieTEIWS = _vazio;
+				}
+				//Alert.show(this._serieTEIWS);
+				
+				this._numAIWS = int(this._feature.attributes.num_ai);
+				
+				if (this._feature.attributes.serie_ai.length > 0)
+				{
+					this._serieAIWS = "'"+this._feature.attributes.serie_ai+"'";
+				}
+				else
+				{
+					this._serieAIWS = _vazio;
+				}
+				//Alert.show(this._serieAIWS);
+				
+				this._idDesWS = int(this._feature.attributes.id_des);
+				
+				if (this._feature.attributes.imovel.length > 0)
+				{
+					this._imovelWS = "'"+this._feature.attributes.imovel+"'";
+				}
+				else
+				{
+					this._imovelWS = _vazio;
+				}
+				//Alert.show(this._imovelWS);
+				
+				this._tipoWS = int(this._feature.attributes.tipo);
+				
+				if (this._feature.attributes.obs.length > 0)
+				{
+					this._obsWS = "'"+this._feature.attributes.obs+"'";
+				}
+				else
+				{
+					this._obsWS = _vazio;
+				}
+				//Alert.show(this._obsWS);
+				
+				
+			}
+			
+			protected function buttonVoltar_clickHandler(event:MouseEvent):void
+			{	
+				currentState = "exibicao";
+			}
+			
+			protected function buttonEditar_clickHandler(event:MouseEvent):void
+			{	
+				currentState = "edicao";
+
+				var date_array:Array;
+				
+				//setAtributos(this._feature);
+				nomeOp_textInput.text = "";
+				idAgente_textInput.text = "";
+				numTEI_textInput.text = "";
+				serieTEI_textInput.text = "";
+				numAI_textInput.text = "";
+				serieAI_textInput.text = "";
+				nomeImovel_textInput.text = "";
+				//pathFoto_textInput.text = "";
+				obs_textArea.text = "";
+				
+				if ((_feature.attributes.data != null) && (_feature.attributes.data != "0"))
+				{
+					date_array = String(_feature.attributes.data).split("/");
+					
+					if (date_array[0] && date_array[1] && date_array[2])
+					{
+							dataObs_dateField.selectedDate = new Date("20"+date_array[2], date_array[1]-1, date_array[0]);
+					}
+				}
+				
+				/* cond_comboBox.selectedIndex = _feature.attributes.condicao; */
+				fonte_comboBox.selectedIndex = _feature.attributes.id_des;
+				tipo_comboBox.selectedIndex = _feature.attributes.tipo;
+				
+				//setAtributos(this._feature);
+			}
+			
+			/* protected function fonte_dropDownList_creationCompleteHandler(event:FlexEvent):void
+			{
+			fonte_comboBox.selectedIndex = 3;		
+			} */
+			
+			/* protected function edicaoGroup_creationCompleteHandler(event:FlexEvent):void
+			{
+				nomeOp.text = _feature.attributes.operacao;
+			} */
+			
+			public function get dataComboCondicao():ArrayCollection
+			{
+				return this._dataComboCondicao;
+			}
+			public function set dataComboCondicao(value:ArrayCollection):void
+			{
+				this._dataComboCondicao = value;
+			}
+			
+			public function get dataComboFonte():ArrayCollection
+			{
+				return this._dataComboFonte;
+			}
+			public function set dataComboFonte(value:ArrayCollection):void
+			{
+				this._dataComboFonte = value;
+			}
+			
+			public function get dataComboTipo():ArrayCollection
+			{
+				return this._dataComboTipo;
+			}
+			public function set dataComboTipo(value:ArrayCollection):void
+			{
+				this._dataComboTipo = value;
+			}
+			
+			private function getValueFromName(array:ArrayCollection, nome:String):int
+			{
+				var i:int;
+				var aux:Object = new Object();
+				var achou:Boolean;
+				
+				for (i=0; (i < array.length) && !achou; i++)
+				{
+					aux = array.getItemAt(i);
+					
+					if (aux.nome == nome)
+					{
+						achou = true;
+					}
+				}
+				
+				return aux.valor;
+			}
+			
+			/* protected function condicao_creationCompleteHandler(event:Event):void
+			{
+				cond_comboBox.selectedIndex = getValueFromName((cond_comboBox.dataProvider as ArrayCollection), this._condicao);
+			} */
+			
+			protected function fonte_creationCompleteHandler(event:Event):void
+			{
+				fonte_comboBox.selectedIndex = getValueFromName((fonte_comboBox.dataProvider as ArrayCollection), this._fonte);
+			}
+			
+			protected function tipo_creationCompleteHandler(event:Event):void
+			{
+				tipo_comboBox.selectedIndex = getValueFromName((tipo_comboBox.dataProvider as ArrayCollection), this._tipo);
+			}
+						
+			/* protected function pathFoto_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest(pathFoto.text), "_blank");
+			}
+			
+			protected function pathFoto_mouseOverHandler(event:MouseEvent):void
+			{
+				pathFoto.styleName = "estiloTextInputOver";
+			}
+			
+			protected function pathFoto_mouseOutHandler(event:MouseEvent):void
+			{
+				pathFoto.styleName = "estiloTextInput";
+			} */
+						
+			protected function exibirPainelVertices(event:MouseEvent):void
+			{
+				if (widgetVertices == null)
+				{
+					var url:String = "widgets/componentes/ibama/feature/VerticesPanel.swf";
+
+					_verticesPanel = ModuleManager.getModule(url);
+					_verticesPanel.addEventListener(ModuleEvent.READY, verticesPanelReadyHandler);           
+					_verticesPanel.load();
+				}
+				else
+				{
+					widgetVertices.closeWidget(event);
+					widgetVertices = null;
+				}
+			}
+			
+			private function verticesPanelReadyHandler(event:ModuleEvent):void
+			{
+				var _verticesPanel:IModuleInfo = event.module;
+				widgetVertices = _verticesPanel.factory.create() as CloseWindowBase;			
+				
+				widgetVertices.x = this.x + this.width + 10;
+				widgetVertices.y = this.y + this.height/2 - 100;
+				
+				widgetVertices.setTitle("Vértices");
+				widgetVertices.setFeature(this._feature);
+				widgetVertices.setMap(this._feature.layer.map);
+								
+				PopUpManager.addPopUp(widgetVertices as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject);
+			}
+			
+			protected function update_resultHandler(event:ResultEvent):void
+			{
+				var xml:XML = new XML(event.result.toString());				
+				
+				if (String(xml..mensagem).toUpperCase() == "OK")
+				{
+					setAtributos(this._feature);
+					currentState = "exibicao";
+					//Alert.show("OK Update:"+event.result.toString());
+				}
+				else
+				{
+					//Alert.show("Error Update:"+event.result.toString());
+				}
+			}
+			
+			protected function update_faultHandler(event:FaultEvent):void
+			{
+				//Alert.show("Error Update:"+event.fault.toString());
+			}			
+			
+			protected function exibirGaleria(event:MouseEvent):void
+			{
+				if (widgetPics == null)
+				{
+					var url:String = "widgets/componentes/ibama/feature/Gallery.swf";
+					
+					_picturesPanel = ModuleManager.getModule(url);
+					_picturesPanel.addEventListener(ModuleEvent.READY, picsPanelReadyHandler);           
+					_picturesPanel.load();
+				}
+				else
+				{
+					widgetPics.closeWidget(event);
+					widgetPics = null;
+				}
+			}
+			
+			private function picsPanelReadyHandler(event:ModuleEvent):void
+			{
+				var _picturesPanel:IModuleInfo = event.module;
+				widgetPics = _picturesPanel.factory.create() as CloseWindowBase;			
+				
+				/* widgetPics.x = this.x + this.width + 10;
+				widgetPics.y = this.y + this.height/2 - 100; */
+				
+				widgetPics.setTitle("Galeria");
+				widgetPics.setFeature(this._feature);
+				widgetPics.setMap(this._feature.layer.map);
+				
+				PopUpManager.addPopUp(widgetPics as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<s:WebService id="ws" wsdl="http://siscom.ibama.gov.br/painelflex/ws/hexWS.php?wsdl">
+			<s:operation name="updateFeatureAttributes" resultFormat="e4x"
+						 result="update_resultHandler(event)" fault="update_faultHandler(event)">
+				<s:request>
+					<entrada>
+						<object_id>{_objIDWS}</object_id>
+						<tipo_geo>pol</tipo_geo>
+						<operacao>{_operacaoWS}</operacao>
+						<data>{_dataObsWS}</data>
+						<id_agente>{_idAgenteWS}</id_agente>
+						<num_tei>{_numTEIWS}</num_tei>
+						<serie_tei>{_serieTEIWS}</serie_tei>
+						<num_ai>{_numAIWS}</num_ai>
+						<serie_ai>{_serieAIWS}</serie_ai>
+						<id_des>{_idDesWS}</id_des>
+						<imovel>{_imovelWS}</imovel>
+						<tipo>{_tipoWS}</tipo>
+						<obs>{_obsWS}</obs>
+						<referencia>0</referencia>
+					</entrada>
+				</s:request>
+			</s:operation>
+		</s:WebService>
+		
+	</fx:Declarations>
+	
+	<solutions:states>
+		<s:State name="edicao"/>
+		<s:State name="exibicao"/>
+		<s:State name="maximized"/>
+		<s:State name="minimized"/>
+		<s:State name="opened"/>
+		<s:State name="closed"/>
+	</solutions:states>
+	
+	<solutions:layout>
+		<s:VerticalLayout paddingRight="5" paddingLeft="5" paddingBottom="5"/>
+	</solutions:layout>
+	
+	<s:BorderContainer includeIn="edicao" styleName="estiloInvisibleContainer">
+		<s:Scroller verticalScrollPolicy="auto" horizontalScrollPolicy="off"
+					width="{_width}" height="{_height}" creationComplete="scroller_creationCompleteHandler(event)">
+			
+			<s:VGroup width="100%" height="100%" gap="7"
+					  verticalAlign="middle" horizontalAlign="center" 
+					  paddingRight="10" paddingLeft="10">
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Nome da Operação" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="nomeOp_textInput" width="60%" styleName="estiloTextInput" prompt="{this._nomeOperacao}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Data da Observação" width="40%" styleName="estiloLabel"/>
+					
+					<mx:DateField id="dataObs_dateField" width="60%" formatString="DD/MM/YYYY" styleName="estiloTextInput"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Identificação Própria" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="idAgente_textInput" width="60%" styleName="estiloTextInput" prompt="{this._idAgente}" maxChars="10"/>
+				</s:HGroup>
+				
+				<!--<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Condição" width="40%" styleName="estiloLabel"/>
+					
+					<s:DropDownList id="cond_comboBox" labelField="nome" width="60%" 
+									creationComplete="condicao_creationCompleteHandler(event)"
+									styleName="estiloDropDownList" dataProvider="{_dataComboCondicao}"/>
+				</s:HGroup>-->
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Número do TEI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="numTEI_textInput" restrict="0-9" width="60%" styleName="estiloTextInput" prompt="{this._numeroTEI}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Série do TEI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="serieTEI_textInput" width="60%" styleName="estiloTextInput" prompt="{this._serieTEI}" maxChars="1"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Número do AI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="numAI_textInput" restrict="0-9" width="60%" styleName="estiloTextInput" prompt="{this._numeroAI}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Série do AI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="serieAI_textInput" width="60%" styleName="estiloTextInput" prompt="{this._serieAI}" maxChars="1"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Fonte do Polígono" width="40%" styleName="estiloLabel"/>
+					
+					<s:DropDownList id="fonte_comboBox" labelField="nome" width="60%" 
+									creationComplete="fonte_creationCompleteHandler(event)"
+									styleName="estiloDropDownList" dataProvider="{_dataComboFonte}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Nome do Imóvel" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="nomeImovel_textInput" width="60%" styleName="estiloTextInput" prompt="{this._nomeImovel}" maxChars="250"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Tipo de Infração" width="40%" styleName="estiloLabel"/>
+					
+					<s:DropDownList id="tipo_comboBox" labelField="nome" width="60%"
+									creationComplete="tipo_creationCompleteHandler(event)"
+									styleName="estiloDropDownList" dataProvider="{_dataComboTipo}"/>
+				</s:HGroup>
+				
+				<!--<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Caminho do Arquivo de Foto" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="pathFoto_textInput" width="60%" styleName="estiloTextInput" prompt="{this._caminhoFoto}"/>
+				</s:HGroup>-->
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Observações" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextArea id="obs_textArea" width="60%" height="100" 
+								styleName="estiloTextInput" prompt="{this._observacao}"
+								creationComplete="textArea_creationCompleteHandler(event)" maxChars="250"/>
+				</s:HGroup>
+				
+				<!--<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Fotos" width="40%" styleName="estiloLabel"/>
+					
+					<s:HGroup width="60%" horizontalAlign="right">
+						<s:Button id="picsBtn2" skinClass="assets.skins.ArrowRightBtnSkin" 
+								  styleName="estiloWidgetContentButton"
+								  width="20" height="20" click="exibirGaleria(event)"/>
+					</s:HGroup>
+				</s:HGroup>-->
+				
+			</s:VGroup>
+		</s:Scroller>
+	</s:BorderContainer>
+	
+	<s:BorderContainer includeIn="exibicao" styleName="estiloInvisibleContainer">
+		<s:Scroller verticalScrollPolicy="auto" horizontalScrollPolicy="off"
+					width="{_width}" height="{_height}" creationComplete="scroller_creationCompleteHandler(event)">
+			
+			<s:VGroup width="100%" height="100%" gap="10"
+					  verticalAlign="middle" horizontalAlign="center" 
+					  paddingRight="10" paddingLeft="10">
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label width="40%" styleName="estiloLabel" text="CPF do servidor"/>
+					
+					<s:TextInput id="loginUser" width="60%" styleName="estiloTextInput" 
+								 editable="false" text="{this._loginUser}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label width="40%" styleName="estiloLabel" text="Nome da Operação"/>
+					
+					<s:TextInput id="nomeOp" width="60%" styleName="estiloTextInput" 
+								 text="{this._nomeOperacao}" editable="false"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Data da Observação" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="dataObs" width="60%" styleName="estiloTextInput" 
+								 text="{this._dataObservacao}" editable="false"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Identificação Própria" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="idAgente" width="60%" styleName="estiloTextInput" editable="false" text="{this._idAgente}"/>
+				</s:HGroup>
+				
+				<!--<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Condição" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="cond" width="60%" styleName="estiloTextInput" editable="false" text="{this._condicao}"/>
+				</s:HGroup>-->
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Número do TEI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="numTEI" width="60%" styleName="estiloTextInput" editable="false" text="{this._numeroTEI}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Série do TEI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="serieTEI" width="60%" styleName="estiloTextInput" editable="false" text="{this._serieTEI}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Número do AI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="numAI" width="60%" styleName="estiloTextInput" editable="false" text="{this._numeroAI}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Série do AI" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="serieAI" width="60%" styleName="estiloTextInput" editable="false" text="{this._serieAI}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Fonte do Polígono" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="fonte" width="60%" styleName="estiloTextInput" editable="false" text="{this._fonte}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Nome do Imóvel" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="nomeImovel" width="60%" styleName="estiloTextInput" editable="false" text="{this._nomeImovel}"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Tipo de Infração" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="tipo" width="60%" styleName="estiloTextInput" editable="false" text="{this._tipo}"/>
+				</s:HGroup>
+				
+				<!--<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Caminho do Arquivo de Foto" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="pathFoto" width="60%" 
+								 styleName="estiloTextInput" editable="false" 
+								 text="{this._caminhoFoto}" useHandCursor="true" buttonMode="true"
+								 click="pathFoto_clickHandler(event)" mouseOver="pathFoto_mouseOverHandler(event)" mouseOut="pathFoto_mouseOutHandler(event)"/>
+				</s:HGroup>-->
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Observações" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextArea id="obs" width="60%" height="100" styleName="estiloTextInput"
+								editable="false" text="{this._observacao}" 
+								creationComplete="textArea_creationCompleteHandler(event)"/>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Área (ha)" width="40%" styleName="estiloLabel"/>
+					
+					<s:TextInput id="areaHa" width="60%" styleName="estiloTextInput" editable="false" text="{this._areaHa}"/>
+				</s:HGroup>
+							
+				<s:VGroup width="100%" gap="5">
+					<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+						<s:Label text="X (centróide)" width="40%" styleName="estiloLabel"/>
+						
+						<s:TextInput id="xCentroide" width="60%" styleName="estiloTextInput" editable="false" text="{this._xCentroide}"/>
+					</s:HGroup>
+					
+					<s:HGroup width="100%" horizontalAlign="right" verticalAlign="top">
+						<s:Label width="40%" styleName="estiloLabel"/>
+						<s:TextInput id="xCentroideDMS" width="60%" styleName="estiloTextInput" editable="false" text="{this._xCentroideDMS}"/>
+					</s:HGroup>
+				</s:VGroup>
+				
+				
+				<s:VGroup width="100%" gap="5">
+					<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+						<s:Label text="Y (centróide)" width="40%" styleName="estiloLabel"/>
+						
+						<s:TextInput id="yCentroide" width="60%" styleName="estiloTextInput" editable="false" text="{this._yCentroide}"/>
+					</s:HGroup>
+					
+					<s:HGroup width="100%" horizontalAlign="right" verticalAlign="top">
+						<s:Label width="40%" styleName="estiloLabel"/>
+						<s:TextInput id="yCentroideDMS" width="60%" styleName="estiloTextInput" editable="false" text="{this._yCentroideDMS}"/>
+					</s:HGroup>
+				</s:VGroup>
+				
+				<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Vértices" width="40%" styleName="estiloLabel"/>
+					
+					<s:HGroup width="60%" horizontalAlign="right">
+						<s:Button id="vertBtn" skinClass="assets.skins.ArrowRightBtnSkin" 
+								  styleName="estiloWidgetContentButton"
+								  width="20" height="20" click="exibirPainelVertices(event)"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<!--<s:HGroup width="100%" horizontalAlign="left" verticalAlign="middle">
+					<s:Label text="Fotos" width="40%" styleName="estiloLabel"/>
+					
+					<s:HGroup width="60%" horizontalAlign="right">
+						<s:Button id="picsBtn" skinClass="assets.skins.ArrowRightBtnSkin" 
+								  styleName="estiloWidgetContentButton"
+								  width="20" height="20" click="exibirGaleria(event)"/>
+					</s:HGroup>
+				</s:HGroup>-->
+				
+				<s:Rect height="5" width="100%"/>
+			</s:VGroup>
+		</s:Scroller>
+	</s:BorderContainer>
+		
+	<s:HGroup width="100%" height="30"
+			  horizontalAlign="right" verticalAlign="bottom" 
+			  paddingRight="5" paddingBottom="5" paddingLeft="5">
+		
+		<s:HGroup width="50%" includeIn="edicao"
+				  horizontalAlign="left" verticalAlign="middle">
+			<s:Button label="Voltar" 
+					  click="buttonVoltar_clickHandler(event)"
+					  styleName="estiloWidgetContentButton" />
+		</s:HGroup>
+		
+		<s:HGroup width="50%" includeIn="edicao"
+				  horizontalAlign="right" verticalAlign="middle">
+			<s:Button label="Atualizar" 
+					  click="buttonSalvar_clickHandler(event)"
+					  styleName="estiloWidgetContentButton" />
+		</s:HGroup>
+		
+		<s:Button label="Editar" 
+				  includeIn="exibicao"
+				  visible="{this._isLogged}" includeInLayout="{this._isLogged}"
+				  click="buttonEditar_clickHandler(event)"
+				  styleName="estiloWidgetContentButton" />
+	</s:HGroup>
+	
+</solutions:CloseWindowBase>

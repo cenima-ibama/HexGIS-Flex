@@ -1,0 +1,493 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>WFSGetFeature.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">informacoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">drag</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptComment">//import com.webmapsolutions.controller.Controller;
+</span>    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">display</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DisplayObject</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Event</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Point</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">net</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">URLLoader</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Timer</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">charts</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">chartClasses</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">BoundedValue</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">controls</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Alert</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">FlexGlobals</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">FlexEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">managers</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">PopUpManager</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ObjectUtil</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Map</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">maps</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">HashMap</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">GetFeatureInfoEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">LayerEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ZoomBoxEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">feature</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Feature</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">format</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">gml</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">GMLFormat</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">format</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">gml</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">parser</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">GMLParser</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Handler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mouse</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ClickHandler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Layer</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ogc</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">WMS</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">XMLRequest</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Bounds</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Location</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Pixel</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proj4as</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ProjProjection</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">osmf</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">TimeEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">osmf</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Version</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">solutions</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">SiteContainer</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">AboutWindowWidget</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">informacoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">drag</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">.</span><span class="ActionScriptOperator">*</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">informacoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">drag</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DrawnBoxEvent</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">informacoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">drag</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DrawBoxHandler</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">informacoes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">drag</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">reader</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">GMLReader</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">wmsAuthKey</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">WMSAuthKey</span>;
+    
+    <span class="ActionScriptASDoc">/** 
+     * @eventType org.openscales.core.events.GetFeatureInfoEvent.GET_FEATURE_INFO_DATA
+     */</span> 
+    <span class="ActionScriptComment">/*    [Event(name="openscales.getfeatureinfodata", type="org.openscales.core.events.GetFeatureInfoEvent")]
+    */</span>    
+    <span class="ActionScriptASDoc">/**
+     * Handler allowing to get information about a WMS feature when we click on it.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">WFSGetFeature</span>
+    <span class="ActionScriptBracket/Brace">{</span>        
+        <span class="ActionScriptComment">//private static var _instance:WFSGetFeature = null;
+</span>        
+        <span class="ActionScriptComment">//private static var _drawBoxHandler:DrawBoxHandler = new DrawBoxHandler();
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_drawBoxHandler</span>:<span class="ActionScriptDefault_Text">DrawBoxHandler</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">DrawBoxHandler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">boundingBox</span>:<span class="ActionScriptDefault_Text">Bounds</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_request</span>:<span class="ActionScriptDefault_Text">XMLRequest</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_layerName</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_center</span>:<span class="ActionScriptDefault_Text">Pixel</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">selecionarCamadaVisivel</span>:<span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_layersNames</span>:<span class="ActionScriptDefault_Text">Array</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_propertyName</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_filter</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_cqlFilter</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_map</span>:<span class="ActionScriptDefault_Text">Map</span>;
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_active</span>:<span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_instance</span>:<span class="ActionScriptDefault_Text">WFSGetFeature</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_nInstances</span>:<span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+        
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">WFSGetFeature</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>:<span class="ActionScriptDefault_Text">Map</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">value</span>:<span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">map</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">target</span>;
+            <span class="ActionScriptDefault_Text">active</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+            
+            <span class="ActionScriptDefault_Text">_drawBoxHandler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">/*public static function getInstance(target:Map=null, value:Boolean = false):WFSGetFeature
+        {
+            if (_instance == null)
+            {
+                _instance = new WFSGetFeature(target, value);
+                
+                _drawBoxHandler.map = target;
+                _drawBoxHandler.active = value;
+            }
+            
+            return _instance;
+        }*/</span>
+        
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">registerListeners</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">SiteContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">addEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">DrawnBoxEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DRAWN</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">getBBox</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">/*SiteContainer.addEventListener(SelectedLayerEvent.SELECTED_LAYER, getLayer);
+                SiteContainer.addEventListener(LayerEvent.LAYER_ADDED, atualizaLista);
+                SiteContainer.addEventListener(LayerEvent.LAYER_REMOVED, atualizaLista);
+                SiteContainer.addEventListener(LayerEvent.LAYER_VISIBLE_CHANGED, atualizaLista);*/</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">protected</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unregisterListeners</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">SiteContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeEventListener</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">DrawnBoxEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">DRAWN</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">getBBox</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptComment">/*SiteContainer.removeEventListener(SelectedLayerEvent.SELECTED_LAYER, getLayer);
+                SiteContainer.removeEventListener(LayerEvent.LAYER_ADDED, atualizaLista);
+                SiteContainer.removeEventListener(LayerEvent.LAYER_REMOVED, atualizaLista);
+                SiteContainer.removeEventListener(LayerEvent.LAYER_VISIBLE_CHANGED, atualizaLista);*/</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">Map</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_map</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Set the existing map to the handler
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>:<span class="ActionScriptDefault_Text">Map</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>    
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_map</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">target</span>;
+                <span class="ActionScriptDefault_Text">_drawBoxHandler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">target</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">active</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">Boolean</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_active</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">active</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span>:<span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_nInstances</span><span class="ActionScriptOperator">++</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_nInstances</span> <span class="ActionScriptOperator">&gt;</span> 0<span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptDefault_Text">_nInstances</span><span class="ActionScriptOperator">--</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">active</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//_controller.activateTool("wfsGetFeature", true);
+</span>                <span class="ActionScriptDefault_Text">_drawBoxHandler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">active</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">true</span>;
+                
+                <span class="ActionScriptDefault_Text">registerListeners</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptDefault_Text">_active</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptDefault_Text">value</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">active</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptComment">//_controller.activateTool("wfsGetFeature", false);
+</span>                                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_nInstances</span> <span class="ActionScriptOperator">==</span> 0<span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">_drawBoxHandler</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">active</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+                    
+                    <span class="ActionScriptComment">/*if (selecionarCamadaVisivel) {
+                    selecionarCamada.closeWindow();
+                    
+                    selecionarCamadaVisivel = false;
+                    }*/</span>
+                    <span class="ActionScriptComment">//layerName = null;
+</span>                    <span class="ActionScriptDefault_Text">boundingBox</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+                    
+                    <span class="ActionScriptDefault_Text">unregisterListeners</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    
+                    <span class="ActionScriptDefault_Text">_active</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">/*_active = value;*/</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">/*private function atualizaLista(event:FlexEvent=null):void {
+        
+        if (event != null) {
+        boundingBox = null;
+        SiteContainer.dispatchEvent(new AtualizaListaEvent(AtualizaListaEvent.LISTA_ATUALIZADA));
+        }
+        
+        //var listaAux:Array= listaCamadas();
+        //selecionarCamada.setCamadas(listaAux);
+        //this.layerName = listaAux[0];
+        }*/</span>
+        
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getLayer</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>:<span class="ActionScriptDefault_Text">SelectedLayerEvent</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layerName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">camada</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">layerName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">String</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layerName</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">layerName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">name</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layerName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">name</span>;
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bounds</span>:<span class="ActionScriptDefault_Text">Bounds</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">reprojectTo</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_center</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getMapPxFromLocation</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Location</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layerName</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> 
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">req</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">prepareRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_layerName</span><span class="ActionScriptBracket/Brace">)</span>;
+                    
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptBracket/Brace">)</span> 
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">destroy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptDefault_Text">_request</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">XMLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">req</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handleResponse</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span>;
+                    <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">send</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    
+                    <span class="ActionScriptComment">//this.cursorManager.setBusyCursor(); 
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">layersNames</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">Array</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">layersNames</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">layers</span>:<span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>            
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layerName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">layers</span>;
+                        
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> 
+            <span class="ActionScriptBracket/Brace">{</span>                
+                <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bounds</span>:<span class="ActionScriptDefault_Text">Bounds</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">reprojectTo</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_center</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getMapPxFromLocation</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Location</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">&gt;</span> 0<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">req</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">buildRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_layersNames</span><span class="ActionScriptBracket/Brace">)</span>;
+                    
+                    <span class="ActionScriptComment">//var req:String = this.prepareRequest(boundingBox, layer);
+</span>                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptBracket/Brace">)</span> 
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">destroy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+
+                    <span class="ActionScriptDefault_Text">_request</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">XMLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">req</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handleResponse</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span>;
+                    <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">send</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    
+                    <span class="ActionScriptComment">//this.cursorManager.setBusyCursor(); 
+</span>                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * 
+         * Method called to send the wfs request getfeature
+         * 
+         * @param boundingBox bbox of the drawn area
+         * 
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getBBox</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>:<span class="ActionScriptDefault_Text">DrawnBoxEvent</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">bounds</span>:<span class="ActionScriptDefault_Text">Bounds</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">req</span>:<span class="ActionScriptDefault_Text">String</span>
+            
+            <span class="ActionScriptDefault_Text">boundingBox</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">bounds</span>;
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layerName</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">bounds</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">reprojectTo</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_center</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getMapPxFromLocation</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Location</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptDefault_Text">req</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">prepareRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_layerName</span><span class="ActionScriptBracket/Brace">)</span>;
+
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptBracket/Brace">)</span> 
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">destroy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                
+                <span class="ActionScriptDefault_Text">_request</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">XMLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">req</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handleResponse</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span>;
+                <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">send</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span> <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>            
+                <span class="ActionScriptDefault_Text">bounds</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">reprojectTo</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_center</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getMapPxFromLocation</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Location</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">bounds</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">center</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+                
+                <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layersNames</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span> <span class="ActionScriptOperator">&gt;</span> 0<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">req</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">buildRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">boundingBox</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_layersNames</span><span class="ActionScriptBracket/Brace">)</span>;
+
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptBracket/Brace">)</span> 
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">destroy</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    
+                    <span class="ActionScriptDefault_Text">_request</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">XMLRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">req</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">handleResponse</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">proxy</span>;
+                    <span class="ActionScriptDefault_Text">_request</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">send</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * This function generate all the post treatments that lead to the generatation 
+         * of the getfeature request
+         * 
+         * @param bbox bounds of the drawn area
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">prepareRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bbox</span>:<span class="ActionScriptDefault_Text">Bounds</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">layerName</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">request</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mapLayer</span>:<span class="ActionScriptDefault_Text">Layer</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getLayerByIdentifier</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">layerName</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mapLayer</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">&amp;&amp;</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mapLayer</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">WMS</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">buildRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bbox</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mapLayer</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">WMS</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">request</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Generate the getfeatureInfo request which is going to be sent to the server
+         * 
+         * @param pix Position of the mouse cursor when the user clicked
+         * @param version Version of WMS
+         * @param layerVec Vector of WMS which has to be integrated into the request
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">buildRequest</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bbox</span>:<span class="ActionScriptDefault_Text">Bounds</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">layers</span>:<span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>    
+            <span class="ActionScriptComment">//bbox = bbox.reprojectTo(layer.projection);
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">i</span>:<span class="ActionScriptDefault_Text">int</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">layersNames</span>:<span class="ActionScriptDefault_Text">String</span>;
+            
+            <span class="ActionScriptDefault_Text">layersNames</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">WMS</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layers</span>;
+            
+            <span class="ActionScriptReserved">for</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">=</span> 1; <span class="ActionScriptDefault_Text">i</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">length</span>; <span class="ActionScriptDefault_Text">i</span><span class="ActionScriptOperator">++</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">layersNames</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">","</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptDefault_Text">i</span><span class="ActionScriptBracket/Brace">]</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">WMS</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layers</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">request</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span>;
+            
+            <span class="ActionScriptComment">//mandatory query layers parameter
+</span>            <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptOperator">+</span><span class="ActionScriptString">"?"</span>;
+            
+            <span class="ActionScriptComment">//mandatory service parameter
+</span>            <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"SERVICE=WFS&amp;"</span>;
+            
+            <span class="ActionScriptComment">//mandatory version parameter
+</span>            <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"VERSION=1.0.0&amp;"</span>;
+            
+            <span class="ActionScriptComment">//mandatory requestion parameter
+</span>            <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"REQUEST=GetFeature&amp;"</span>;
+            
+            <span class="ActionScriptComment">//mandatory query layers parameter
+</span>            <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"TYPENAME="</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">layersNames</span>  <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">"&amp;"</span>;
+            
+            <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"outputFormat=text/xml; subtype=gml/3.1.1&amp;"</span>;
+            
+            <span class="ActionScriptComment">//parametro opcional
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">propertyName</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"PROPERTYNAME="</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">propertyName</span> <span class="ActionScriptOperator">+</span><span class="ActionScriptString">"&amp;"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptComment">//parametro opcional
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">filter</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"FILTER="</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">filter</span><span class="ActionScriptOperator">+</span><span class="ActionScriptString">"&amp;"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptComment">//parametro opcional
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">cqlFilter</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"CQL_FILTER="</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">cqlFilter</span> <span class="ActionScriptOperator">+</span><span class="ActionScriptString">"&amp;"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptComment">//mandatory bbox parameter (minY, minX, maxY, maxX)
+</span>            <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"BBOX="</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">bbox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">left</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">+</span><span class="ActionScriptString">","</span><span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">bbox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">bottom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">+</span><span class="ActionScriptString">","</span><span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">bbox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">right</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">+</span><span class="ActionScriptString">","</span><span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">bbox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">top</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">toString</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptString">"&amp;"</span>;                        
+            
+            <span class="ActionScriptComment">//mandatory map request part parameter
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptBracket/Brace">[</span>0<span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">version</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptString">"1.3.0"</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"CRS="</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">bbox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">srsCode</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">else</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">request</span> <span class="ActionScriptOperator">+=</span> <span class="ActionScriptString">"SRS="</span> <span class="ActionScriptOperator">+</span> <span class="ActionScriptDefault_Text">bbox</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">srsCode</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptComment">/*if (layers[0] is WMSAuthKey)
+            {
+                request += "&amp;authkey=88203dcc-2ae8-48ff-99f5-d9eab0f43e7e";
+            }*/</span>
+            
+            <span class="ActionScriptComment">//Alert.show(request);
+</span>            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">request</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        
+        <span class="ActionScriptASDoc">/**
+         * Read the incoming response from the server
+         * 
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">handleResponse</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">event</span>:<span class="ActionScriptDefault_Text">Event</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">loader</span>:<span class="ActionScriptDefault_Text">URLLoader</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">event</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">target</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">URLLoader</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">gmlReader</span>:<span class="ActionScriptDefault_Text">GMLReader</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">GMLReader</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">null</span><span class="ActionScriptOperator">,</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">HashMap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptDefault_Text">gmlReader</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">version</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"3.1.1"</span>;
+            <span class="ActionScriptComment">//gmlformat.asyncLoading = false;
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ret</span>:<span class="ActionScriptDefault_Text">Object</span>;
+
+            <span class="ActionScriptComment">//Alert.show(ObjectUtil.toString(loader.data));
+</span>            <span class="ActionScriptDefault_Text">ret</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">gmlReader</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">read</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">loader</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">//Alert.show(ret.toString());
+</span>            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">SiteContainer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">dispatchEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">GetFeatureEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">GetFeatureEvent</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">GET_FEATURE_DATA</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">ret</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layerName</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_center</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptComment">//var feature:Vector.&lt;Feature&gt; = (ret as Vector.&lt;Feature&gt;);
+</span>        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">propertyName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">String</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_propertyName</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">propertyName</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_propertyName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">filter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">String</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_filter</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">filter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_filter</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">cqlFilter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">String</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_cqlFilter</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">cqlFilter</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">value</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> 
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_cqlFilter</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">value</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

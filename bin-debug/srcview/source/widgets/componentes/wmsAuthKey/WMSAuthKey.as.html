@@ -1,0 +1,83 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>WMSAuthKey.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">wmsAuthKey</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Grid</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ogc</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">WMS</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ogc</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">provider</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">WMSTileProvider</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">layer</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">params</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ogc</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">WMSParams</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">tile</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ImageTile</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">tile</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Tile</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Bounds</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Location</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Pixel</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geometry</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">basetypes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Size</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">controls</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Alert</span>;
+    
+    
+    <span class="ActionScriptASDoc">/**
+     * Instances of WMS are used to display data from OGC Web Mapping Services.
+     *
+     * @author Bouiaw
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">WMSAuthKey</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">WMS</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         * The tile provider allows users to generate requests to the server and get the requested tiles
+         */</span>
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_tileProvider</span>:<span class="ActionScriptDefault_Text">WMSAuthKeyTileProvider</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Constructor of the class
+         * 
+         * @param name Name of the layers to display
+         * @param url URL of the service to request
+         * @param styles Styles of the layers to display
+         * 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">WMSAuthKey</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">identifier</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">url</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">layers</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">styles</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">""</span><span class="ActionScriptOperator">,</span>
+                            <span class="ActionScriptDefault_Text">format</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"image/png"</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">{</span>
+            
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">identifier</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptComment">// Properties initialization
+</span>            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layerName</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">name</span>;
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">url</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">url</span>;
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_layers</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">layers</span>;
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_styles</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">styles</span>;
+            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_format</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">format</span>;
+            <span class="ActionScriptComment">// In WMS we must be in single tile mode
+</span>            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">tiled</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span>;
+            <span class="ActionScriptComment">// Call the tile provider to generate the request and get the tile requested
+</span>            <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_tileProvider</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">WMSAuthKeyTileProvider</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">url</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">_version</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">layers</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">projection</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">styles</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">format</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Override method used to update the wms tile displayed when using the zoom control
+         * 
+         */</span>
+        <span class="ActionScriptReserved">override</span> <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">redraw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">fullRedraw</span>:<span class="ActionScriptDefault_Text">Boolean</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">false</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span> <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span> <span class="ActionScriptOperator">==</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptReserved">return</span>;
+            <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_tileProvider</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">WMSAuthKeyTileProvider</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">tileWidth</span>;
+            <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_tileProvider</span> <span class="ActionScriptReserved">as</span> <span class="ActionScriptDefault_Text">WMSAuthKeyTileProvider</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">this</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">tileHeight</span>;
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">redraw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">fullRedraw</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+
+</pre></body>
+</html>

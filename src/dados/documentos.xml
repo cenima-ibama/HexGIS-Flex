@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<documentos>
+	<doc nome="DNIT" 
+		 descricao="Regimento Interno. Resolução Nº 6, de 10 de Março de 2004."
+         url="dados/documentos/Regimento_interno_DNIT.pdf" />
+         
+    <doc nome="As Crônicas de Gelo e Fogo" 
+		 descricao="A Dança dos Dragões, Capítulo 26: Soprado pelo Vento"
+         url="http://omelete.uol.com.br/images/especiais/sopradopelovento.pdf" />
+         
+    <doc nome="Once Upon a Time" 
+		 descricao="A Collection of Classic Fairy Tales: Rumpelstiltskin"
+         url="http://a.abc.com/m/images/shows/once-upon-a-time/poster/once_rumple2.pdf" />
+         
+    <doc nome="Once Upon a Time" 
+		 descricao="A Collection of Classic Fairy Tales: Snow White"
+         url="http://a.abc.com/m/images/shows/once-upon-a-time/poster/once_snowwhite.pdf" />
+         
+    <doc nome="Once Upon a Time" 
+		 descricao="A Collection of Classic Fairy Tales: Cinderella"
+         url="http://a.abc.com/m/images/shows/once-upon-a-time/poster/once_cinderella.pdf" />
+      
+     <doc nome="Gone" 
+		 descricao="Fome, segundo volume da série escrita por Michael Grant. Capítulo 1."
+         url="http://galerarecord.com.br/upload/catalogo/FOME.pdf" />
+</documentos> 

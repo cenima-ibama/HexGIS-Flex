@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 initialize="init()" width="100%" height="100%">
+	
+	<fx:Declarations>
+		<!-- Placer ici les éléments non visuels (services et objets de valeur, par exemple). -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="15" paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"
+						  verticalAlign="middle" horizontalAlign="left"/>
+	</s:layout>
+	
+	<s:Group id="nameGroup" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle" />
+		</s:layout>
+		
+		<s:Label id="formatLabel" text="Formato:" width="40%" styleName="estiloLabel"/>
+		
+		<s:DropDownList id="listFormat"
+						styleName="estiloDropDownList"
+						change="{this.formatChange(event)}" 
+						dataProvider="{this.formatProvider}"
+						selectedIndex="{this.selectedFormat}"
+						width="60%"/>
+	</s:Group>
+	
+	<s:Button id="validateExportButton" label="Exportar"
+			  click="{this.validateExportFeature(event)}" bottom="0"
+			  styleName="estiloWidgetContentMainButton"/>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.format.Format;
+			import org.openscales.core.format.GPXFormat;
+			import org.openscales.core.format.GeoRssFormat;
+			import org.openscales.core.handler.IHandler;
+			import org.openscales.core.handler.feature.SelectFeaturesHandler;
+			import org.openscales.core.handler.feature.draw.EditFeaturesHandler;
+			import org.openscales.core.handler.feature.draw.FeatureLayerEditionHandler;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.geometry.Geometry;
+			import org.openscales.proj4as.ProjProjection;
+			
+			import widgets.componentes.alerta.Alerta;
+			import widgets.componentes.vetorizar.desenhar.NewExportFeature;
+			import widgets.componentes.vetorizar.desenhar.exportar.NewKMLFormat;
+			
+			private var _exportFeature:NewExportFeature = null;
+			
+			/**
+			 * The current selected format
+			 * @default the first one : 0
+			 */
+			[Bindable]
+			public var selectedFormat:Number = 0;
+			
+			/**
+			 * Datas in the format dropdownlist
+			 */
+			[Bindable]
+			public var formatProvider:ArrayCollection = new ArrayCollection();
+			
+			/**
+			 * Contains all the format supported
+			 */
+			[Bindable]
+			public var supportedFormat:Array = null;
+			
+			/**
+			 * The file reference
+			 */
+			private var fileReference:FileReference;
+			
+			private static const DEFAULT_FILE_NAME:String = "export";
+			private var _alreadyInit:Boolean = false;
+			
+			/**
+			 * Initialise the component onCreationComplete
+			 */
+			public function init():void
+			{
+				if(this._alreadyInit)
+					return;
+				
+				if(!this.supportedFormat)
+				{
+					// init all available formats
+					this.supportedFormat = new Array();
+					this.supportedFormat[0] = "KML";
+					/*
+					this.supportedFormat[1] = "GPX";
+					this.supportedFormat[2] = "GeoRSS";
+					this.supportedFormat[3] = "OSM";
+					this.supportedFormat[4] = "GML";
+					*/
+					
+					this.selectedFormat = 0;
+				}
+				
+				// init formats :
+				for each(var format:String in supportedFormat)
+				{
+					this.formatProvider.addItem(format);
+				}
+				
+				this._alreadyInit = true;
+			}
+			
+			
+			/**
+			 * Call when a change event if dispatch by the dropdownlist linked to formats
+			 * Update the current format value according to the new selection
+			 * And then refresh the version list
+			 */
+			public function formatChange(event:Event):void
+			{
+				if(event)
+				{
+					var list:DropDownList = event.currentTarget as DropDownList
+					this.selectedFormat = list.selectedIndex;
+				}
+			}
+			
+			/**
+			 * Change the text values on Map Language changed
+			 * @param event The I18N event received
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				
+			}
+			
+			/**
+			 * Export the fila at the requested format
+			 */
+			public function validateExportFeature(event:MouseEvent):void
+			{
+				var format:String = this.formatProvider.getItemAt(this.selectedFormat) as String;
+				
+				var fileName:String = DEFAULT_FILE_NAME;
+				
+				// deselect/don't edit features for export
+				// search the select handler
+				var currentSelection:Vector.<Feature> = new Vector.<Feature>();
+				var select:EditFeaturesHandler = null;
+				var edit:FeatureLayerEditionHandler = null;
+				var i:int = 0;
+				var controls:Vector.<IHandler> = this.exportFeature.layer.map.controls;
+				var j:int = controls.length;
+				
+				for(; i<j; ++i)
+				{
+					if(controls[i] is FeatureLayerEditionHandler && controls[i].active)
+					{
+						edit = controls[i] as FeatureLayerEditionHandler;
+						if(!(edit.layerToEdit == this.exportFeature.layer))
+							edit = null;
+					}
+					
+					if(controls[i] is EditFeaturesHandler && controls[i].active)
+					{
+						select = controls[i] as EditFeaturesHandler;
+						if(!(select.layers[0].identifier == this.exportFeature.layer.identifier))
+							select = null;
+						else
+							currentSelection = select.selectedFeatures;
+					}
+				}
+				
+				if(edit)
+				{
+					edit.editionModeStop();
+				}
+				
+				if(select)
+				{
+					// put back the original feature style (select or edit)
+					i=0;
+					j=currentSelection.length;
+					for(; i<j; ++i)
+					{
+						currentSelection[i].style = currentSelection[i].originalStyle;
+					}
+				}
+				
+				var writeFormat:Format;
+				switch(format)
+				{
+					case "KML":
+						fileName += ".kml";
+						writeFormat = new NewKMLFormat();
+						break;
+					
+					case "GPX":
+						fileName += ".gpx";
+						writeFormat = new GPXFormat();
+						break;
+					
+					case "GeoRss":
+						fileName += ".xml";
+						writeFormat = new GeoRssFormat();
+						break;
+					
+					/*case "GML":
+					fileName += ".gml";
+					var writeGML:GML321Writer = new GML321Writer();
+					//datas = writeGML.write(this.exportFeature.layer.features);
+					break;*/
+				}
+				
+				// redraw selected style
+				// put back the original feature style
+				if(select)
+				{
+					i=0;
+					j=currentSelection.length;
+					for(; i<j; ++i)
+					{
+						currentSelection[i].style = (select.selectedStyle != null) ? select.selectedStyle(currentSelection[i]) : SelectFeaturesHandler.defaultSelectedStyle(currentSelection[i]);
+					}
+				}
+				
+				if(edit)
+				{
+					edit.featuresToEdit = currentSelection;
+					edit.editionModeStart();
+				}
+				
+				//open a native save file dialog, using the default file name
+				this.saveFormatExport(writeFormat, fileName, ProjProjection.getProjProjection(Geometry.DEFAULT_SRS_CODE));
+				this.exportFeature.closePopUp();
+			}
+			
+			
+			/**
+			 * Return the data of the layer in the specified format.
+			 * Use the write method of the given format to return data
+			 * The features will be exported in the given ProjProjection, 
+			 * if no projProjection is specified the features will be exported in the layer Projection
+			 */
+			public function getFormatExport(format:Format, exProj:ProjProjection = null):Object
+			{
+				
+				if (!exProj)
+				{
+					return format.write(this.exportFeature.layer.features);
+				}
+				else
+				{
+					var featuresLength:Number = this.exportFeature.layer.features.length;
+					var extFeatures:Vector.<Feature> = new Vector.<Feature>(featuresLength);
+					for(var i:int = 0; i<featuresLength; ++i)
+					{
+						extFeatures[i] = this.exportFeature.layer.features[i].clone();
+						//extFeatures[i].geometry.projection = this.projection;
+						if (exProj != this.exportFeature.layer.features[i].projection)
+							extFeatures[i].geometry.transform(exProj);
+					}
+					
+					return format.write(extFeatures);
+				}
+				return null;
+			}
+			
+			/**
+			 * Export the layer in the given Format and write it on the filesystem with the
+			 * specified file name.
+			 * Use the write method of the given format to write the file
+			 * The features will be exported in the given ProjProjection, 
+			 * if no projProjection is specified the features will be exported in the layer Projection
+			 */
+			public function saveFormatExport(format:Format, fileName:String, exProj:ProjProjection = null):void
+			{					
+				var datas:Object = this.getFormatExport(format, exProj);
+				
+				var fileReference:FileReference;
+				//create the FileReference instance
+				fileReference = new FileReference();
+				
+				//listen for the file has been saved
+				fileReference.addEventListener(Event.COMPLETE, onFileSave);
+				
+				//listen for when then cancel out of the save dialog
+				fileReference.addEventListener(Event.CANCEL,onCancel);
+				
+				//listen for any errors that occur while writing the file
+				fileReference.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+				
+				//open a native save file dialog, using the default file name
+				fileReference.save(datas, fileName);
+			}
+			
+			
+			/**
+			 * called once the file has been saved
+			 */
+			private function onFileSave(e:Event):void
+			{
+				//Alert.show("Sucess Saving File : " + e.toString());
+				
+				fileReference = null;
+			}
+			
+			/**
+			 * called if the user cancels out of the file save dialog
+			 */
+			private function onCancel(e:Event):void
+			{
+				//Alert.show("Cancel Saving File : " + e.toString());
+				
+				fileReference = null;
+			}
+			
+			/**
+			 * called if an error occurs while saving the file
+			 */
+			private function onSaveError(e:IOErrorEvent):void
+			{
+				var alerta:Alerta = new Alerta();
+				
+				alerta.exibirErro("Falha ao salvar o arquivo.");
+				//Alert.show("Error Saving File : " + e.text);
+				
+				fileReference = null;
+			}
+			
+			/**
+			 * reproject features
+			 */
+			/*private function reprojectTo(features:Vector.<Feature>,srcproj:*,destproj:*):Vector.<Feature> {
+			var src:ProjProjection = ProjProjection.getProjProjection(srcproj);
+			var dest:ProjProjection = ProjProjection.getProjProjection(destproj);
+			if(src==dest)
+			return features;
+			var i:uint = 0;
+			var j:uint = features.length;
+			for(; i < j; ++i){
+			features[i].geometry.projection = src;
+			features[i].geometry.transform(dest);
+			}
+			return features;
+			}*/
+			
+			
+			/**
+			 * Return the importFeature linked to theb current form
+			 */
+			public function get exportFeature():NewExportFeature
+			{
+				return _exportFeature;
+			}
+			
+			
+			/**
+			 * @private
+			 */
+			public function set exportFeature(value:NewExportFeature):void
+			{
+				_exportFeature = value;
+				if(_exportFeature.layer && _exportFeature.layer.map)
+				{
+					this._exportFeature.layer.map.addEventListener(I18NEvent.LOCALE_CHANGED, this.onMapLanguageChange);
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+</s:Group>

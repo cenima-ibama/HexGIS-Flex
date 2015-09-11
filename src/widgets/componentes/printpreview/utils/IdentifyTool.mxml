@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:ToolsBase xmlns="*" 
+				xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:solutions="solutions.*">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.ListEvent;
+			import org.openscales.core.layer.ogc.WFS;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.feature.MultiPolygonFeature;
+			import flash.utils.ByteArray;
+			import org.openscales.core.handler.feature.SelectFeaturesHandler;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.layer.FeatureLayer;
+			
+			[Bindable]public var layersname:Array = new Array();
+			private var openLayer:WFS;
+			private var opensearch:Boolean;
+			
+			private var parcelsearch:Search;			
+			private var resultsArray:Array = new Array();
+			[Bindable]private var featurecount:int = 0;			
+			private var selectfeaturelayer:FeatureLayer;
+			
+			override protected function init():void
+			{
+				//Store window height
+				panelHeight = this.height;
+				//Disable the red selection box
+				_model.selectfeature.enableBoxSelection = false;
+				for each(var item:* in _model.wfsArray)
+				{
+				layersname.push(item.layer.name);
+				}
+				//Add listener for feature click data
+				_model.map.addEventListener(FeatureEvent.FEATURE_SELECTED, displayFeatureData);
+				//Store featurelayer
+				selectfeaturelayer = _model.map.getLayerByIdentifier("SelectedFeatureLayer") as FeatureLayer; 
+				//
+				_model.clearSearch = this.clear;
+			}
+			
+			private function cb_changeHandler(evt:ListEvent):void 
+			{
+				for each(var layer:* in _model.map.layers)
+				{
+				if(layer.params != null && layer.params.service == "WFS" && layer.name == cb1.selectedItem)
+				{
+				//Draw the selected wfs layer
+				layer.visible = true;
+				layer.redraw();
+				openLayer = layer;
+				//Turn on selection tool
+				_model.selectfeature.active = true;
+				break;
+				}
+				}
+				
+				if(layer.params != null && layer.params.service == "WFS" && layer.name == "wfsParcel")
+				{
+				opensearch = true;
+				search.visible = true;					
+				}
+			}
+			
+			
+			private function displayFeatureData(event:FeatureEvent):void 
+			{
+				clear();
+				
+				//Store the selected feature
+				_model.selectedFeaturearray = new Array();
+				
+				var featureheaderdata:String = "State - ";
+				var featuredata:String = "";
+				var multiplefeaturedata:String = "";
+				for each (var res:MultiPolygonFeature in event.features) 
+				{
+				//Store the selected feature in an array
+				_model.selectedFeaturearray.push(res)
+				for (var detail:String in res.attributes)
+				{
+				if(detail != "coordinates")
+				{
+				featuredata += detail + ":" + res.attributes[detail] + "\n";
+				if(detail == "STATE_NAME")
+				{
+				featureheaderdata += res.attributes[detail] + "\n";
+				}	
+				}                          
+				}	
+				}
+				//Set metadata in textarea based on feature click		
+				metadata.text = featureheaderdata + featuredata;
+			}
+			
+			private function clone(source:Object):*
+			{
+				var myBA:ByteArray = new ByteArray();
+				myBA.writeObject(source);
+				myBA.position = 0;
+				return(myBA.readObject());
+			}
+			
+			
+			private function openSearch():void
+			{
+				parcelsearch = new Search();
+				createChildren();
+			}
+			
+					
+			
+			
+		
+			private function clear():void
+			{
+				
+				if(selectfeaturelayer.features.length > 0)
+				{
+					var unselectFeature:SelectFeaturesHandler = new SelectFeaturesHandler();
+					
+					for(var i:int = 0; i < selectfeaturelayer.features.length; i++)
+					{
+						if(selectfeaturelayer.features[i].style != null)
+						{
+							selectfeaturelayer.features[i].style.rules[0].symbolizers[0].fill.color = "0x99d0f2";
+							selectfeaturelayer.features[i].style.rules[0].symbolizers[0].stroke.color = "0xFFFFFF";
+						}						
+					} 		
+					
+					//Reset feature results
+					metadata.text = "";
+					
+					if(_model.selectedFeaturearray != null && _model.selectedFeaturearray.length > 0)
+					{
+					for each (var item:Feature in _model.selectedFeaturearray)
+					{
+						//(_model.map.getLayerByIdentifier(("wfsParcel") as FeatureLayer).addChild(item));
+						item.style = item.originalStyle;
+					}
+					}	
+					//Now clear the feature layer
+					//_model.map.getLayerByIdentifier("SelectedFeatureLayer").clearbox();
+					
+					//Redraw the wfs and feature layers		
+					//_model.map.getLayerByIdentifier("wfsParcel").redraw();	  
+					//_model.map.getLayerByIdentifier("SelectedFeatureLayer").redraw();  							
+				}
+			}	
+			
+			
+			private function hideWFS():void
+			{
+				if(openLayer != null)
+				{
+					openLayer.visible = false;
+				}
+				cb1.selectedIndex = -1;
+				if(opensearch)
+				{
+					search.visible = false;
+					opensearch = false;
+				}
+				//Remove wfs layer
+				if(parcelsearch != null)
+				{
+				identsearch.removeChild(parcelsearch);
+				}
+				
+				//Reset pop up height
+				this.height = 200;
+				//Reset selected parcels
+				clear();
+			}
+			
+			override protected function createChildren():void
+			{
+				super.createChildren();
+				
+				if(parcelsearch != null)
+				{
+				parcelsearch.height = 200;
+				this.height = 400;
+				panelHeight = this.height;
+				identsearch.addChild(parcelsearch)
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:VBox id="identsearch" width="100%" height="100%">
+		<mx:VBox width="100%" height="100%" horizontalAlign="center" borderStyle="solid">
+			<mx:HBox id="clearbox" width="100%" >
+				<mx:ComboBox id="cb1" prompt="Please select a Layer..."
+							 dataProvider="{layersname}" change="cb_changeHandler(event);"/>
+				<mx:Button id="search" label="Search" click="openSearch()" visible="false"/>
+			</mx:HBox>
+			<mx:TextArea id="metadata" width="95%" height="80%" editable="false">
+				<mx:htmlText><![CDATA[<br>Select a layer from the above <font color="#008800">drop down menu.</font><br><br><font color="#008800">Click on a feature </font>to view attributes..]]></mx:htmlText>
+			</mx:TextArea>
+			<mx:Spacer height="5"/>
+		</mx:VBox>
+	</mx:VBox>
+</solutions:ToolsBase>

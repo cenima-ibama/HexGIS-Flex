@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				rollOver="lblRollOver()" rollOut="lblRollOut(event)"
+				autoDrawBackground="false" height="25" width="100%" 
+				creationComplete="onCreationCompleteHandler(event)"
+				dataChange="updateCompleteHandler(event);">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			private function onClick(evt:Event):void 
+			{
+				data.selecionado = !data.selecionado;
+			}
+			
+			private function lblRollOver():void
+			{
+				cbCont.styleName = "estiloCBContRollOver";
+			}
+			
+			protected function lblRollOut(event:MouseEvent):void
+			{
+				cbCont.styleName = "estiloCBCont";
+			}
+			
+			protected function onCreationCompleteHandler(event:FlexEvent):void
+			{
+				cbCont.styleName = "estiloCBCont";
+			}
+			
+			protected function updateCompleteHandler(event:Event):void
+			{
+				if(data != null)
+				{
+					check.selected = data.selecionado;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer styleName="estiloInvisibleContainer" width="100%" height="25">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"
+				gap="0" paddingBottom="0" paddingLeft="0" paddingRight="2" paddingTop="0"/>
+		</s:layout>
+		
+			<s:BorderContainer id="cbCont" width="100%" height="25">
+				<s:layout>
+					<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" gap="0"/>
+				</s:layout>
+				<s:Rect width="10"/>
+				<s:CheckBox id="check" label="{data.name}" width="100%" 
+							change="onClick(event)" updateComplete="updateCompleteHandler(event)"/>
+				<s:Rect width="10"/>
+			</s:BorderContainer>
+	</s:BorderContainer>
+			
+</s:ItemRenderer>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget  	xmlns="*"
+						xmlns:solutions="solutions.*"
+						xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						xmlns:s="library://ns.adobe.com/flex/spark" 
+						xmlns:mx="library://ns.adobe.com/flex/mx" 
+						creationComplete="configure()">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:Zoom id="zoom" duration="500" zoomHeightFrom="0" zoomWidthFrom="0" originX="{this.x}" originY="{this.y}"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import widgets.componentes.graficos.type.BubChartComponent;
+			import widgets.componentes.graficos.type.CanChartComponent;
+			import widgets.componentes.graficos.type.ColBarLinAreChartComponent;
+			import widgets.componentes.graficos.type.PieChartComponent;
+			
+			import solutions.SiteContainer;
+			
+			import mx.controls.Alert;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.feature.Feature;
+			
+			
+			[Bindable]
+			private var _data:Object;
+			
+			[Bindable]
+			private var _mode:String;
+			
+			[Bindable]
+			private var _layerName:String;
+			
+			[Bindable]
+			private var nResultados:String;
+			
+			private var numeroRegs:int = 0;
+			
+			private var colBarLinAreChart:ColBarLinAreChartComponent;
+			private var pieChart:PieChartComponent;
+			private var bubChart:BubChartComponent;
+			private var canChart:CanChartComponent;
+			
+			
+			override protected function configure():void
+			{				
+				super.configure();
+				
+				super.reducedHeight = 75;
+				
+				var auxTitle:String = "Gráfico de " + this._mode;
+				
+				if (this._layerName)
+				{
+					auxTitle = auxTitle + ": " + this._layerName;
+				}
+
+				super.setTitle(auxTitle);
+
+				
+				if (numeroRegs > 0)
+				{						
+					switch (this._mode)
+					{
+						case ("Colunas"):
+							
+						case ("Barras"): 
+							
+						case ("Linhas"): 
+							
+						case ("Áreas"):
+							createColBarLinAreChart();
+							break;
+						
+						case ("Setores"):
+							createPieChart();
+							break;
+						
+						case ("Bolhas"):
+							createBubChart();
+							break;
+						
+						case ("Candelabros"): 
+							createCanChart();
+							break;
+					}
+				}
+				
+			}
+			
+			private function createColBarLinAreChart():void
+			{				
+				if (colBarLinAreChart == null)
+				{
+					colBarLinAreChart = new ColBarLinAreChartComponent();
+					
+					var obj:Object = new Object();
+					obj.dados = this._data;
+					obj.modo = this._mode;
+					
+					colBarLinAreChart.data = obj;
+					
+					container.addElement(colBarLinAreChart as IVisualElement);
+				}
+			}
+			
+			private function createPieChart():void
+			{
+				if (pieChart == null)
+				{
+					pieChart = new PieChartComponent();
+					
+					var obj:Object = new Object();
+					obj.dados = this._data;
+					obj.modo = this._mode;
+					
+					pieChart.data = obj;
+					
+					container.addElement(pieChart as IVisualElement);
+				}
+			}
+			
+			private function createBubChart():void
+			{
+				if (bubChart == null)
+				{
+					bubChart = new BubChartComponent();
+					
+					var obj:Object = new Object();
+					obj.dados = this._data;
+					obj.modo = this._mode;
+					
+					bubChart.data = obj;
+					
+					container.addElement(bubChart as IVisualElement);
+				}
+			}
+			
+			private function createCanChart():void
+			{
+				if (canChart == null)
+				{
+					canChart = new CanChartComponent();
+					
+					var obj:Object = new Object();
+					obj.dados = this._data;
+					obj.modo = this._mode;
+					
+					canChart.data = obj;
+					
+					container.addElement(canChart as IVisualElement);
+				}
+			}
+			
+			override public function setData(value:Object):void 
+			{
+				if (value != null) 
+				{				
+					var dadosRecebidos:Vector.<Feature> = value.dados as Vector.<Feature>;
+					numeroRegs = dadosRecebidos.length;					
+					
+					this._layerName = value.camada;
+					this._mode = value.modo;
+					this._data = value.dados;
+					
+					if (numeroRegs <= 0)
+					{						
+						this.setStyle("showEffect", zoom);
+						currentState = "minimized";
+						this.setMinMaxBtnVisible(false);
+						nResultados = "Nenhum registro recebido         ";
+					}
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:BorderContainer id="container"
+					   width="{0.7*this.map.width}" height="{0.7*this.map.height}" minWidth="200" minHeight="80"
+					   styleName="estiloInvisibleContainer">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="20"
+							  paddingLeft="0" paddingTop="0" paddingBottom="0" paddingRight="0"/>
+		</s:layout>
+	</s:BorderContainer>
+		
+	<solutions:controlBarContent>
+		<mx:Label id="lblRegs" text="{nResultados}" styleName="estiloLabel" width="100%"/>		
+	</solutions:controlBarContent>
+</solutions:BaseWidget>

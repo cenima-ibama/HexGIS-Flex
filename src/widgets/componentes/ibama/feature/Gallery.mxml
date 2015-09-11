@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<solutions:CloseWindowBase xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						   xmlns:s="library://ns.adobe.com/flex/spark" 
+						   xmlns:mx="library://ns.adobe.com/flex/mx" 
+						   xmlns:solutions="solutions.*" 
+						   creationComplete="creationCompleteHandler(event)">
+	
+	
+	<fx:Style source="assets/styles/estiloGaleria.css"/>
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.Base64Decoder;
+			import mx.utils.Base64Encoder;
+			
+			import org.openscales.core.feature.Feature;
+			
+			import widgets.componentes.ibama.renderer.galleryItemRenderer;
+			
+			
+			[Bindable] private var _objID:int;
+			[Bindable] private var _loadedImagesArray:ArrayCollection = new ArrayCollection();
+			private var _newImagesArray:ArrayCollection;
+			private var _imageString:String;
+			
+			private var _fileReference:FileReference;
+			private var _fileByteArray:ByteArray = new ByteArray();
+			private var _extensionsImageUpload:String = ".png,.jpg,.jpeg,.bmp,.gif";
+			
+			private var _itemRenderer:Class = galleryItemRenderer;
+			
+			
+			protected function galeria_creationCompleteHandler(event:FlexEvent):void
+			{
+				galeria.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				galeria.scroller.verticalScrollBar.setStyle("chromeColor", this.getStyle("backgroundColor"));
+				
+				if (_feature is IbamaPolygonFeature)
+				{
+					if (_feature.attributes.hasOwnProperty("id"))
+					{
+						_objID = _feature.attributes.id;
+						ws.getImages.send();
+					}
+				}
+			}
+			
+			protected function getImages_resultHandler(event:ResultEvent):void
+			{
+				var teste:XML = XML(event.result[0]);
+				var teste2:XML = XML(teste.children());
+				var teste3:XML = XML(teste2.aImagens);
+				
+				for (var i:int = 0; i < teste3.item.length(); i++)
+				{
+					var o:Object = new Object();
+					/* o.objectid = teste3.item[i].objectid.toString();
+					o.download = teste3.item[i].download.toString();
+					o.data = criarData(teste3.item[i].data.toString());
+					o.ano = teste3.item[i].ano.toString();
+					o.plataforma = teste3.item[i].plataforma.toString();
+					o.sensor = teste3.item[i].sensor.toString();
+					o.id = teste3.item[i].id.toString(); */
+					o.quicklook = teste3.item[i].quicklook.toString();
+					/* Converter base64 para imagem - Início */
+					var byteArr:ByteArray;
+					var base64Dec:Base64Decoder = new Base64Decoder();
+					base64Dec.decode(o.quicklook);
+					byteArr = base64Dec.toByteArray();
+					/* Converter base64 para imagem - Fim */
+					_loadedImagesArray.addItem(byteArr);
+				}
+			}
+			
+			protected function getImages_faultHandler(event:FaultEvent):void
+			{
+				//do something
+			}
+			
+			protected function browseFiles():void
+			{				
+				_fileReference = new FileReference();
+				_fileReference.addEventListener(Event.SELECT, onFileSelect);
+				_fileReference.addEventListener(Event.CANCEL,onCancel);
+				
+				_fileReference.browse();			
+			}
+			
+			protected function addFile():void
+			{
+				if (!_newImagesArray)
+				{
+					_newImagesArray = new ArrayCollection();
+				}
+				
+				if (_imageString)
+				{
+					_newImagesArray.addItem(_imageString);
+					_loadedImagesArray.addItem(_imageString);
+
+					_imageString = null;
+				}
+			}
+			
+			private function onFileSelect(event:Event):void
+			{
+				_fileReference.addEventListener(Event.COMPLETE, completeHandler);
+				_fileReference.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+				_fileReference.load();
+			}
+			
+			private function ioErrorHandler(event:IOErrorEvent):void
+			{
+				_fileReference = null;
+				Alert.show("Ocorreu um erro ao adicionar a Mídia, tente novamente!");
+				//imageAdded.text = "Ocorreu um erro ao adicionar a Mídia, tente novamente!";
+			}
+			
+			private function onFileLoadComplete(e:Event=null):void
+			{
+			}
+			
+			private function onCancel(e:Event=null):void
+			{
+			}
+						
+			private function completeHandler(event:Event):void
+			{
+				var typeTmp:String = (_fileReference.type).toLowerCase();
+				var permission:Boolean;
+				
+				if (_extensionsImageUpload.indexOf(typeTmp) >= 0)
+				{
+					permission = true;
+					
+					_fileByteArray = new ByteArray();
+					_fileByteArray.clear();
+					_fileByteArray = _fileReference.data;
+					//fileByteArray.compress();
+					//testeImagem.source = fileByteArray;
+					//videoDisplay.source = fileByteArray;
+					
+					var base64Enc:Base64Encoder = new Base64Encoder();
+					base64Enc.encodeBytes(_fileByteArray);
+					_imageString = base64Enc.toString();
+					
+					/* Converter base64 para imagem - Início */
+					/*var byteArr:ByteArray;
+					var base64Dec:Base64Decoder = new Base64Decoder();
+					base64Dec.decode(imageString);
+					byteArr = base64Dec.toByteArray();*/
+					/* Converter base64 para imagem - Fim */
+					//testeImagem.source = byteArr;
+					//_imageAdded.text = "Mídia adicionada com sucesso!";
+				}
+				else 
+				{
+					Alert.show("Arquivo não permitido, favor enviar uma imagem ou um vídeo!");
+					//imageAdded.text = "Arquivo não permitido, favor enviar uma imagem ou um vídeo!";
+					_imageString = null;
+				}
+				_fileReference = null;
+				
+				CursorManager.removeBusyCursor();
+			}
+			
+			protected function container_creationCompleteHandler(event:FlexEvent):void
+			{
+				container.height = 0.9*FlexGlobals.topLevelApplication.height;
+				container.width = 0.95*FlexGlobals.topLevelApplication.width;
+								
+				var factory:ClassFactory = new ClassFactory(this._itemRenderer) 
+				
+				var instance:Object = new this._itemRenderer();
+				
+				factory.properties = {
+					gallery: this
+				}
+				
+				galeria.itemRenderer = factory;
+			}
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				PopUpManager.centerPopUp(this as IFlexDisplayObject);
+			}
+			
+			public function setFullImageSource(value:Object):void
+			{
+				if (value)
+				{
+					fullImage.source = value;
+					fullImage.load();
+				}
+			}
+
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		
+		<s:WebService id="ws">
+			<s:operation name="getImages" resultFormat="e4x" 
+						 result="getImages_resultHandler(event)" 
+						 fault="getImages_faultHandler(event)">
+				<s:request>
+					<entrada>
+						<object_id>{_objID}</object_id>
+					</entrada>
+				</s:request>
+			</s:operation>
+		</s:WebService>
+	</fx:Declarations>
+	
+	
+	<!--<s:BorderContainer id="container" styleName="widgetContentContainer" width="860" height="450">
+		<s:layout>
+			<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center"/>
+		</s:layout>-->
+		<s:HGroup id="container"
+				  paddingBottom="10" paddingLeft="30" paddingRight="30" paddingTop="30" gap="15"
+				  creationComplete="container_creationCompleteHandler(event)"
+				  verticalAlign="middle" horizontalAlign="center">
+			<s:VGroup id="list" height="100%" width="15%">
+					<s:List id="galeria" dataProvider="{_loadedImagesArray}" 
+							horizontalScrollPolicy="off" verticalScrollPolicy="auto"
+							height="100%" width="100%" styleName="estiloListaLayerManager"
+							creationComplete="galeria_creationCompleteHandler(event)"
+							 >
+						<s:layout>
+							<s:TileLayout horizontalGap="10" verticalGap="10" 
+										  horizontalAlign="center" verticalAlign="middle"
+										  requestedColumnCount="2" columnWidth="100" /> 
+						</s:layout>
+					</s:List>
+			</s:VGroup>
+			
+			<s:HGroup height="100%" verticalAlign="middle" horizontalAlign="left">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="2" alpha="0.3" caps="square"/>
+					</s:stroke>
+				</s:Line>
+			</s:HGroup>
+			
+			<s:VGroup id="picture" height="100%" width="70%" verticalAlign="top" horizontalAlign="center">
+				<mx:Image id="fullImage" maintainAspectRatio="true" height="{picture.height}" width="{picture.width}"/>
+			</s:VGroup>
+			
+			<s:HGroup height="100%" verticalAlign="middle" horizontalAlign="left">
+				<s:Line height="100%">
+					<s:stroke>
+						<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="2" alpha="0.3" caps="square"/>
+					</s:stroke>
+				</s:Line>
+			</s:HGroup>
+			
+			<s:VGroup id="control" height="100%" width="15%">
+				<s:VGroup width="100%">
+					<s:Label text="Adicionar Imagem" width="100%" styleName="estiloLabel"/>
+					
+					<s:HGroup width="100%">
+						<s:Button id="chooseLocalFileButton" 
+								  width="90%" label="Selecionar"
+								  styleName="estiloWidgetContentMainButton"
+								  click="{this.browseFiles()}"/>
+						
+						<s:Button id="addLocalFileButton" 
+								  width="30" label="+"
+								  styleName="estiloWidgetContentMainButton"
+								  click="{this.addFile()}"/>
+					</s:HGroup>
+							
+				</s:VGroup>
+			</s:VGroup>
+		</s:HGroup>
+	<!--</s:BorderContainer>-->
+
+</solutions:CloseWindowBase>

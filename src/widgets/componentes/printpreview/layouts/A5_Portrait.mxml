@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:DataRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+		width="300" height="420" >
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	 
+	<fx:Script>
+		<![CDATA[
+			import mx.graphics.ImageSnapshot;
+			
+			import org.openscales.core.Map;
+			
+			import widgets.componentes.printpreview.utils.ModelLocator;
+			import widgets.componentes.printpreview.utils.PrintMapUtil;
+			
+			[Bindable] private var _model:ModelLocator=ModelLocator.getInstance();		
+			[Bindable] private var now:Date = new Date();
+			
+			private var _map:String;
+			
+			public function set map(val:Map):void
+			{
+				//				_map = val;
+				_model.map = val;
+				
+				var bm : Bitmap = new Bitmap(ImageSnapshot.captureBitmapData(_model.map));
+				var printmaputil:PrintMapUtil = new PrintMapUtil()
+				mapImage.source = printmaputil.trimmedMap(bm,
+													mapImage.width,
+													mapImage.height);
+				//_map.zoomSliderVisible = true;
+				//_map.scaleBarVisible = true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:DateFormatter id="dtFormatter" formatString="MMM DD, YYYY"/>
+	</fx:Declarations>
+	<mx:Canvas id="pageBorder" 
+			   x="10" y="10"
+			   width="280" height="325"
+			   verticalScrollPolicy="off" horizontalScrollPolicy="off"
+			   borderStyle="solid" borderColor="#000000" 
+			   backgroundColor="#FFFFFF"/>	
+	<mx:Image id="mapImage" 
+			  x="15" y="15"
+			  width="270" height="315" 
+			  />
+	<mx:Canvas id="titleBorder" 
+			   x="10" y="340"
+			   width="280" height="70"
+			   verticalScrollPolicy="off" horizontalScrollPolicy="off"
+			   borderStyle="solid" borderColor="#000000" 
+			   backgroundColor="#FFFFFF">
+	</mx:Canvas>
+	<mx:Image  id="northImg" 
+			   x="15" y="345"
+			   width="40" height="40"
+			   source="assets/images/popups/print/logo.png" autoLoad="true"/>
+	<mx:Image id="logoImg" 
+			  x="245" y="345"
+			  width="40" height="40"
+			  source="assets/images/popups/print/i_nav.png" alpha="1.0"/>
+	<mx:Text id="dateTxt" 
+			 x="186" y="390" 
+			 text="" 
+			 textAlign="right" 
+			 color="#000000"
+			 height="18" fontSize="8" width="100" fontFamily="Arial"/>
+	<mx:Text id="datePrintedText" 
+			 x="100" y="364" 
+			 text="{'Printed:' + dtFormatter.format(now.toLocaleDateString())}" 
+			 textAlign="center" 
+			 color="#000000"
+			 height="18" fontSize="8" width="100" fontFamily="Arial"/>
+	<mx:Text id="titleTxt" 
+			 x="65" y="350" 
+			 text="My Portrait Map" 
+			 fontSize="12" fontWeight="bold"
+			 color="#000000" 
+			 width="169" height="37" 
+			 textAlign="center"  fontFamily="Arial"/>
+</s:DataRenderer>

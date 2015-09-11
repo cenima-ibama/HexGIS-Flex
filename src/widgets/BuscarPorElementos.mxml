@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:solutions="solutions.*"
+		  width="400" height="300"
+		  creationComplete="creationCompleteHandler(event)">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.capabilities.GetCapabilities;
+			import org.openscales.core.layer.ogc.WFS;
+			import org.openscales.core.style.Style;
+			
+			import spark.events.IndexChangeEvent;
+			
+			private var filterLayer:WFS;
+			
+			
+			protected function creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				var mapLayers:Vector.<Layer>= null;
+				var mapLayersLength:Number = 0;
+				
+				var i:Number = 0;
+				
+				layerList.dataProvider = new ArrayCollection();
+				
+				if (this.map)
+				{
+					mapLayers= this.map.layers;
+					
+					mapLayersLength = mapLayers.length;
+					
+					for (i = mapLayersLength-1; i>=0; i--)
+					{
+						if (mapLayers[i] is WFS)
+						{
+							layerList.dataProvider.addItem(mapLayers[i]);
+						}
+					}
+				}	
+			}
+			
+			protected function layerList_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				if(layerList != null)
+				{
+					filterLayer = layerList.selectedItem as WFS;
+					
+					filterLayer.visible = true;
+					filterLayer.redraw();
+					
+					//Alimentar dropdown de colunas
+//					var capabilities:GetCapabilities = new GetCapabilities("http://projetos.hexgis.com/geoserver", filterLayer.url, cbkFunc, "2.0.0");
+//					capabilities.getAllCapabilities();
+//					function cbkFunc(getCap:GetCapabilities):void 
+//					{
+//						filterLayer.capabilities = getCap.getAllCapabilities();
+//					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup width="{width}" height="{height}" horizontalAlign="center">
+		<s:HGroup width="100%" height="100%" verticalAlign="middle">	
+			<s:Label text="Camada: "/>
+			<s:DropDownList id="layerList" prompt="Selecione uma camada" change="layerList_changeHandler(event)" labelField="identifier"/>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="100%" verticalAlign="middle">	
+			<s:Label text="Coluna: "/>
+			<s:DropDownList id="columnList"/> 
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="100%" verticalAlign="middle">	
+			<s:Label text="Valor: "/>
+			<s:TextInput prompt="Valor" id="valueInput"/> 
+		</s:HGroup>
+		
+		<s:HGroup width="100%" height="100%" verticalAlign="middle">			
+			<s:Button id="clean" label="Limpar"/>
+			<s:Button id="search" label="Buscar"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+</solutions:BaseWidget>

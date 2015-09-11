@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- FeatureInfoDisplay Flex control, used to change layer order or visbility -->
+<s:Group xmlns="http://openscales.org"
+		 xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.feature.Feature;
+			
+			import widgets.componentes.informacoes.drag.event.TotalRegistrosEvent;
+			import solutions.SiteContainer;
+			
+			private var _data:ArrayCollection = new ArrayCollection();
+			
+			[Bindable]
+			private var attr:Object;
+			
+			[Bindable]
+			private var dados:Object;
+			
+			[Bindable]
+			private var _results:Vector.<Feature>;
+			
+			
+			/**
+			 * The dataProvider use for the list.
+			 */
+			[Bindable]
+			public function get data():ArrayCollection
+			{
+				return _data;
+			}
+			/**
+			 * @private
+			 */
+			public function set data(value:ArrayCollection):void
+			{
+				_data = value;
+			}
+
+			[Bindable]
+			public function get results():Object
+			{
+				return _results;
+			}
+			public function set results(dadosFeature:Object):void
+			{				
+				this._data.removeAll();
+				
+				_results = (dadosFeature) as Vector.<Feature>;
+				var resultsLength:Number = results.length;
+				
+				var nAttr:int = 0;
+				
+				if(resultsLength > 0)
+				{
+					for (var i:Number=0; i<resultsLength; ++i)
+					{
+						var feat:Feature = results[i];
+						dados = new Object();
+						dados.prop = "Índice";
+						
+						var arrayNome:Array = feat.name.split(".");
+
+						dados.descr = Number(arrayNome[1]);
+						data.addItem(dados);
+						attr = (feat.attributes);
+						
+						nAttr = 1;
+						for (var name:String in attr) 
+						{ 
+							if((name != "coordinates") && (name != "coordenadas"))
+							{
+								dados = new Object();
+								dados.prop = name;
+								dados.descr = attr[name];
+								data.addItem(dados);
+								
+								nAttr++;
+							}
+						}
+						dados = new Object();
+						dados.prop = " ";
+						dados.descr = " "; 
+						data.addItem(dados);
+					}
+					SiteContainer.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, nAttr));
+				}
+				else 
+				{
+					infoGrid.visible = false;
+					infoGrid.includeInLayout = false;
+					SiteContainer.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, 0));
+					//this.map.dispatchEvent(new TotalRegistrosEvent(TotalRegistrosEvent.TOTAL_REGISTROS, 0));
+				}
+				
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<mx:DataGrid id="infoGrid" dataProvider="{data}" width="350" height="200"
+				 styleName="estiloMxDataGrid" alternatingItemColors="[#f9f2ee, #dddddd]"
+				 horizontalScrollPolicy="auto">
+		<mx:columns >
+			<mx:DataGridColumn headerText="Atributo" dataField="prop" wordWrap="true"/>
+			<mx:DataGridColumn headerText="Descrição" dataField="descr" wordWrap="true"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</s:Group>

@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 initialize="init()" 
+		 creationComplete="configure()"
+		 title="{widgetTitle}">
+		
+	<fx:Declarations>
+		
+		<s:Move id="hideW" effectEnd="hideW_effectEndHandler(event)"/>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.*;
+			
+			import flash.display.DisplayObject;
+			import flash.events.MouseEvent;
+			
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.controls.Label;
+			import mx.core.Application;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.effects.Fade;
+			import mx.effects.Resize;
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			import mx.skins.Border;
+			
+			import solutions.event.AppEvent;
+			
+			import spark.components.BorderContainer;
+			import spark.components.Group;
+			import spark.components.Panel;
+			import spark.effects.Move;
+			import spark.layouts.HorizontalLayout;
+			
+			
+			[Bindable]
+			private var maxBtn:Button = new Button();
+			
+			[Bindable]
+			private var minBtn:Button = new Button();
+			private var closeBtn:Button = new Button();
+			
+			[Bindable]
+			private var includeMinMaxBtn:Boolean = true;
+			
+			private var resize:Resize = new Resize();
+			
+			private var lastState:String;
+						
+			[Bindable]
+			private var previousWidth:int;
+			
+			[Bindable]
+			private var previousHeight:int;
+			
+			[Bindable]
+			private var _reducedWidth:int = 60;
+			
+			[Bindable]
+			private var _reducedHeight:int = 33;
+			
+			[Bindable]
+			private var _maximizedWidth:int;
+			
+			[Bindable]
+			private var _maximizedHeight:int;
+						
+			[Bindable]
+			private var widgetTitle:String = "";
+			
+			[Bindable]
+			private var widgetId:Number; 
+			
+			private var _minMaxBtnVisible:Boolean = true;
+			
+			private static const WIDGET_OPENED:String = "widgetOpened";
+			
+			private static const WIDGET_CLOSED:String = "widgetClosed";
+			
+			private static const WIDGET_MINIMIZED:String = "widgetMinimized";
+			
+			private static const WIDGET_MAXIMIZED:String = "widgetMaximized";
+
+			
+			protected function init():void
+			{						
+				//currentState = "maximized";
+				
+				maxBtn.label="□";
+				maxBtn.toolTip="Maximizar";
+				maxBtn.styleName = "estiloWidgetBtn";
+				maxBtn.buttonMode = true;
+				maxBtn.useHandCursor = true;
+				maxBtn.visible = includeMinMaxBtn;
+				maxBtn.includeInLayout = includeMinMaxBtn;
+				maxBtn.addEventListener(MouseEvent.CLICK, maximizeWidget);
+				
+				minBtn.label="–";
+				minBtn.toolTip="Minimizar";
+				minBtn.styleName = "estiloWidgetBtn";
+				minBtn.buttonMode = true;
+				minBtn.useHandCursor = true;
+				minBtn.visible = includeMinMaxBtn;
+				minBtn.includeInLayout = includeMinMaxBtn;
+				minBtn.addEventListener(MouseEvent.CLICK, minimizeWidget);
+				//minMaxBtn.setStyle("skinClass", Class(assets.skins.TabButtonSkin));
+				//Alert.show(minMaxBtn.getStyle("skinClass"));
+				
+				closeBtn.label="X";
+				closeBtn.toolTip="Fechar";
+				closeBtn.styleName = "estiloWidgetBtn";
+				closeBtn.buttonMode = true;
+				closeBtn.useHandCursor = true;
+				closeBtn.addEventListener(MouseEvent.CLICK, closeWidget);
+				//closeBtn.setStyle("skinClass", Class(assets.skins.TabButtonSkin));
+				
+				//super();
+			}
+			
+			protected function configure():void
+			{
+				hideW.xTo = FlexGlobals.topLevelApplication.width;
+				previousHeight = this.height;
+				previousWidth = this.width;		
+				_maximizedWidth = Application.application.stage.width*0.7;
+				_maximizedHeight = Application.application.stage.height*0.8;
+				currentState = BaseWidget.STATE_OPENED;
+			}
+						
+			public function setId(value:Number):void
+			{
+				widgetId = value;
+			}
+			
+			/**
+			 * Set the widget title. A widget titile can be configured in the config.xml.
+			 * 
+			 * @param value the title text.
+			 */
+			public function setTitle(value:String):void
+			{
+				widgetTitle = value;
+				
+				_reducedWidth = widgetTitle.length*7 + 100;
+				this.minWidth = _reducedWidth;
+			}
+			
+			public function setMinMaxBtnVisible(value:Boolean):void
+			{
+				includeMinMaxBtn = value;
+			}
+			
+			public function setState(value:String):void
+			{
+				switch (value)
+				{
+					case BaseWidget.STATE_MAXIMIZED:
+					{
+						maximizeWidget(null);
+						break;
+					}
+						
+					case BaseWidget.STATE_OPENED:
+					{
+						maximizeWidget(null);
+						break;
+					}
+						
+					case BaseWidget.STATE_MINIMIZED:
+					{
+						minimizeWidget(null);
+						break;
+					}
+						
+					case BaseWidget.STATE_CLOSED:
+					{
+						closeWidget(null);
+						break;
+					}
+						
+					default:
+					{
+						maximizeWidget(null);
+						break;
+					}
+				}
+			}
+			
+			private function minimizeWidget(event:MouseEvent):void
+			{
+				if (!seqMinimize.isPlaying)
+				{
+					lastState = currentState;			
+					currentState = BaseWidget.STATE_MINIMIZED;
+					
+					minBtn.visible=false;
+					maxBtn.right = 35;
+					
+					dispatchEvent(new Event(WIDGET_MINIMIZED));
+				}
+			}			
+			
+			private function maximizeWidget(event:MouseEvent):void
+			{
+				
+				if (!seqMaximize.isPlaying)
+				{
+					
+					if (currentState == BaseWidget.STATE_MINIMIZED)
+					{
+						minBtn.visible=true;
+						maxBtn.right = 65;
+						setLastState();
+					}
+					else if (currentState == BaseWidget.STATE_MAXIMIZED)
+					{
+						currentState =  BaseWidget.STATE_OPENED;
+						dispatchEvent(new Event(WIDGET_OPENED));
+					}
+					else
+					{
+						lastState = currentState;
+						currentState =  BaseWidget.STATE_MAXIMIZED;
+						dispatchEvent(new Event(WIDGET_MAXIMIZED));
+					}
+				}
+			}			
+			
+			private function setLastState():void
+			{
+				switch (lastState)
+				{
+					case BaseWidget.STATE_MAXIMIZED:
+					{
+						currentState = lastState;
+						dispatchEvent(new Event(WIDGET_MAXIMIZED));
+					}
+						
+					case BaseWidget.STATE_OPENED:
+					{
+						currentState = lastState;
+						dispatchEvent(new Event(WIDGET_OPENED));
+					}
+						
+				}
+			}
+			
+			protected function closeWidget(event:MouseEvent):void
+			{
+				if ((currentState != BaseWidget.STATE_MINIMIZED) && (currentState !=  BaseWidget.STATE_MAXIMIZED) && (currentState != BaseWidget.STATE_OPENED))
+				{
+					lastState = currentState;
+				}
+				else
+				{
+					lastState = "null";
+				}
+				
+				hideW.play([this]);
+			}
+			
+			//--------------------------------------
+			// Skin Parts
+			//--------------------------------------
+			
+			/**
+			 * The skin part that represents the title bar of the underlying Panel.
+			 *      NOTE: The default PanelSkin already has this, it's just not defined as a skinPart in the Panel class.
+			 * We want it so that we can capture dragging.
+			 */
+			[SkinPart(required="true")]
+			public var topGroup:Group;
+			
+			//--------------------------------------
+			// Overridden Methods
+			//--------------------------------------
+			
+			protected override function partAdded( partName:String, instance:Object ) : void
+			{
+				super.partAdded( partName, instance );
+				
+				if (instance == topGroup)
+				{
+					Group(instance).addEventListener( MouseEvent.MOUSE_DOWN, topGroup_mouseDownHandler );
+					Group(instance).addEventListener( MouseEvent.MOUSE_UP, topGroup_mouseUpHandler );
+					
+					Group(instance).addElement(closeBtn);
+					closeBtn.right = 5;
+					closeBtn.top = 7;
+					closeBtn.width = 30;
+					closeBtn.height = 20;
+					closeBtn.visible = true;
+					
+					Group(instance).addElement(minBtn);
+					minBtn.right = 35;
+					minBtn.top = 7;
+					minBtn.width = 30;
+					minBtn.height = 20;
+					minBtn.visible = true;
+					
+					Group(instance).addElement(maxBtn);
+					maxBtn.right = 65;
+					maxBtn.top = 7;
+					maxBtn.width = 30;
+					maxBtn.height = 20;
+					maxBtn.visible = true;
+				}
+			}
+			
+			protected override function partRemoved( partName:String, instance:Object ) : void
+			{
+				super.partRemoved( partName, instance );
+				
+				if (instance == topGroup)
+				{
+					Group( instance ).removeEventListener( MouseEvent.MOUSE_DOWN, topGroup_mouseDownHandler );
+					Group( instance ).removeEventListener( MouseEvent.MOUSE_UP, topGroup_mouseUpHandler );
+				}
+			}
+			
+			//--------------------------------------
+			// Event Handlers
+			//--------------------------------------
+			
+			protected function topGroup_mouseDownHandler( event:MouseEvent ):void
+			{
+				if ( !DragManager.isDragging )
+					startDrag();
+			}
+			
+			protected function topGroup_mouseUpHandler( event:MouseEvent ):void
+			{
+				stopDrag();
+			}
+			
+			override public function stylesInitialized():void 
+			{
+				super.stylesInitialized();
+				this.setStyle("skinClass",Class(WidgetSkin));
+			}
+			
+			[Bindable]
+			public function get reducedHeight():Number
+			{
+				return this._reducedHeight;
+			}
+			public function set reducedHeight(value:Number):void
+			{
+				this._reducedHeight = value;
+			}
+			
+			protected function hideW_effectEndHandler(event:EffectEvent):void
+			{
+				/* minMaxBtn.removeEventListener(MouseEvent.CLICK, minimizeWidget);
+				minMaxBtn.addEventListener(MouseEvent.CLICK, maximizeWidget); */
+				
+				//PopUpManager.removePopUp(this as IFlexDisplayObject);
+				
+				SiteContainer.dispatchEvent(new AppEvent(AppEvent.WIDGET_CLOSED, false, false, widgetId));
+				currentState = "closed";
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:states>
+		<s:State name="maximized"/>
+		<s:State name="minimized"/>
+		<s:State name="opened"/>
+		<s:State name="closed"/>
+	</s:states>
+	
+	<s:transitions>
+		<s:Transition id="transMinimize" fromState="*" toState="minimized">
+			<s:Sequence id="seqMinimize">
+				<s:SetAction target="{this.contentGroup}" property="visible" value="false"/>
+				<mx:Resize target="{this}" duration="500" widthTo="{_reducedWidth}" heightTo="{_reducedHeight}"/>
+				<s:SetAction target="{minBtn}" property="toolTip" value="abrir"/>
+				<s:SetAction target="{this}" property="visible" value="true"/>
+			</s:Sequence>
+		</s:Transition>
+		
+		<s:Transition id="transMaximize" fromState="*" toState="maximized">
+			<s:Sequence id="seqMaximize">
+				<mx:Resize target="{this}" duration="500" widthTo="{_maximizedWidth}" heightTo="{_maximizedHeight}"/>
+				<s:SetAction target="{this.contentGroup}" property="visible" value="true"/>
+				<s:SetAction target="{minBtn}" property="toolTip" value="abrir"/>
+			</s:Sequence>
+		</s:Transition>
+				
+		<s:Transition id="transClose" fromState="*" toState="closed">
+			<s:Sequence id="seqClose">
+				<s:SetAction target="{this}" property="visible" value="false"/>
+			</s:Sequence>
+		</s:Transition>
+		
+		<s:Transition id="transOpen" fromState="*" toState="opened">
+			<s:Sequence id="seqOpen">
+				<mx:Resize target="{this}" duration="500" widthTo="{previousWidth}" heightTo="{previousHeight}"/>
+				<s:SetAction target="{this}" property="visible" value="true"/>
+				<s:SetAction target="{this.contentGroup}" property="visible" value="true"/>
+			</s:Sequence>
+		</s:Transition>
+	</s:transitions>
+	
+	<fx:Metadata>
+		[Event(name="widgetOpened", type="flash.events.Event")]
+		[Event(name="widgetClosed", type="flash.events.Event")]
+		[Event(name="widgetMinimized", type="flash.events.Event")]
+		[Event(name="widgetMaximized", type="flash.events.Event")]
+	</fx:Metadata>
+	
+</s:Panel>

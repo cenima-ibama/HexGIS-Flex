@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group 	xmlns="org.openscales.fx.control.layer.*"				
+			xmlns:mx="library://ns.adobe.com/flex/mx"
+			xmlns:s="library://ns.adobe.com/flex/spark"
+			xmlns:fx="http://ns.adobe.com/mxml/2009"
+			xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+			xmlns:os="org.openscales.fx.control.*"
+			xmlns:drawing="org.openscales.fx.control.drawing.*"
+			xmlns:gerenciador="widgets.componentes.gerenciador.*"
+			xmlns:exportar="widgets.componentes.vetorizar.desenhar.exportar.*" 
+			xmlns:label="widgets.componentes.vetorizar.desenhar.label.*" 
+			xmlns:selecionar="widgets.componentes.gerenciador.layer.desenhar.selecionar.*"
+			xmlns:fxg="assets.fxg.*"
+			width="100%" creationComplete="onCreationComplete();" xmlns:layer="widgets.componentes.gerenciador.layer.*" xmlns:desenhar="widgets.componentes.vetorizar.desenhar.*"
+			>
+	
+	<fx:Metadata>
+		<![CDATA[
+		/** 
+		* @eventType org.openscales.core.events.DrawingEvent.CHANGE_ACTIVE_LAYER
+		*/ 
+		[Event(name="openscales.drawing.change_active_layer", type="org.openscales.core.events.LayerEvent")]
+		
+		]]>
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[						
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.events.PropertyChangeEvent;
+			
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.layer.ogc.WFS;
+			import org.openscales.core.layer.ogc.WMS;
+			import org.openscales.fx.control.IconButton;
+			import org.openscales.fx.control.drawing.DrawingToolbar;
+			
+			import spark.components.Label;
+			
+			import widgets.LayerManagerWidget;
+			import widgets.componentes.gerenciador.layer.NewChangeLayerPosition;
+			import widgets.componentes.gerenciador.layer.NewDeleteLayer;
+			import widgets.componentes.layerGroup.LayerGroup;
+			
+			
+			public static var DRAWLABEL:String="label";
+			public static var DRAWPOINT:String="point";
+			public static var DRAWSHAPE:String="shape";
+			public static var DRAWPATH:String="path";
+			public static var DRAWPOLYGON:String="polygon";
+			public static var DRAWSELECT:String="select";
+			public static var DRAWDELETE:String="delete";
+			public static var DRAWEDIT:String="edit";
+			public static var DRAWMOVE:String="move";
+			public static var DRAWMANAGE:String="manage";
+			public static var DRAWADD:String="add";
+			public static var DRAWIMPORT:String="import";
+			public static var DRAWEXPORT:String="export";
+			
+			[Embed(source="/assets/images/popups/widgetHide2.png")]
+			protected const BTN_MINIMIZE:Class;
+			
+			[Embed(source="/assets/images/popups/widgetHide2Over.png")]
+			protected const BTN_MINIMIZE_OVER:Class;
+			
+			[Embed(source="/assets/images/popups/widgetShow2.png")]
+			protected const BTN_MAXIMIZE:Class;
+			
+			[Embed(source="/assets/images/popups/widgetShow2Over.png")]
+			protected const BTN_MAXIMIZE_OVER:Class;
+			
+			private static var _maximizedLayers:HashMap = new HashMap();
+			
+			private var _timer:Timer;
+			
+			[Bindable]
+			private var isLayer:Boolean = false;
+			
+			[Bindable]
+			private var isLayerGroup:Boolean = false;
+			
+			/**
+			 * The current source to the button to display reduce or maximize
+			 * @default maximize
+			 */
+			[Bindable]
+			public var _btnReduceMaximize:Class = BTN_MAXIMIZE;
+			
+			[Bindable]
+			public var _btnReduceMaximizeOver:Class = BTN_MAXIMIZE_OVER;
+			
+			/**
+			 * Tootip for reduce maximize button
+			 */
+			[Bindable]
+			public var tooltipReduceMaximize:String = "Expandir este item";
+			
+			/**
+			 * To know if the current LayerRenderer display a minimize or maximize item
+			 * @default true
+			 */
+			[Bindable]
+			public var isMinimized:Boolean = true;
+			
+			/**
+			 * @private
+			 * Define if the current layer is a drawing layer or not
+			 * @default false
+			 */
+			protected var _isDrawingLayer:Boolean = false;
+			
+			/**
+			 * Indicates if the drawingTools has to be displayed
+			 */
+			[Bindable]
+			public var isDisplayedDrawingTools:Boolean = false;
+			
+			/**
+			 * @private
+			 * Define if the optionnal group has to be displayed
+			 * @default false
+			 */
+			protected var _optionnalGroupDisplayed:Boolean = false;
+			
+			/**
+			 * @private
+			 * Define the difference of size between maximize and minimize renderer
+			 * @default 0
+			 */
+			protected var _maximizeGroupSize:Number = 0;
+			
+			/**
+			 * @private
+			 * The position of the layerManagerDrawingTools
+			 * @default 0
+			 */
+			protected var _groupPositionDraw:Number = 0;
+			
+			/**
+			 * @private
+			 * The position of the layerManagerOptionnalDisplay
+			 * @defualt 0
+			 */
+			protected var _groupPositionOptionnal:Number = 0;
+			
+			/**
+			 * The layer rendered by this ItemRenderer
+			 */
+			[Bindable]
+			protected var _layer:Layer;
+			
+			[Bindable]
+			protected var _color:uint;
+			
+			[Bindable]
+			protected var _data:LayerRendererObject;
+			
+			[Bindable]
+			//protected var _layerManager:NewLayerManager;
+			protected var _layerManager:LayerManagerWidget;
+			
+			[Bindable]
+			protected var _rendererOptions:Object;
+			
+			[Bindable]
+			protected var _drawingToolbar:DrawingToolbar;
+			
+			[Bindable]
+			protected var _displayZoomToExtent:Boolean = false;
+			
+			[Bindable]
+			protected var _displayMetadatas:Boolean = false;
+			
+			[Bindable]
+			protected var _displayDrawing:Boolean = false;
+			
+			
+			/**
+			 * The Layer rendered by this itemrenderer
+			 */
+			[Bindable]
+			public function get layer():Layer
+			{
+				return _layer;
+			}
+			
+			public function set layer(value:Layer):void 
+			{				
+				if (value)
+				{
+					this._layer = value as Layer;
+					
+					//addLayerTemplate();
+				}
+				
+			}
+			
+			/**
+			 * The LayerManager this ItemRenderer is displayed in
+			 */
+			[Bindable]
+			public function get layerManager():LayerManagerWidget
+			{
+				return _layerManager;
+			}
+			
+			public function set layerManager(value:LayerManagerWidget):void
+			{
+				_layerManager = value;
+				
+				if(_layerManager.map)
+				{
+					
+					_layerManager.map.addEventListener(I18NEvent.LOCALE_CHANGED,this.onMapLanguageChange);
+				}
+				
+				if(_maximizedLayers.getValue(_layerManager) == null)
+				{
+					
+					_maximizedLayers.put(_layerManager, new ArrayCollection());
+				}
+			}
+			
+			/**
+			 * @inherit
+			 * 
+			 * The options implemented by the DefaultLayerRenderer are 
+			 * 
+			 * &lt;LayerManager&gt;
+			 *	 	&lt;rendererOptions&gt;
+			 *			&lt;fx:Object
+			 *				displayLegend="true/false"
+			 *				displayZoomToExtent="true/false"
+			 *				displayMetadatas="true/false"
+			 *              displayDrawing="true/false" /&gt;
+			 *		&lt;/rendererOptions&gt;
+			 * &lt;/LayerManager&gt;
+			 */
+			[Bindable]
+			public function get rendererOptions():Object{
+				
+				return _rendererOptions;
+			}
+			
+			public function set rendererOptions(value:Object):void{
+				
+				_rendererOptions = value;
+				
+				if(value){
+					if(value['displayZoomToExtent'])
+						_displayZoomToExtent = true;
+					if(value['displayMetadatas'])
+						_displayMetadatas = true;
+					if(value['displayDrawing'])
+						_displayDrawing = true;
+					
+					if(_displayZoomToExtent || _displayMetadatas || _displayDrawing)
+						_optionnalGroupDisplayed = true;
+				}
+			}
+			
+			/* public function set data(value:LayerRendererObject):void
+			{
+				this.layer = value.layer;
+				this.layerManager = value.layerManager;
+				this.rendererOptions = value.rendererOptions;
+			} */
+			
+			
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				this.tooltipReduceMaximize = "Expandir este item";	
+			}
+			
+			/**
+			 * According to the group optionnal and drawing tools, set the size and position for this renderer
+			 */
+			public function setGroupSize():void
+			{
+				this._maximizeGroupSize = group.height+layerManagerAdditionnalDisplay.height;
+				
+				// according to the group displayed or not, set the position of the different group
+				this._groupPositionOptionnal = group.height + layerManagerAdditionnalDisplay.height;
+				this._groupPositionDraw = this._groupPositionOptionnal;
+				
+				
+				if(this._optionnalGroupDisplayed == true)
+				{
+					this._maximizeGroupSize += layerManagerOptionnalDisplay.height;
+					this._groupPositionDraw += layerManagerOptionnalDisplay.height;
+				}
+				
+				if(this._isDrawingLayer && this._displayDrawing)
+				{
+					this._maximizeGroupSize += layerManagerDrawingTools.height;
+				}
+				
+				layerManagerOptionnalDisplay.y = this._groupPositionOptionnal;
+				layerManagerDrawingTools.y = this._groupPositionDraw; // work in progress
+			}
+			
+			
+			protected function onCreationComplete():void
+			{
+				if(this._timer) 
+				{
+					this._timer.reset();
+				} 
+				else 
+				{
+					this._timer = new Timer(500,1);
+					this._timer.addEventListener(TimerEvent.TIMER, this.updateItemEnability);
+				}
+				
+				callLater(configure);
+			}
+			
+			private function configure():void
+			{
+				this.parent.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, this.parentChange);
+				this.layerLabel.addEventListener(PropertyChangeEvent.PROPERTY_CHANGE, this.parentChange);
+				this.layerLabel.addEventListener(MouseEvent.CLICK, this.onThisLabelClick);
+				this._layer.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, this.onOtherLabelClick);
+				this._layer.map.addEventListener(LayerEvent.LAYER_REMOVED, this.onLayerRemoved);
+				this._layer.map.addEventListener(MapEvent.RELOAD, this.resetTimer)
+					
+				if((_maximizedLayers.getValue(_layerManager) as ArrayCollection).getItemIndex(_layer) < 0)
+				{
+					
+					this.isMinimized = true;
+				}
+				else
+				{
+					this.isMinimized = false;
+				}
+				
+				this.manageToogle();
+				this._isDrawingLayer = false;
+				
+				if((this._layer != null))
+				{	
+					layerLabel.text = this._layer.displayedName;
+					
+					if((this._layer is VectorLayer) && (this._layer as VectorLayer).editable)
+					{
+						this._isDrawingLayer = true;
+					}
+					else
+					{
+						this._isDrawingLayer = false;
+					}
+					
+					var displayDrawingToolbar:Boolean = true;
+					for(var k:uint = 0; k < this.layer.map.controls.length; k++)
+					{
+						if(this.layer.map.controls[k] is DrawingToolbar)
+						{	
+							if((this.layer.map.controls[k] as DrawingToolbar).mode != "multiple") 
+							{
+								displayDrawingToolbar = false;
+							} 
+							else
+							{
+								this._drawingToolbar = (this.layer.map.controls[k] as DrawingToolbar);
+								
+								//Need to show/hide components from toolbar
+								for(var i:uint = 0 ; i < this._drawingToolbar.multipleModeInitTools.length ; i++)
+								{
+									if(this._drawingToolbar.multipleModeDisplayTools.indexOf(this._drawingToolbar.multipleModeInitTools[i]) < 0) 
+									{
+										this.getComponentFromString(this._drawingToolbar.multipleModeInitTools[i]).visible = false;
+										this.getComponentFromString(this._drawingToolbar.multipleModeInitTools[i]).width = 0;
+										this.getComponentFromString(this._drawingToolbar.multipleModeInitTools[i]).height = 0;
+									}
+								}
+								
+							}
+						}
+					}
+					_color = (this._layer.selected && !displayDrawingToolbar) ? 0xd0d0d0 : 0xffffff;
+					this.isDisplayedDrawingTools = !this.isMinimized && this._isDrawingLayer && displayDrawingToolbar;
+					this.updateItemEnability(null);
+				}
+				
+				this.setGroupSize();
+			}
+			
+			private function getComponentFromString(value:String):UIComponent
+			{
+				var myComponent:UIComponent = null;
+				switch(value) 
+				{
+					case DRAWLABEL:
+						myComponent = this.drawLabel;break;
+					case DRAWPOINT:
+						myComponent = this.drawPoint;break;
+					case DRAWSHAPE:
+						myComponent = this.drawShape;break;
+					case DRAWPATH:
+						myComponent = this.drawPath;break;
+					case DRAWPOLYGON:
+						myComponent = this.drawPolygon;break;
+					case DRAWSELECT:
+						myComponent = this.selectFeatures;break;
+					case DRAWDELETE:
+						myComponent = this.deleteFeatures;break;
+					case DRAWEDIT:
+						myComponent = this.editFeatures;break;
+					case DRAWMOVE:
+						myComponent = this.moveFeatures;break;
+					case DRAWMANAGE:
+						/* myComponent = this.manageAttributes;break; */
+					case DRAWEXPORT:
+						myComponent = this.exportFeature;break;
+				}
+				
+				return myComponent;
+			}
+			
+			private function resetTimer(event:MapEvent):void
+			{
+				this._timer.reset();
+				this._timer.start();
+			} 
+			
+			protected function updateItemEnability(event:Event=null):void
+			{
+				if(this._layer && this.layer.map)
+				{
+					this.enabled = this._layer.available;
+				}
+			}
+			
+			/**
+			 * Called when a layer is removed
+			 */
+			protected function onLayerRemoved(event:LayerEvent):void
+			{
+				if(event.layer.selected && this._layer.map)
+				{
+					event.layer.selected = false;
+					var evt:DrawingEvent = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_LAYER);
+					evt.layer = null;
+					this._layer.map.dispatchEvent(evt);
+				}
+			}
+			
+			/**
+			 * Update the layer on its label click
+			 */
+			private function onThisLabelClick(evt:MouseEvent):void
+			{
+				var displayDrawingToolbar:Boolean = true;
+				for(var k:uint = 0; k < this.layer.map.controls.length; k++)
+				{
+					if(this.layer.map.controls[k] is DrawingToolbar)
+						if((this.layer.map.controls[k] as DrawingToolbar).mode != "multiple") 
+						{
+							displayDrawingToolbar = false;
+						} 
+						else 
+						{
+							this._drawingToolbar = (this.layer.map.controls[k] as DrawingToolbar);
+						}
+					
+				}
+				if(this._layer.hasOwnProperty("features") && !displayDrawingToolbar)
+				{
+					var event:DrawingEvent = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_LAYER);
+					event.layer = this._layer as VectorLayer;
+					this._layer.selected = true;
+					_color = this._layer.selected ? 0xd0d0d0 : 0xffffff;
+					this._layer.map.dispatchEvent(event);
+				}
+			}
+			
+			/**
+			 * Update the layer on other label click
+			 */
+			private function onOtherLabelClick(evt:DrawingEvent):void
+			{
+				if(!evt.layer)
+					return;
+				if(!(evt.layer.hasOwnProperty("features")) || evt.layer != this._layer && this._layer){
+					this._layer.selected = false;
+					_color = this._layer.selected ? 0xd0d0d0 : 0xffffff;
+				}
+			}
+
+			/*private function addLayerTemplate():void
+			{
+				var group:Group = new Group();
+				group.percentWidth = 100;
+				group.percentHeight = 100;
+				
+				var vLayout:VerticalLayout = new VerticalLayout();
+				vLayout.horizontalAlign = "center";
+				vLayout.verticalAlign = "middle";
+				group.layout = vLayout;
+				
+				var group1:Group = new Group();
+				group1.percentWidth = 100;
+				group1.height = 30;
+				
+				var hLayout:HorizontalLayout = new HorizontalLayout();
+				hLayout.horizontalAlign = "left";
+				hLayout.verticalAlign = "bottom";
+				hLayout.paddingLeft = 5;
+				hLayout.paddingBottom = 10;
+				hLayout.paddingRight = 5;
+				hLayout.paddingTop = 0;
+				group1.layout = hLayout;
+				
+				var clv:ChangeLayerVisibility = new ChangeLayerVisibility();
+				clv.layer = this._layer;
+				clv.toolTipChangeVisibility = "Mudar a visibilidade desta camada";
+				
+				var lbl:Label = new Label();
+				lbl.percentWidth = 80;
+				lbl.styleName = "estiloLabel";
+				lbl.setStyle("fontSize", 13);
+				lbl.text = _layer.displayedName;
+				
+				var clp:NewChangeLayerPosition = new NewChangeLayerPosition();
+				clp.layer = _layer;
+				clp.layerManager = _layerManager;
+				
+				var lmReduceMaximize:IconButton = new IconButton();
+				lmReduceMaximize.width = 16;
+				lmReduceMaximize.height = 16;
+				lmReduceMaximize.addEventListener(MouseEvent.CLICK, reduceMaximizeLayerManager)
+				lmReduceMaximize.icon = this._btnReduceMaximize;
+				lmReduceMaximize.iconOver = this._btnReduceMaximizeOver;
+				lmReduceMaximize.iconDown = this._btnReduceMaximizeOver;
+				lmReduceMaximize.toolTip = this.tooltipReduceMaximize;
+				
+				var dl:NewDeleteLayer= new NewDeleteLayer();
+				dl.layer = this._layer;
+				dl.tooltipDelete = "Excluir esta camada";
+				
+				group1.addElement(clv);
+				group1.addElement(lbl);
+				group1.addElement(clp);
+				group1.addElement(lmReduceMaximize);
+				group1.addElement(dl);
+				
+				var groupLegend:Group = new Group();
+				groupLegend.percentWidth = 100;
+				groupLegend.visible = (this._layer is WMS)?true:false;
+				groupLegend.includeInLayout = (this._layer is WMS)?true:false;
+				
+				hLayout = new HorizontalLayout();
+				hLayout.horizontalAlign = "left";
+				hLayout.verticalAlign = "middle";
+				hLayout.paddingLeft = 5;
+				hLayout.paddingBottom = 0;
+				hLayout.paddingRight = 5;
+				hLayout.paddingTop = 0;
+				groupLegend.layout = hLayout;
+				
+				var leg:Legenda = new Legenda();
+				leg.layer = this._layer;
+				
+				groupLegend.addElement(leg);
+				
+				group.addElement(group1);
+				group.addElement(groupLegend);
+				
+				var expandedGroup:Group = new Group();
+				expandedGroup.percentWidth = 100;
+				expandedGroup.visible = !this.isMinimized;
+				expandedGroup.includeInLayout = !this.isMinimized;
+				
+				var vLayout:VerticalLayout = new VerticalLayout();
+				vLayout.horizontalAlign = "center";
+				vLayout.verticalAlign = "middle";
+				vLayout.paddingLeft = 5;
+				vLayout.paddingBottom = 0;
+				vLayout.paddingRight = 5;
+				vLayout.paddingTop = 0;
+				expandedGroup.layout = vLayout;
+				
+				var layerManagerDrawingTools:Group = new Group();
+				layerManagerDrawingTools.height = 60;
+				layerManagerDrawingTools.percentWidth = 100;
+				layerManagerDrawingTools.visible = this.isDisplayedDrawingTools;
+				layerManagerDrawingTools.includeInLayout = this.isDisplayedDrawingTools;
+				
+				vLayout = new VerticalLayout();
+				layerManagerDrawingTools.layout = vLayout;
+				
+				var group2:Group = new Group();
+				group2.height = 30;
+				group2.percentWidth = 100;
+				
+				hLayout = new HorizontalLayout();
+				hLayout.horizontalAlign = "center";
+				hLayout.verticalAlign = "middle";
+				hLayout.gap = 20;
+				group2.layout = hLayout;
+				
+				var drawLabel:NewDrawLabel = new NewDrawLabel();
+				drawLabel.map = this._layer.map;
+				drawLabel.target = this._layer;
+				drawLabel.toolTip = "Adicionar um label";
+				
+				var drawPoint:DrawPoint = new DrawPoint();
+				drawPoint.map = this._layer.map;
+				drawPoint.target = this._layer;
+				drawPoint.toolTip = "Adicionar um ponto";
+				
+				var drawPath:DrawPath = new DrawPath();
+				drawPath.map = this._layer.map;
+				drawPath.target = this._layer;
+				drawPath.toolTip = "Desenhar uma reta";
+				
+				var drawPolygon:DrawPolygon = new DrawPolygon();
+				drawPolygon.map = this._layer.map;
+				drawPolygon.target = this._layer;
+				drawPolygon.toolTip = "Desenhar um polígono";
+				
+				var drawShape:DrawShape = new DrawShape();
+				drawShape.map = this._layer.map;
+				drawShape.target = this._layer;
+				drawShape.toolTip = "Desenhar uma forma";
+				
+				group2.addElement(drawLabel);
+				group2.addElement(drawPoint);
+				group2.addElement(drawPath);
+				group2.addElement(drawPolygon);
+				group2.addElement(drawShape);
+				
+				
+				var group3:Group = new Group();
+				group3.height = 30;
+				group3.percentWidth = 100;
+				
+				hLayout = new HorizontalLayout();
+				hLayout.horizontalAlign = "center";
+				hLayout.verticalAlign = "middle";
+				hLayout.gap = 20;
+				group3.layout = hLayout;
+				
+				var selectFeatures:NewSelectFeatures = new NewSelectFeatures()
+				selectFeatures.fxMap = this._drawingToolbar.fxMap;
+				selectFeatures.map = this._layer.map;
+				selectFeatures.target = this._layer;
+				selectFeatures.toolTip = "Selecionar";
+				
+				var deleteFeatures:DeleteFeatures = new DeleteFeatures();
+				deleteFeatures.map = this._layer.map;
+				deleteFeatures.target = this._layer;
+				deleteFeatures.toolTip = "Excluir";
+				
+				var editFeatures:EditFeatures = new EditFeatures();
+				editFeatures.map = this._layer.map;
+				editFeatures.target = this._layer;
+				editFeatures.toolTip = "Editar";
+				
+				var moveFeatures:MoveFeatures = new MoveFeatures();
+				moveFeatures.map = this._layer.map;
+				moveFeatures.target = this._layer;
+				moveFeatures.toolTip = "Mover";
+				
+				var exportFeature:NewExportFeature = new NewExportFeature();
+				exportFeature.map = this._layer.map;
+				exportFeature.target = this._layer;
+				
+				group3.addElement(selectFeatures);
+				group3.addElement(deleteFeatures);
+				group3.addElement(editFeatures);
+				group3.addElement(moveFeatures);
+				group3.addElement(exportFeature);
+				
+				layerManagerDrawingTools.addElement(group2);
+				layerManagerDrawingTools.addElement(group3);
+				
+				
+				var layerManagerAdditionnalDisplay:Group = new Group();
+				layerManagerAdditionnalDisplay.height = 20;
+				layerManagerAdditionnalDisplay.percentWidth = 100;
+				
+				var layerControlOpacity:ChangeLayerOpacity = new ChangeLayerOpacity();
+				layerControlOpacity.layer = this._layer;
+				layerControlOpacity.toolTip = "Mudar a opacidade desta camada";
+				layerManagerAdditionnalDisplay.addElement(layerControlOpacity);
+				
+				expandedGroup.addElement(layerManagerDrawingTools);
+				expandedGroup.addElement(layerManagerAdditionnalDisplay);
+				
+				container.addElement(group);
+				container.addElement(expandedGroup);
+			}*/
+			
+			
+			private function manageToogle():void 
+			{
+				if(!this.layer || !this.layer.map) 
+				{
+					this.isDisplayedDrawingTools = false;
+					this._btnReduceMaximize = BTN_MAXIMIZE;
+					this._btnReduceMaximizeOver = BTN_MAXIMIZE_OVER;
+					return;
+				}
+				
+				var displayDrawingToolbar:Boolean = true;
+				for(var k:uint = 0; k < this.layer.map.controls.length; k++)
+				{
+					if(this.layer.map.controls[k] is DrawingToolbar) 
+					{
+						if((this.layer.map.controls[k] as DrawingToolbar).mode != "multiple")
+						{
+							displayDrawingToolbar = false;
+							break;
+						} 
+						else 
+						{
+							this._drawingToolbar = (this.layer.map.controls[k] as DrawingToolbar);
+						}
+					}
+				}
+				
+				this.isDisplayedDrawingTools = !this.isMinimized && this._isDrawingLayer && displayDrawingToolbar;
+				
+				this._btnReduceMaximize = this.isMinimized ?  BTN_MAXIMIZE : BTN_MINIMIZE;
+				this._btnReduceMaximizeOver = this.isMinimized ?  BTN_MAXIMIZE_OVER : BTN_MINIMIZE_OVER;
+				this.tooltipReduceMaximize = this.isMinimized ? "Expandir este item" : "Reduzir este item";
+				
+				var index:int;
+				if(isMinimized)
+				{
+					index = (_maximizedLayers.getValue(_layerManager) as ArrayCollection).getItemIndex(_layer);
+					if(index!=-1)
+					{	
+						(_maximizedLayers.getValue(_layerManager) as ArrayCollection).removeItemAt(index);	
+					}
+				}
+				else
+				{
+					index = (_maximizedLayers.getValue(_layerManager) as ArrayCollection).getItemIndex(_layer);
+					if(index==-1)
+					{
+						(_maximizedLayers.getValue(_layerManager) as ArrayCollection).addItem(_layer);
+					}
+				}
+			}
+			
+			/**
+			 * Reduce or maximize the current LayerManager
+			 */
+			public function reduceMaximizeLayerManager(event:Event):void 
+			{
+				this.isMinimized = !this.isMinimized;
+				this.manageToogle();
+			}
+			
+			private function parentChange(event:PropertyChangeEvent):void
+			{
+				this.invalidateDisplayList();
+			}    
+			
+		]]>
+	</fx:Script>
+	
+
+	<s:BorderContainer styleName="estiloGrupoLayerManager" width="100%" height="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" gap="0"/>
+		</s:layout>
+		
+		<s:Group id="group" width="100%" height="100%">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" verticalAlign="middle" />
+			</s:layout>
+		
+			<s:Group width="100%" height="30">
+				<s:layout>
+					<s:HorizontalLayout paddingLeft="5" paddingBottom="10" paddingRight="5" paddingTop="0"
+										horizontalAlign="left" verticalAlign="bottom" />
+				</s:layout>
+				
+				<ChangeLayerVisibility id="clv" layer="{this._layer}" tooltipChangeVisibility="Mudar a visibilidade desta camada" />
+				
+				<s:Label id="layerLabel" width="80%" styleName="estiloLabel" fontSize="13" text="{_layer.displayedName}" />
+				
+				<layer:NewChangeLayerPosition id="clp" layer="{_layer}" layerManager="{_layerManager}" />
+				
+				<os:IconButton id="layerManagerReduceMaximize"
+								width="16" height="16"
+								click="reduceMaximizeLayerManager(event)"
+								icon="{this._btnReduceMaximize}"
+								iconOver="{this._btnReduceMaximizeOver}"
+								iconDown="{this._btnReduceMaximizeOver}"
+								toolTip="{this.tooltipReduceMaximize}" />
+				
+				<layer:NewDeleteLayer id="dl" layer="{this._layer}" tooltipDelete="Excluir esta camada"/>
+				
+			</s:Group>
+		
+			<s:Group id="layerLegend" width="100%" includeInLayout="{(this._layer is WMS)?true:false}" visible="{(this._layer is WMS)?true:false}">
+				<s:layout>
+					<s:HorizontalLayout verticalAlign="middle" horizontalAlign="left" paddingLeft="5" paddingBottom="5"/>
+				</s:layout>
+			
+				<layer:Legenda id="leg" layer="{this._layer}"/>
+			</s:Group>
+		</s:Group>
+		
+		<s:Group id="expandedGroup" width="100%" minWidth="0" 
+				 visible="{!this.isMinimized}" includeInLayout="{!this.isMinimized}">
+			<s:layout>
+				<s:VerticalLayout gap="10" horizontalAlign="center" verticalAlign="middle" 
+								  paddingTop="10" paddingLeft="5" paddingBottom="5" />
+			</s:layout>
+		
+			<s:Group id="layerManagerDrawingTools" height="60" width="100%" 
+					 visible="{this.isDisplayedDrawingTools}" includeInLayout="{this.isDisplayedDrawingTools}">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+			
+				<s:Group height="30" width="100%" visible="{this.isDisplayedDrawingTools}" includeInLayout="{this.isDisplayedDrawingTools}">		
+					<s:layout>
+						<s:HorizontalLayout gap="20" horizontalAlign="center" verticalAlign="middle" />
+					</s:layout>
+				
+					<desenhar:NewDrawLabel id="drawLabel" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Adicionar um label"/>
+				
+					<drawing:DrawPoint id="drawPoint" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Adicionar um ponto" />
+				
+					<drawing:DrawPath id="drawPath" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Desenhar uma reta" />
+				
+					<drawing:DrawPolygon id="drawPolygon" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Desenhar um polígono" />
+				
+					<drawing:DrawShape id="drawShape" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Desenhar uma forma" />
+				</s:Group>
+			
+				<s:Group height="30" width="100%" visible="{this.isDisplayedDrawingTools}" includeInLayout="{this.isDisplayedDrawingTools}">
+					<s:layout>
+						<s:HorizontalLayout gap="20" horizontalAlign="center" verticalAlign="middle" />
+					</s:layout>
+					
+					<desenhar:NewSelectFeatures id="selectFeatures" fxMap="{this._drawingToolbar.fxMap}" 
+												   map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Selecionar"/>
+					
+					<drawing:DeleteFeatures id="deleteFeatures" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Excluir" />
+					
+					<drawing:EditFeatures id="editFeatures" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Editar" />
+					
+					<drawing:MoveFeatures id="moveFeatures" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Mover" />
+					<!--<atributos:NewManageAttributes id="manageAttributes" map="{this._layer.map}" target="{this._layer as VectorLayer}" toolTip="Gerenciar atributos" />-->
+					<desenhar:NewExportFeature id="exportFeature" map="{this._layer.map}" layer="{this._layer as VectorLayer}"/>
+				</s:Group>
+			</s:Group>
+			
+			<s:Group id="layerManagerAdditionnalDisplay" height="20" width="100%" 
+					visible="{!this.isMinimized}" includeInLayout="{!this.isMinimized}">
+				
+				<ChangeLayerOpacity id="layerControlOpacity" layer="{this._layer}" toolTip="Mudar a opacidade desta camada" />
+			</s:Group>
+			
+			<s:Group id="layerManagerOptionnalDisplay" height="30" width="100%" 
+					visible="false" includeInLayout="false">
+			<!--visible="{!this.isMinimized}" includeInLayout="{!this.isMinimized}"-->
+			
+				<LayerZoomToExtent id="layerControlZoomToExtent" visible="{_displayZoomToExtent}" includeInLayout="{_displayZoomToExtent}"
+									layer="{_layer}" tooltipZoomToExtent="Zoom para a extensão máxima desta camada"/>
+			
+				<LayerMetadata x="40" id="layerControlMetadatas" visible="{_displayMetadatas}" includeInLayout="{_displayMetadatas}" />
+			</s:Group>
+		</s:Group>
+		
+	</s:BorderContainer>
+			
+	
+</s:Group>

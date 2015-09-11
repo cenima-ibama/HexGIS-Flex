@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:flash = "flash.filters.*" >
+	
+	
+	<fx:Declarations>
+		
+		<!--<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="1000"/>-->
+		
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import org.openscales.core.Map;
+			
+			import solutions.BaseWidget;
+			import solutions.CloseWindowBase;
+			import solutions.SiteContainer;
+			import solutions.event.AppEvent;
+			
+			[Bindable]
+			private var marcaOnUrl:String = "assets/images/icons/info-icon.png";
+									
+			private var informacoes:IModuleInfo;
+			
+			private var _map:Map;
+
+			public function set map(value:Map):void
+			{
+				_map = value;
+			}
+
+			protected function infocaller_clickHandler(event:MouseEvent):void
+			{			
+				var url:String = "widgets/InfoWidget.swf";
+				
+				informacoes = ModuleManager.getModule(url);
+				informacoes.addEventListener(ModuleEvent.READY, infoWindowReadyHandler);           
+				informacoes.load();
+				this.cursorManager.setBusyCursor();
+				
+			}
+			
+			private function infoWindowReadyHandler(event:ModuleEvent):void
+			{
+				var info:IModuleInfo = event.module;
+				var widget:BaseWidget = info.factory.create() as BaseWidget;
+				
+				widget.setTitle("Informações");
+				widget.setMap(_map);
+				
+				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, false);
+				(widget as IFlexDisplayObject).y = 130;
+				
+				showW.play([widget]);
+				
+				callLater(removeBusyCursor);
+				
+				SiteContainer.dispatchEvent(new AppEvent(AppEvent.WIDGET_LOADED));
+			}
+			
+			private function removeBusyCursor():void
+			{
+				this.cursorManager.removeBusyCursor();   
+			}
+			
+		]]>
+	</fx:Script>
+
+	<mx:Image id="infocaller" 
+			  width="45" height="45" 
+			  alpha="0.5" source="{marcaOnUrl}"
+			  click="infocaller_clickHandler(event)"/>
+	
+	<fx:Declarations>
+	
+	<s:Move id="showW" xFrom="-200" xTo="170"/>
+
+	</fx:Declarations>
+</s:Group>

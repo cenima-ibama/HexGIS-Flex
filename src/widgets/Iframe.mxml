@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sol:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:sol="solutions.*"
+				xmlns:os="http://openscales.org"
+				xmlns:flexiframe="http://code.google.com/p/flex-iframe/">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<s:Group width="100%">
+		<mx:Panel title="HexGIS - Ao Vivo"
+				  width="80%"
+				  height="80%">
+			
+				<flexiframe:IFrame 
+					id="googleIFrame"
+					label="Google"
+					source="http://www.bnu.tv/camera/embed?camera=lagonorte"
+					width="600"
+					height="356"/>
+		</mx:Panel>
+	</s:Group>
+</sol:BaseWidget>

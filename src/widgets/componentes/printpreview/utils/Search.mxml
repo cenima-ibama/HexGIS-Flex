@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"  width="400" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+<fx:Script>
+	<![CDATA[
+		import org.openscales.core.basetypes.Bounds;
+		import org.openscales.core.feature.PolygonFeature;
+		import org.openscales.core.geometry.Collection;
+		import org.openscales.core.geometry.Geometry;
+		import org.openscales.core.handler.feature.SelectFeaturesHandler;
+		import org.openscales.core.layer.FeatureLayer;
+		import org.openscales.core.layer.ogc.WFS;
+		
+		import widgets.componentes.printpreview.utils.ModelLocator;
+		
+		[Bindable] protected var _model:ModelLocator=ModelLocator.getInstance(); 
+		private var selectFeature:SelectFeaturesHandler = new SelectFeaturesHandler();
+		
+		/**
+		 * Search button selected
+		 **/	
+		private function executeQuery():void
+		{	
+			_model.clearSearch();
+			
+			//Find matching features and highlight them 	
+			var componentCollectionArray:Array = new Array();
+			//Store the selected feature
+			_model.selectedFeaturearray = new Array(); 	
+		    //For each layer in the map
+			for each(var item:* in _model.map.layers)
+			{
+		        //Make sure we are working with the correct layer		
+		       if(item is FeatureLayer)
+		       {			   
+			            //For each feature in the layer			
+			            for each(var items:* in item.features)
+						{
+							//Search the stored features for user name typed in by the user 
+			                //if(items.attributes['UNEMPLOY'] == ownername.text)
+			                if(new Number(items.attributes['UNEMPLOY']) > new Number(ownername.text))
+							{
+			                    //Store these features so they can be cleared
+			             		_model.selectedFeaturearray.push(items)
+			                    //Make selected feature yellow					
+			                    //items.style = SelectFeaturesHandler.defaultSelectedStyle(items);
+			                    //selectFeature.setSelectedStyle(items)
+			                    //Generate a geometry object from the feature and store in an array
+								var geom1:Geometry = items.geometry;
+								componentCollectionArray.push(geom1);
+							}
+						}	       	
+		       }
+
+			}	
+			
+			if(componentCollectionArray.length > 0)
+			{
+			    //Create a collection object and pass the geometry array
+				var geomcoll:Collection = new Collection(componentCollectionArray);
+			    //Calculate the union of extents
+				geomcoll.calculateBounds(); 
+			    //Zoom to this new extent
+			    //_model.map.zoomToExtent(geomcoll.bounds as Bounds);				
+			}
+		}
+		
+		/**
+		 * Reset query and disable results tab
+		 **/
+		public function reset(clear:String = null):void
+		{
+
+		}		
+	]]>
+</fx:Script>
+		<s:Label text="Unemployment by State" fontWeight="bold"/>
+		<s:Label text="Enter number of unemployed eg. 995502.0"/>
+		<s:Label text="Note: This search is against states visible in the current view" color="red" fontSize="9"/>
+		<mx:HBox>
+			<s:Label text="Greater than: "	/>
+			<mx:TextInput id="ownername" text="" width="120" />
+		</mx:HBox>
+		<mx:Spacer height="5"/>
+		<mx:HBox horizontalAlign="center" width="100%">
+		     <mx:Button label="Submit" click="executeQuery()"/>
+		   <!--  <mx:Button label="Reset" click="reset()"/>-->
+		 </mx:HBox>
+</s:ItemRenderer>

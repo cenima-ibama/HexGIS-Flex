@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+// Copyright © 2008 ESRI
+//
+// All rights reserved under the copyright laws of the United States.
+// You may freely redistribute and use this software, with or
+// without modification, provided you include the original copyright
+// and use restrictions.  See use restrictions in the file:
+// <install location>/FlexViewer/License.txt
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+<s:Group	xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			xmlns:s="library://ns.adobe.com/flex/spark" 
+			xmlns:mx="library://ns.adobe.com/flex/mx"
+			width ="100%" 
+			height ="100%"
+    		initialize ="init()">
+
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import org.openscales.core.Map;
+			
+			import solutions.BaseWidget;
+			import solutions.IBaseWidget;
+			import solutions.event.AppEvent;
+			import solutions.utils.Hashtable;
+			
+			import widgets.componentes.ibama.feature.IbamaPolygonFeature;
+			import widgets.componentes.informacoes.drag.WFSGetFeature;
+			import widgets.componentes.webService.DeleteFeatureObject;
+			import widgets.componentes.webService.UpdateWSLineObject;
+			import widgets.componentes.webService.UpdateWSPointObject;
+			import widgets.componentes.webService.UpdateWSPolygonObject;
+			import widgets.componentes.webService.WSLinesObject;
+			import widgets.componentes.webService.WSPointsObject;
+			import widgets.componentes.webService.WSPolygonsObject;
+				
+			[Bindable]
+		    private var _configData:ConfigData;
+		    
+			private var _map:Map;
+					
+			private var _widgetTable:Hashtable = new Hashtable();
+			
+			private var _info:IModuleInfo;
+			
+			[Bindable] private var _tipoGeo:String;			
+			[Bindable] private var _operacao:String;
+			[Bindable] private var _dataObs:String;
+			[Bindable] private var _idAgente:String;
+			[Bindable] private var _condicao:int;
+			[Bindable] private var _numTEI:int;
+			[Bindable] private var _serieTEI:String;
+			[Bindable] private var _numAI:int;
+			[Bindable] private var  _serieAI:String;
+			[Bindable] private var _idDes:int;
+			[Bindable] private var _imovel:String;
+			[Bindable] private var _tipo:int;
+			[Bindable] private var _obs:String;
+			[Bindable] private var _referencia:int;
+			[Bindable] private var _x:Number;
+			[Bindable] private var _y:Number;
+			[Bindable] private var _length:String;
+			[Bindable] private var _wayPoints:String;
+			[Bindable] private var _areaHa:Number;
+			[Bindable] private var _objID:String ;
+			[Bindable] private var _index:int;
+			
+			private var _atributos:Object;
+			
+			private var _vazio:String = "' '";
+			
+			[Bindable] private var _wsPolygon:IbamaPolygonFeature;
+						
+			private var _oldResultF:Function = null;
+			private var _oldFaultF:Function = null;
+			
+			private var _timer:Timer;
+			
+			private static var _wfsGetFeature:WFSGetFeature;
+			
+						     
+		    private function init():void
+		    {
+				SiteContainer.addEventListener(AppEvent.MAP_LOADED, onMapLoad); 
+			    SiteContainer.addEventListener(AppEvent.CONFIG_LOADED, config);
+			    SiteContainer.addEventListener(AppEvent.WIDGET_MENU_CLICKED, widgetMenuClicked);
+				SiteContainer.addEventListener(AppEvent.WIDGET_CLOSED, widgetClosed);
+			}
+		    
+		    private function config(event:AppEvent):void
+		    {
+		    	_configData = event.data as ConfigData;
+			}
+			
+			private function loadWidgets(event:TimerEvent):void
+			{
+				for (var i:Number = 0; i < _configData.configWidgets.length; i++)
+				{
+					var id:Number  = _configData.configWidgets[i].id;
+					var preload:String = _configData.configWidgets[i].preload;
+					
+					if (preload == "true")
+					{
+						SiteContainer.dispatchEvent(new AppEvent(AppEvent.WIDGET_MENU_CLICKED, false, false, id));
+					}
+				}
+			}
+		
+		    private function onMapLoad(event:AppEvent):void
+		    {
+		        _map = event.data as Map;
+				
+				if ((!this._timer) && (_map))
+				{
+					this._timer = new Timer(1000,1);
+					this._timer.addEventListener(TimerEvent.TIMER, this.loadWidgets);
+				}
+				
+				_timer.start();
+		    }	
+			
+			private function widgetClosed(event:AppEvent):void
+			{
+				_widgetTable.remove(event.data);
+			}
+		    
+		    private function widgetMenuClicked(event:AppEvent):void
+		    {
+		    	var id:Number = event.data as Number;
+		    	var url:String = _configData.configWidgets[id].url;
+		    	var widget:IBaseWidget;
+
+				if (!_widgetTable.containsKey(id))
+		    	{
+					_info = ModuleManager.getModule(url);
+					_info.data = {id: id};
+					_info.addEventListener(ModuleEvent.READY, widgetReadyHandler);           
+					_info.load();
+					this.cursorManager.setBusyCursor();
+		    	}
+		    }		    
+		    
+		    private function widgetReadyHandler(event:ModuleEvent):void
+		    {
+				var info:IModuleInfo = event.module;
+				
+		    	var id:Number = info.data.id;
+		    	var label:String = _configData.configWidgets[id].label;
+		    	var icon:String = _configData.configWidgets[id].icon;
+		    	var config:String = _configData.configWidgets[id].config;
+				
+		    	var widget:IBaseWidget = info.factory.create() as IBaseWidget;
+				
+		    	widget.setId(id);
+		    	widget.setTitle(label);
+		    	widget.setIcon(icon);
+		    	widget.setConfig(config);
+		    	widget.setConfigData(_configData);
+		    	widget.setMap(_map);
+				widget.setWidgetManager(this);
+				
+		    	_widgetTable.add(id, widget);
+				
+				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, false);
+
+				(widget as IFlexDisplayObject).y = 130;
+				
+				showW.play([widget]);
+
+				callLater(removeBusyCursor);
+				
+				SiteContainer.dispatchEvent(new AppEvent(AppEvent.WIDGET_LOADED));
+		    }
+			
+			private function removeBusyCursor():void
+			{
+				this.cursorManager.removeBusyCursor();   
+			}
+			
+			public function saveBD(entrada:Object, resultF:Function, faultF:Function):void
+			{
+				if (this._configData.userData != null)
+				{
+					if (entrada is WSPointsObject)
+					{
+						this._wayPoints = entrada.shape;
+						this._x = entrada.x;
+						this._y = entrada.y;
+						this._tipoGeo = "pon";
+						this._index = entrada.index;
+						this._atributos = (entrada as WSPointsObject).attributes;
+					}
+					else if (entrada is WSLinesObject)
+					{
+						this._wayPoints = entrada.shape;
+						this._length = String(entrada.length);
+						this._tipoGeo = "lin";
+						this._index = entrada.index;
+						this._atributos = (entrada as WSLinesObject).attributes;
+					}
+					else if (entrada is WSPolygonsObject)
+					{
+						this._wayPoints = entrada.shape;
+						this._areaHa = entrada.area_ha;
+						this._tipoGeo = "pol";
+						this._index = entrada.index;
+						this._atributos = (entrada as WSPolygonsObject).attributes;
+					}
+
+					if (this._atributos.operacao.length > 0)
+					{
+						this._operacao = "'"+this._atributos.operacao+"'";
+					}
+					else
+					{
+						this._operacao = _vazio;
+					}
+					
+					if (this._atributos.data.length > 0) 
+					{
+						this._dataObs = "'"+this._atributos.data+"'";
+					}
+					else
+					{
+						this._dataObs = _vazio;
+					}
+					
+					if (this._atributos.id_agente.length > 0)
+					{
+						this._idAgente = "'"+this._atributos.id_agente+"'";
+					}
+					else
+					{
+						this._idAgente = _vazio;
+					}
+					
+					this._condicao = this._atributos.condicao;
+					
+					this._numTEI = this._atributos.num_tei;
+					
+					if (this._atributos.serie_tei.length > 0)
+					{
+						this._serieTEI = "'"+this._atributos.serie_tei+"'";
+					}
+					else
+					{
+						this._serieTEI = _vazio;
+					}
+					
+					this._numAI = this._atributos.num_ai;
+					
+					if (this._atributos.serie_ai.length > 0)
+					{
+						this._serieAI = "'"+this._atributos.serie_ai+"'";
+					}
+					else
+					{
+						this._serieAI = _vazio;
+					}
+					
+					this._idDes = this._atributos.id_des;
+					
+					if (this._atributos.imovel.length > 0)
+					{
+						this._imovel = "'"+this._atributos.imovel+"'";
+					}
+					else
+					{
+						this._imovel = _vazio;
+					}
+					
+					this._tipo = this._atributos.tipo;
+					
+					if (this._atributos.obs.length > 0)
+					{
+						this._obs = "'"+this._atributos.obs+"'";
+					}
+					else
+					{
+						this._obs = _vazio;
+					}
+					
+					this._referencia = this._atributos.referencia;
+					
+					if (this._oldResultF != null) ws.removeEventListener(ResultEvent.RESULT, this._oldResultF);
+					if (this._oldFaultF != null) ws.removeEventListener(FaultEvent.FAULT , this._oldFaultF);
+					
+					this._oldResultF = resultF;
+					this._oldFaultF = faultF;
+					
+					ws.addEventListener(ResultEvent.RESULT, resultF);
+					ws.addEventListener(FaultEvent.FAULT , faultF);			
+										
+					if (entrada is WSPointsObject)
+					{
+						ws.savePoint.send();
+					}
+					else if (entrada is WSLinesObject)
+					{
+						ws.saveLine.send();
+					}
+					else if (entrada is WSPolygonsObject)
+					{
+						ws.savePolygon.send();
+					}
+					
+				}
+			}
+			
+			public function updatePoint(entrada:UpdateWSPointObject, resultF:Function, faultF:Function):void
+			{
+				if (this._configData.userData != null)
+				{
+					this._objID = entrada.fid;
+					this._wayPoints = entrada.shape;
+					this._x = entrada.x;
+					this._y = entrada.y;
+					this._tipoGeo = "pon";
+					this._index = entrada.index;					
+					
+					if (this._oldResultF != null) ws.removeEventListener(ResultEvent.RESULT, this._oldResultF);
+					if (this._oldFaultF != null) ws.removeEventListener(FaultEvent.FAULT , this._oldFaultF);
+									
+					this._oldResultF = resultF;
+					this._oldFaultF = faultF;
+					
+					ws.addEventListener(ResultEvent.RESULT, resultF);
+					ws.addEventListener(FaultEvent.FAULT , faultF);
+					
+					ws.updatePoint.send();
+				}
+			}
+			
+			public function updateLine(entrada:UpdateWSLineObject, resultF:Function, faultF:Function):void
+			{
+				if (this._configData.userData != null)
+				{
+					this._objID = entrada.fid;
+					this._wayPoints = entrada.shape;
+					this._length = String(entrada.length);
+					this._tipoGeo = entrada.tipo_geo;
+					this._index = entrada.index;
+					
+					if (this._oldResultF != null) ws.removeEventListener(ResultEvent.RESULT, this._oldResultF);
+					if (this._oldFaultF != null) ws.removeEventListener(FaultEvent.FAULT , this._oldFaultF);
+					
+					this._oldResultF = resultF;
+					this._oldFaultF = faultF;
+					
+					ws.addEventListener(ResultEvent.RESULT, resultF);
+					ws.addEventListener(FaultEvent.FAULT , faultF);
+
+					ws.updateLine.send();
+				}
+			}
+			
+			public function updatePolygon(entrada:UpdateWSPolygonObject, resultF:Function, faultF:Function):void
+			{
+				if (this._configData.userData != null)
+				{
+					this._objID = entrada.fid;
+					this._wayPoints = entrada.shape;
+					this._areaHa = entrada.area_ha;
+					this._tipoGeo = entrada.tipo_geo;
+					this._index = entrada.index;
+					
+					if (this._oldResultF != null) ws.removeEventListener(ResultEvent.RESULT, this._oldResultF);
+					if (this._oldFaultF != null) ws.removeEventListener(FaultEvent.FAULT , this._oldFaultF);
+					
+					this._oldResultF = resultF;
+					this._oldFaultF = faultF;
+					
+					ws.addEventListener(ResultEvent.RESULT, resultF);
+					ws.addEventListener(FaultEvent.FAULT , faultF);
+					
+					ws.updatePolygon.send();
+				}
+			}
+			
+			public function deleteFeature(entrada:DeleteFeatureObject, resultF:Function, faultF:Function):void
+			{
+				if (this._configData.userData != null)
+				{
+					this._objID = entrada.fid;
+					this._tipoGeo = entrada.tipo_geo;
+					this._index = entrada.index;
+										
+					if (this._oldResultF != null) ws.removeEventListener(ResultEvent.RESULT, this._oldResultF);
+					if (this._oldFaultF != null) ws.removeEventListener(FaultEvent.FAULT , this._oldFaultF);
+					
+					this._oldResultF = resultF;
+					this._oldFaultF = faultF;
+					
+					ws.addEventListener(ResultEvent.RESULT, resultF);
+					ws.addEventListener(FaultEvent.FAULT , faultF);
+
+					ws.deleteFeature.send();
+				}
+			}
+			
+		]]>
+	</fx:Script> 
+	   
+	
+	<fx:Declarations>
+		<!--http://10.1.8.78/ws/hexWS.php?wsdl-->
+		<s:WebService id="ws" wsdl="http://siscom.ibama.gov.br/painelflex/ws/hexWS.php?wsdl">
+			
+			<s:operation name="savePoint" resultFormat="e4x">
+				<s:request>
+					<entrada>
+						<cpf>{"'"+this._configData.userData.cpf+"'"}</cpf>
+						<shape>{_wayPoints}</shape>
+						<tipo_geo>pon</tipo_geo>
+						<x>{_x}</x>
+						<y>{_y}</y>
+						<index>{_index}</index>
+						<operacao>{_operacao}</operacao>
+						<data>{_dataObs}</data>
+						<id_agente>{_idAgente}</id_agente>
+						<num_tei>{_numTEI}</num_tei>
+						<serie_tei>{_serieTEI}</serie_tei>
+						<num_ai>{_numAI}</num_ai>
+						<serie_ai>{_serieAI}</serie_ai>
+						<id_des>{_idDes}</id_des>
+						<imovel>{_imovel}</imovel>
+						<tipo>{_tipo}</tipo>
+						<obs>{_obs}</obs>
+						<referencia>{_referencia}</referencia>
+					</entrada>
+				</s:request>
+			</s:operation>
+			
+			<s:operation name="saveLine" resultFormat="e4x">
+				<s:request>
+					<entrada>
+						<cpf>{"'"+this._configData.userData.cpf+"'"}</cpf>
+						<shape>{_wayPoints}</shape>
+						<tipo_geo>lin</tipo_geo>
+						<length>{_length}</length>
+						<index>{_index}</index>
+						<operacao>{_operacao}</operacao>
+						<data>{_dataObs}</data>
+						<id_agente>{_idAgente}</id_agente>
+						<num_tei>{_numTEI}</num_tei>
+						<serie_tei>{_serieTEI}</serie_tei>
+						<num_ai>{_numAI}</num_ai>
+						<serie_ai>{_serieAI}</serie_ai>
+						<id_des>{_idDes}</id_des>
+						<imovel>{_imovel}</imovel>
+						<tipo>{_tipo}</tipo>
+						<obs>{_obs}</obs>
+					</entrada>
+				</s:request>
+			</s:operation>
+			
+			<s:operation name="savePolygon" resultFormat="e4x">
+				<s:request>
+					<entrada>
+						<cpf>{"'"+this._configData.userData.cpf+"'"}</cpf>
+						<shape>{_wayPoints}</shape>
+						<tipo_geo>pol</tipo_geo>
+						<area_ha>{_areaHa}</area_ha>
+						<index>{_index}</index>
+						<operacao>{_operacao}</operacao>
+						<data>{_dataObs}</data>
+						<id_agente>{_idAgente}</id_agente>
+						<num_tei>{_numTEI}</num_tei>
+						<serie_tei>{_serieTEI}</serie_tei>
+						<num_ai>{_numAI}</num_ai>
+						<serie_ai>{_serieAI}</serie_ai>
+						<id_des>{_idDes}</id_des>
+						<imovel>{_imovel}</imovel>
+						<tipo>{_tipo}</tipo>
+						<obs>{_obs}</obs>
+						<!--<condicao>{_condicao}</condicao>-->
+					</entrada>
+				</s:request>
+			</s:operation>
+			
+			<s:operation name="updatePoint" resultFormat="e4x">
+				<s:request>
+					<entrada>
+						<object_id>{_objID}</object_id>
+						<shape>{_wayPoints}</shape>
+						<x>{_x}</x>
+						<y>{_y}</y>
+						<tipo_geo>pon</tipo_geo>
+						<index>{_index}</index>
+					</entrada>
+				</s:request>
+			</s:operation>
+			
+			<s:operation name="updateLine" resultFormat="e4x">
+				<s:request>
+					<entrada>
+						<object_id>{_objID}</object_id>
+						<shape>{_wayPoints}</shape>
+						<length>{_length}</length>
+						<tipo_geo>lin</tipo_geo>
+						<index>{_index}</index>
+					</entrada>
+				</s:request>
+			</s:operation>
+			
+			<s:operation name="updatePolygon" resultFormat="e4x">
+				<s:request>
+					<entrada>
+						<object_id>{_objID}</object_id>
+						<shape>{_wayPoints}</shape>
+						<area_ha>{_areaHa}</area_ha>
+						<tipo_geo>pol</tipo_geo>
+						<index>{_index}</index>
+					</entrada>
+				</s:request>
+			</s:operation>
+			
+			<s:operation name="deleteFeature" resultFormat="e4x">
+				<s:request>
+					<entrada>
+						<object_id>{_objID}</object_id>
+						<tipo_geo>{_tipoGeo}</tipo_geo>
+					</entrada>
+				</s:request>
+			</s:operation>
+		</s:WebService>
+		
+		
+		<s:Move id="showW" xFrom="-200" xTo="170"/>
+		
+		
+	</fx:Declarations>
+	
+</s:Group>

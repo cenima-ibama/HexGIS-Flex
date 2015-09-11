@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<os:IconButton xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:os="org.openscales.fx.control.*"
+			   implements="org.openscales.core.control.IControl"
+			   toolTip="{this.tooltip}"
+			   icon="{_btnLabel}" alpha="{_alpha}"
+			   width="15" height="15" click="onClick()" enabled="{active}">
+	
+	<!--rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"-->
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.control.IControl;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.LabelFeature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.handler.IHandler;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.style.Style;
+			import org.openscales.fx.control.drawing.DrawLabel;
+			import org.openscales.fx.control.drawing.popup.EditLabel;
+			import org.openscales.fx.control.layer.LayerManager;
+			import org.openscales.geometry.LabelPoint;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			
+			import spark.components.Button;
+			import spark.components.HGroup;
+			import spark.components.Label;
+			import spark.components.TextInput;
+			import spark.components.TitleWindow;
+			
+			import widgets.componentes.vetorizar.desenhar.label.popup.NewEditLabel;
+			
+			[Bindable]
+			private var _alpha:Number = 0.5;
+			
+			[Bindable]
+			private var tooltip:String = Catalog.getLocalizationForKey('drawing.label');
+			
+			[Bindable]
+			[Embed(source="/assets/images/icons/black/1.png")]
+			private var _btnLabel:Class;
+			
+			private var _active:Boolean = true;
+			private var _drawingActivated:Boolean = false;
+			private var _isClick:Boolean = false;
+			private var _style:Style = Style.getDefinedLabelStyle("Arial",12,0,false,false);
+			private var _map:Map;
+			private var _target:VectorLayer;
+			
+			
+			private var feature:LabelFeature;
+			private var _drawingMode:String;
+			
+			/**
+			 * Indicates for Drawing mode
+			 * multiple : tools are in the LayerSwitcher
+			 * unique : tools are in the DrawingToolbar
+			 */
+			[Bindable]
+			public function get drawingMode():String
+			{
+				return _drawingMode;
+			}
+			
+			public function set drawingMode(value:String):void
+			{
+				_drawingMode = value;
+			}
+			
+			/**
+			 * Flag for activating and deactivating the component
+			 * @default true;
+			 */
+			[Bindable]
+			public function get active():Boolean
+			{
+				return _active;
+			}
+			public function set active(value:Boolean):void
+			{
+				_active = value;
+			}
+			
+			/**
+			 * Drawing style of the label
+			 */
+			public function get style():Style
+			{
+				return this._style;
+			}
+			public function set style(value:Style):void
+			{
+				this._style = value;
+			}
+			
+			/**
+			 * Map controled by this control
+			 */
+			public function get map():Map{
+				
+				return this._map;
+			}
+			public function set map(value:Map):void{
+				
+				this._map = value;
+				this._map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, onChangeActiveHandler);
+				this._map.addEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, onChangeActiveHandler);
+				this._map.addEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, onChangeActiveHandler);
+				this._map.addEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, onChangeActiveHandler);
+				this._map.addEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, onChangeActiveHandler);
+				this._map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, onChangeActiveLayer);
+				this._map.addEventListener(I18NEvent.LOCALE_CHANGED, onMapLanguageChange);
+				this._map.addEventListener(MapEvent.MOUSE_CLICK, this.createLabel);
+			}
+			
+			/**
+			 * To create a LabelFeature
+			 */
+			private function createLabel(event:Event):void{
+				
+				if(this._drawingActivated)
+				{
+					var pixel:Pixel = new Pixel(this._map.mouseX, this._map.mouseY);
+					var labelLocation:Location = this._map.getLocationFromMapPx(pixel);
+					var pt:LabelPoint = new LabelPoint(null, labelLocation.x, labelLocation.y);
+					pt.projection = this.map.projection;
+					feature = new LabelFeature(pt);
+					feature.layer = this.target;
+					
+					var editLabel:NewEditLabel = new NewEditLabel();
+					editLabel.containerPopup = this;
+					editLabel.feature= feature; 
+				}
+			}
+			
+			/**
+			 * Position (x,y) of the handler
+			 */
+			public function get position():Pixel{
+				
+				return new Pixel(x,y);
+			}
+			public function set position(value:Pixel):void{
+				
+				if(value){
+					x = value.x;
+					y = value.y;
+				}
+			}
+			
+			/**
+			 * Layer the features will be drawn on
+			 */
+			[Bindable]
+			public function get target():VectorLayer{
+				
+				return this._target;
+			}
+			public function set target(value:VectorLayer):void{
+				this.disactivate();
+				this._target = value;
+			}
+			
+			/**
+			 * To activate or disactivate the handler
+			 */
+			public function activate():void{
+				
+				this._drawingActivated = true;
+				_alpha = 1;
+				this._map.doubleclickZoomEnabled = false;
+			}
+			public function disactivate():void{
+				
+				this._drawingActivated = false;
+				_alpha = 0.5;
+			}
+			
+			/**
+			 * On button click, dispatch a DrawingEvent.DRAW_HANDLER_ACTIVATED event
+			 */
+			public function onClick():void
+			{	
+				if(!this.target)
+					return;
+				
+				// Disactive this component
+				var evt:DrawingEvent;
+				if(this._drawingActivated)
+				{
+					disactivate();
+					this._map.doubleclickZoomEnabled = true;
+					return;
+				}
+				
+				// Disactive others drawing tools components
+				this._isClick = true;
+				evt = new DrawingEvent(DrawingEvent.DRAW_HANDLER_ACTIVATED);
+				evt.activeHandler = this.id;
+				evt.layer = this.target;
+				this._map.dispatchEvent(evt);
+				
+				// Disactive mesure tools components
+				evt = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_HANDLER);
+				evt.activeHandler = null;
+				this._map.dispatchEvent(evt);
+				
+				// Active this component
+				activate();
+			}
+			
+			private function itemRollOver(event:MouseEvent):void
+			{
+				_alpha = 1.0;
+			}
+			
+			private function itemRollOut(event:MouseEvent):void
+			{				
+				if (!this._drawingActivated)
+				{
+					_alpha = 0.5;
+				}
+			}
+			
+			/**
+			 * Check the handler when a DrawingEvent.DRAW_HANDLER_ACTIVATED or
+			 * DrawingEvent.EDIT_HANDLER_ACTIVATED or DrawingEvent.MOVE_HANDLER_ACTIVATED
+			 * or DrawingEvent.SELECT_HANDLER_ACTIVATED event occured
+			 */
+			public function onChangeActiveHandler(evt:DrawingEvent=null):void
+			{
+				if(this._drawingActivated && !this._isClick)
+					disactivate();
+				else
+					this._isClick = false;
+			}
+			
+			/**
+			 * Update the target on active layer changed
+			 */
+			private function onChangeActiveLayer(evt:DrawingEvent):void{
+				
+				if(this.drawingMode == 'unique')
+				{
+					if(this._drawingActivated){
+						disactivate();
+						this._map.mouseNavigationEnabled = true;
+						this._map.panNavigationEnabled = true;
+						this._map.zoomNavigationEnabled = true;
+						this._map.keyboardNavigationEnabled = true;
+					}
+					
+					this.target = evt.layer;
+					
+					if(!evt.layer || !evt.layer.editable) {
+						this.buttonMode = false;
+						this.useHandCursor = false;
+						this.toolTip = Catalog.getLocalizationForKey('drawing.selectDrawingLayer');
+					} else {
+						this.buttonMode = true;
+						this.useHandCursor = true;
+						this.toolTip = Catalog.getLocalizationForKey('drawing.label');
+					}
+				}
+			}
+			
+			/**
+			 * Update texts on map language changed
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void{
+				
+				//this.tooltip = Catalog.getLocalizationForKey('drawing.label');
+			}
+			
+			// Unused functions
+			public function draw():void{
+				
+				this.invalidateDisplayList();
+			}
+			public function destroy():void{}
+		]]>
+	</fx:Script>			
+</os:IconButton>

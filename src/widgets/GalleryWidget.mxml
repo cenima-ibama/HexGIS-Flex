@@ -1,0 +1,55 @@
+<solutions:BaseWidget xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					  xmlns:s="library://ns.adobe.com/flex/spark" 
+					  xmlns:mx="library://ns.adobe.com/flex/mx"
+					  xmlns:os="http://openscales.org"
+					  xmlns:solutions="solutions.*" initialize="init()">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Declarations>
+		
+		<fx:XML id="xml" source="dados/galeria.xml" />
+		
+		<s:XMLListCollection id="xmlListColl" source="{xml.imagem}" />
+		
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			override protected function init():void
+			{
+				super.init();
+				
+				scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				scroller.verticalScrollBar.setStyle("chromeColor", "#728188");
+			}
+		]]>
+	</fx:Script>
+	
+	
+	<s:BorderContainer id="container" styleName="widgetContentContainer" width="860" height="450">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" 
+							  paddingLeft="5" paddingTop="5" paddingBottom="5" paddingRight="5"/>
+		</s:layout>
+		
+		<s:Scroller id="scroller" left="0" top="0" right="0" bottom="0" 
+					focusEnabled="false" verticalScrollPolicy="auto">
+			<s:DataGroup id="galeria"
+						dataProvider="{xmlListColl}"
+						itemRenderer="widgets.componentes.galeria.renderer.GalleryItemRenderer">
+				<s:layout>
+					<s:TileLayout horizontalGap="30" verticalGap="15" 
+								  horizontalAlign="center" verticalAlign="middle"
+								  paddingBottom="0" paddingLeft="30" paddingRight="30" paddingTop="0"
+								  requestedColumnCount="5" requestedRowCount="3"/> 
+				</s:layout>
+			</s:DataGroup>
+		</s:Scroller>
+				
+	</s:BorderContainer>
+</solutions:BaseWidget>

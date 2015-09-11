@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:os="http://openscales.org"
+		 initialize="init()">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.events.ModuleEvent;
+			import mx.managers.PopUpManager;
+			import mx.modules.IModuleInfo;
+			import mx.modules.ModuleManager;
+			
+			import org.openscales.core.Map;
+			
+			import solutions.IBaseWidget;
+			import solutions.SiteContainer;
+			
+			import widgets.componentes.graficos.event.ChartsBarEvents;
+			import widgets.componentes.informacoes.drag.WFSGetFeature;
+			import widgets.componentes.informacoes.drag.event.GetFeatureEvent;
+			
+			
+			[Bindable]
+			private var _mode:String;
+			
+			[Bindable]
+			private var _active:Boolean;
+			
+			[Bindable]
+			private var _layerName:String;
+			
+			[Bindable]
+			private var _map:Map;
+			
+			[Bindable]
+			private var _wfsGetFeature:WFSGetFeature;
+						
+			private var info:IModuleInfo;
+			
+			private var nomeCamada:String;
+			
+			private var infoDragWidgetX:Number;
+			
+			private var infoDragWidgetY:Number;
+			
+			private var dadosRecebidos:Object;
+			
+			private var chartData:Object;
+			
+			
+			private function init():void
+			{
+				 /* _wfsGetFeature = new WFSGetFeature();  */
+				/*_wfsGetFeature = WFSGetFeature.getInstance(this.map, false);*/
+			}
+			
+			
+			public function get wfsGetFeature():WFSGetFeature
+			{
+				return this._wfsGetFeature;
+			}
+			public function set wfsGetFeature(value:WFSGetFeature):void 
+			{
+				this._wfsGetFeature = value;
+			}
+			
+			public function get layerName():String 
+			{
+				return this._layerName;
+			}
+			public function set layerName(name:String):void 
+			{
+				this._layerName = name;
+				_wfsGetFeature.layerName = name;
+			}
+			
+			public function get map():Map
+			{
+				return _map;
+			}
+			
+			public function set map(value:Map):void 
+			{
+				if (value)
+				{
+					_map = value;
+					_wfsGetFeature.map = this.map;
+					//active = true;
+				}
+			}
+			
+			public function get active():Boolean 
+			{
+				return _active;
+			}
+			
+			public function set active(value:Boolean):void
+			{
+				if (!value) 
+				{
+					desactivate();
+				}
+			}
+
+			
+			private function activate():void
+			{
+				_active = true;
+								
+				if (!_wfsGetFeature)
+				{
+					_wfsGetFeature = new WFSGetFeature(map, false);
+				}
+				
+				ativarWFSGetFeature();
+				
+				SiteContainer.dispatchEvent(new ChartsBarEvents(ChartsBarEvents.CHART_ACTIVATED));
+			}
+			
+			private function desactivate():void
+			{
+				var aux:IVisualElement;
+				var i:int;
+				var tam:int = buttons.numElements;
+				
+				for (i=0; i<tam; i++)
+				{
+					aux = buttons.getElementAt(i);
+					
+					if (aux is IconButton)
+					{
+						(aux as IconButton).alpha = 0.5;
+					}
+				}
+				_active = false;
+				_mode = "";
+				
+				if (_wfsGetFeature == null)
+				{
+					_wfsGetFeature = new WFSGetFeature(map, false);
+				}
+				
+				desativarWFSGetFeature();
+				
+				SiteContainer.dispatchEvent(new ChartsBarEvents(ChartsBarEvents.CHART_DESACTIVATED));
+			}
+			
+			private function ativarWFSGetFeature():void
+			{
+				_wfsGetFeature.active = true;
+				
+				SiteContainer.addEventListener(GetFeatureEvent.GET_FEATURE_DATA, handleData);
+			}
+			
+			private function desativarWFSGetFeature():void
+			{
+				_wfsGetFeature.active = false;
+				
+				SiteContainer.removeEventListener(GetFeatureEvent.GET_FEATURE_DATA,handleData);
+			}
+			
+			protected function onClick(event:MouseEvent):void
+			{
+				var i:int;
+				var tam:int = buttons.numElements;
+				
+				var aux:IconButton;
+								
+				for (i=0; i<tam; i++)
+				{
+					aux = buttons.getElementAt(i) as IconButton;
+					
+					if (aux.id == event.target.id) 
+					{
+						if (_mode == aux.id)
+						{
+							aux.alpha = 0.5;
+							_active = false;
+							_mode = "";
+							
+							desativarWFSGetFeature();
+							SiteContainer.dispatchEvent(new ChartsBarEvents(ChartsBarEvents.CHART_DESACTIVATED));
+						}
+						else
+						{
+							aux.alpha = 1.0;
+							_mode = aux.id;
+							activate();
+						}
+					}
+					else
+					{
+						aux.alpha = 0.5;
+					}
+						
+				}
+			}
+			
+			private function handleData(event:GetFeatureEvent):void
+			{
+				nomeCamada = event.layerName;
+				infoDragWidgetX = event.center.x;
+				infoDragWidgetY = event.center.y;
+				dadosRecebidos = event.data;
+				
+				chartData = new Object();
+				chartData.modo = this._mode;
+				chartData.camada = this._layerName;
+				chartData.dados = dadosRecebidos;
+
+				/* if ((event.data != 0) || (event.data != null))
+				{ */
+				var url:String = "widgets/ChartManagerWidget.swf";
+				info = ModuleManager.getModule(url);
+				info.addEventListener(ModuleEvent.READY, widgetReadyHandler);           
+				info.load();
+				//this.cursorManager.setBusyCursor();   
+				/* } */
+			}
+			
+			private function widgetReadyHandler(event:ModuleEvent):void
+			{
+				var info:IModuleInfo = event.module;
+				
+				//var icon:String = configData.configWidgets[id].icon;
+				//var config:String = configData.configWidgets[id].config;
+				var widget:IBaseWidget = info.factory.create() as IBaseWidget;
+				//widget.setId(-1);
+				//widget.setTitle("Informações: " + nomeCamada + "       ");
+				//widget.setIcon(" ");
+				//widget.setConfig(config);
+				//widget.setConfigData(configData);
+				//widget.setLayerName(nomeCamada);
+				widget.setMap(map);
+				widget.setData(chartData);
+
+				PopUpManager.addPopUp(widget as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, false);
+				(widget as IFlexDisplayObject).x = infoDragWidgetX;
+				(widget as IFlexDisplayObject).y = infoDragWidgetY;
+				
+				//this.cursorManager.removeBusyCursor();
+				//PopUpManager.centerPopUp(widget as IFlexDisplayObject);
+				/* var widgetDO:DisplayObject = widget as DisplayObject;
+				addChild(widgetDO); */
+				/*  var widgetIVE:IVisualElement = widget as IVisualElement;
+				addElement(widgetIVE); */ 
+				/*this.cursorManager.removeBusyCursor();*/   
+			}
+			
+			private function itemRollOver(event:MouseEvent):void
+			{
+				var auxIconBtn:IconButton = event.currentTarget as IconButton;
+				
+				auxIconBtn.alpha = 1.0;
+			}
+			
+			private function itemRollOut(event:MouseEvent):void
+			{
+				var auxIconBtn:IconButton = event.currentTarget as IconButton;
+				
+				if (_mode != auxIconBtn.id)
+				{
+					auxIconBtn.alpha = 0.5;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:Group id="buttons">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" gap="30"/>
+		</s:layout>
+		
+		<os:IconButton id="Colunas" icon="assets/images/icons/charts/column_chart_icon30.png" 
+					   toolTip="Colunas" width="30" height="30" alpha="0.5" click="onClick(event)" 
+					   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"/>
+		
+		<os:IconButton id="Barras" icon="assets/images/icons/charts/bar_chart_icon30.png" 
+					   toolTip="Barras" width="30" height="30" alpha="0.5" click="onClick(event)"
+					   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"/>
+		
+		<os:IconButton id="Linhas" icon="assets/images/icons/charts/line_chart_icon30.png"
+					   toolTip="Linhas" width="30" height="30" alpha="0.5" click="onClick(event)"
+					   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"/>
+		
+		<os:IconButton id="Áreas" icon="assets/images/icons/charts/area_chart_icon30.png" 
+					   toolTip="Áreas" width="30" height="30" alpha="0.5" click="onClick(event)"
+					   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"/>
+		
+		<os:IconButton id="Setores" icon="assets/images/icons/charts/pie_chart_icon30.png" 
+					   toolTip="Setores" width="30" height="30" alpha="0.5" click="onClick(event)"
+					   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"/>
+		
+		<os:IconButton id="Bolhas" icon="assets/images/icons/charts/bubble_chart_icon30.png" 
+					   toolTip="Bolhas" width="30" height="30" alpha="0.5" click="onClick(event)"
+					   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"/>
+		
+		<os:IconButton id="Candelabros" icon="assets/images/icons/charts/candlestick_chart_icon30.png" 
+					   toolTip="Candelabros" width="30" height="30" alpha="0.5" click="onClick(event)"
+					   rollOver="itemRollOver(event)" rollOut="itemRollOut(event)"/>
+				
+	</s:Group>
+</s:Group>

@@ -1,0 +1,251 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>AppEvent.as</title>
+<link rel="stylesheet" type="text/css" href="../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">////////////////////////////////////////////////////////////////////////////////
+</span><span class="ActionScriptComment">//
+</span><span class="ActionScriptComment">// Copyright © 2008 ESRI
+</span><span class="ActionScriptComment">//
+</span><span class="ActionScriptComment">// All rights reserved under the copyright laws of the United States.
+</span><span class="ActionScriptComment">// You may freely redistribute and use this software, with or
+</span><span class="ActionScriptComment">// without modification, provided you include the original copyright
+</span><span class="ActionScriptComment">// and use restrictions.  See use restrictions in the file:
+</span><span class="ActionScriptComment">// &lt;install location&gt;/FlexViewer/License.txt
+</span><span class="ActionScriptComment">//
+</span><span class="ActionScriptComment">////////////////////////////////////////////////////////////////////////////////
+</span><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">solutions</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">event</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">events</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Event</span>;
+
+    <span class="ActionScriptASDoc">/**
+     * AppEvent is used within the application to send message among components
+     * through the EventBus. All event driven messaging in the Flex Viewer is
+     * using the AppEvent.
+     * 
+     * &lt;p&gt;The typical way of sending a message via the AppEvent is, for example:&lt;/p&gt;
+     * 
+     * &lt;listing&gt;
+     *   SiteContainer.dispatchEvent(new AppEvent(AppEvent.WIDGET_MENU_CLICKED, false, false, data));
+     * &lt;/listing&gt;
+     * 
+     * &lt;p&gt;The typical way of receiving a message via the AppEvent is, for example:&lt;/p&gt;
+     * &lt;listing&gt;
+     *   SiteContainer.addEventListener(AppEvent.WIDGET_MENU_CLICKED, widgetMenuClicked);
+     * &lt;/listing&gt;
+     * @see EventBus
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">AppEvent</span> <span class="ActionScriptReserved">extends</span> <span class="ActionScriptDefault_Text">Event</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        
+        <span class="ActionScriptComment">//--------------------------------------------------------------------------
+</span>        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptComment">//  Class constants
+</span>        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptComment">//--------------------------------------------------------------------------
+</span>        
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">WIDGET_CLOSED</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"widgetClosed"</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">WIDGET_CONFIG_LOADED</span>:<span class="ActionScriptDefault_Text">String</span>  <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"widgetConfigLoaded"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * The error event type. This event type is used to send a user friendly
+         * error message via the event bus. A error window will display the error
+         * message.
+         * 
+         * &lt;p&gt;When sending the error message, the data sent with the AppEvent is the
+         * error string. For example: &lt;/p&gt;
+         * 
+         * &lt;listing&gt;
+         * SiteContainer.dispatchEvent(new AppEvent(AppEvent.APP_ERROR, false, false, "A Error Message"));
+         * &lt;/listing&gt;
+         * 
+         * @see components.ErrorWindow
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">APP_ERROR</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"appError"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+        * This event type indicates that the Flex Viewer application has completed loading the
+        * configuration file. The ConfigManager sends this event so that other components that
+        * are interested in obtaining configuration data can listen to this event.
+        * 
+        * @see ConfigManager
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">CONFIG_LOADED</span>:<span class="ActionScriptDefault_Text">String</span>  <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"configLoaded"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * This event type indicates that the map is loaded. The MapManager sends this event so
+         * that other components such as the Controller can start working with the map.
+         * 
+         * @see MapManager
+         * @see Controller
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">MAP_LOADED</span>:<span class="ActionScriptDefault_Text">String</span>             <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"mapLoaded"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * This event type indicates a dynamic layer is loaded.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">LAYER_LOADED</span>:<span class="ActionScriptDefault_Text">String</span>           <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"layerLoaded"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * This event type is used by the Controller to indicate a base map menu item
+         * is clicked.
+         * 
+         * @see Controller
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">BASEMAP_MENU_CLICKED</span>:<span class="ActionScriptDefault_Text">String</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"basemapMenuClicked"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * This event type is used by the Controller to indicate a widget menu item
+         * is clicked.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">WIDGET_MENU_CLICKED</span>:<span class="ActionScriptDefault_Text">String</span>  <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"widgetMenuClicked"</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">WIDGET_LOADED</span>:<span class="ActionScriptDefault_Text">String</span>  <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"widgetLoaded"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * This event type is used by either Flex Viewer components or a widget to
+         * request set the map naviation method. The map navigation method could be
+         * pan, zoomin, zoomout, etc.
+         * 
+         * &lt;p&gt;The navigation methods supported are:&lt;/p&gt;
+         * &lt;listing&gt;
+         * pan          (Navigation.PAN)
+         * zoomin       (Navigation.ZOOM_IN)
+         * zoomout      (Navigation.ZOOM_OUT)
+         * zoomfull     (SiteContainer.NAVIGATION_ZOOM_FULL)
+         * zoomprevious (SiteContainer.NAVIGATION_ZOOM_PREVIOUS)
+         * zoomnext     (SiteContainer.NAVIGATION_ZOOM_NEXT)
+         * &lt;/listing&gt;
+         * 
+         * &lt;p&gt;The navigation request can be sent as such:&lt;/P&gt;
+         * &lt;listing&gt;
+         *  var data:Object =
+         *     {
+         *       tool: Navigation.PAN,
+         *       status: status
+         *      }
+         *   SiteContainer.dispatchEvent(new AppEvent(AppEvent.SET_MAP_NAVIGATION, false, false, data));
+         * &lt;/listing&gt;
+         * 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SET_MAP_NAVIGATION</span>:<span class="ActionScriptDefault_Text">String</span>   <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"setMapNavigation"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * This event type is used to set the status text shown at the controller bar. to AppEvent
+         * to set the status string, for example:
+         * 
+         * &lt;listing&gt;
+         *  dispatchEvent(new AppEvent(AppEvent.SET_STATUS, false, false, status));
+         * &lt;/listing&gt;
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SET_STATUS</span>:<span class="ActionScriptDefault_Text">String</span>           <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"setStatus"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Used to show the info windows on the map through the AppEvent via EventBus.
+         * 
+         * &lt;listing&gt;
+         *  SiteContainer.dispatchEvent(new AppEvent(AppEvent.SHOW_INFOWINDOW, false, false, infoData));
+         * &lt;/listing&gt;
+         * 
+         * The infoData is a dynamic object structure as, for example:
+         * &lt;listing&gt;
+         *   var infoData:Object =
+         *       {
+         *          icon: icon,              //a Image object
+         *          title: "a title string",
+         *          content: "a string",
+         *          link: "http://a.url.com",
+         *          point: point,            //a Point object
+         *          geometry: geom           //a Geometry object
+         *       };
+         * &lt;/listing&gt;
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHOW_INFOWINDOW</span>:<span class="ActionScriptDefault_Text">String</span>      <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"widgetShowInfo"</span>;
+
+        <span class="ActionScriptASDoc">/**
+         * Used to set map's interactive mode, such as Draw point, line, etc. To
+         * use AppEven via EventBuas:
+         * 
+         * &lt;listing&gt;
+         * SiteContainer.dispatchEvent(new AppEvent(AppEvent.SET_MAP_ACTION, false, false, data));
+         * &lt;/listing&gt;
+         * 
+         * Where data is a dynamic data structure:
+         * 
+         * &lt;listing&gt;
+         * var data:Object = 
+         *   {
+         *       tool: action,       //a actions tring token
+         *       status: "status string",
+         *       handler: callback   //a callback Function
+         *   }
+         * &lt;/listing&gt;
+         * Please refer to the Developer's Guide for details.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SET_MAP_ACTION</span>:<span class="ActionScriptDefault_Text">String</span>       <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"setMapAction"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * For widget chain and data manager to manage the session generated data.
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DATA_ADDED</span>:<span class="ActionScriptDefault_Text">String</span>           <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"dataAdded"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * For widget chain. TBD
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DATA_UPDATED</span>:<span class="ActionScriptDefault_Text">String</span>           <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"dataUpdated"</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * for widget chain. TBD
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">DATA_FETCH</span>:<span class="ActionScriptDefault_Text">String</span>           <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"dataFetch"</span>;
+
+        <span class="ActionScriptComment">// Water
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">IDENTIFY</span>:<span class="ActionScriptDefault_Text">String</span>             <span class="ActionScriptOperator">=</span> <span class="ActionScriptString">"identify"</span>;
+        
+                
+        <span class="ActionScriptComment">//--------------------------------------------------------------------------
+</span>        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptComment">//  Constructor
+</span>        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptComment">//--------------------------------------------------------------------------    
+</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">AppEvent</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">type</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">bubbles</span>:<span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">false</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">cancelable</span>:<span class="ActionScriptDefault_Text">Boolean</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">false</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">data</span>:<span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">data</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptDefault_Text">_data</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">data</span>;
+            <span class="ActionScriptReserved">super</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">type</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">bubbles</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">cancelable</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+                
+        <span class="ActionScriptComment">//--------------------------------------------------------------------------
+</span>        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptComment">//  Properties
+</span>        <span class="ActionScriptComment">//
+</span>        <span class="ActionScriptComment">//--------------------------------------------------------------------------
+</span>        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_data</span>:<span class="ActionScriptDefault_Text">Object</span>;
+    
+        <span class="ActionScriptASDoc">/**
+        * The data will be passed via the event. It allows even dispatcher publishes
+        * data to event listener(s).
+        */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">get</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">Object</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_data</span>;
+        <span class="ActionScriptBracket/Brace">}</span> 
+        
+        <span class="ActionScriptASDoc">/**
+         * @private
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptReserved">set</span> <span class="ActionScriptDefault_Text">data</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">data</span>:<span class="ActionScriptDefault_Text">Object</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_data</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">data</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span></pre></body>
+</html>

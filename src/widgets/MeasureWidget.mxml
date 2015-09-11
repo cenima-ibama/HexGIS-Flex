@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget 
+			xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			xmlns:s="library://ns.adobe.com/flex/spark" 
+			xmlns:mx="library://ns.adobe.com/flex/mx"
+			xmlns:measure="org.openscales.fx.control.measure.*"
+			xmlns:distancia="widgets.componentes.medidas.distancia.*"
+			xmlns:angulo="widgets.componentes.medidas.angulo.*"
+			xmlns:area="widgets.componentes.medidas.area.*"
+			xmlns:os="http://openscales.org"
+			xmlns:solutions="solutions.*">
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	<fx:Script>
+		<![CDATA[			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			
+			import org.openscales.core.Map;
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.MeasureEvent;
+			import org.openscales.core.handler.feature.draw.DrawPathHandler;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.measure.*;
+			import org.openscales.fx.FxMap;
+			import org.openscales.geometry.basetypes.Pixel;
+			import org.openscales.geometry.basetypes.Unit;
+			
+			import solutions.SiteContainer;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import widgets.componentes.informacoes.click.event.ClickActivatedEvent;
+			import widgets.componentes.informacoes.drag.event.DragActivatedEvent;
+			import widgets.componentes.medidas.angulo.NewAzimuth;
+			import widgets.componentes.medidas.distancia.NewDistance;
+			import widgets.componentes.zoomBox.ZoomBoxActivatedEvent;
+			
+			
+			public static const SEXAGESIMAL:String = "dms";
+			public static const DEGREE:String = "deg";
+			public static const RADIAN:String = "rad";
+			public static const METRIC:String = "metric";
+			
+			public static const METER:String = "m";
+			public static const KILOMETER:String = "km";
+			
+			public static const FOOT:String = "ft";
+			public static const MILE:String = "mi";
+			public static const INCH:String = "in";
+			public static const ENGLISH:String = "english";
+			
+			public static const DISTANCEMEASURE:String="distance";
+			public static const AZIMUTHMEASURE:String="azimuth";
+			public static const SURFACEMEASURE:String="surface";
+			
+			[Bindable]
+			private var _btnPath:Class;
+			
+			[Bindable]
+			private var panelTitle:String;
+			
+			[Bindable]
+			private var _exitToolTip:String;
+			
+			[Bindable]
+			public var _result:String = "0";
+			
+			//protected var _active:Boolean = false;
+			
+			private var ultimaMedida:IMeasure;
+			private var ultimaDistancia:NewDistance = new NewDistance();
+			private var ultimoAngulo:NewAzimuth = new NewAzimuth();
+			private var ultimaArea:Surface = new Surface();
+			
+			/* {sistema:'Polegadas', macro:'in'},  */
+			private var listaSistPath:ArrayCollection = new ArrayCollection
+				([{sistema:'Metros', macro:'m'}, 
+					{sistema:'Kilometros', macro:'km'},
+					{sistema:'Pés', macro:'ft'},
+					{sistema:'Milhas', macro:'mi'},
+					{sistema:'Métrico', macro:'metric'},
+					{sistema:'Unidades Inglesas', macro:'english'}]);
+			
+			private var listaSistAzimuth:ArrayCollection = new ArrayCollection([{sistema:'Sexagesimal', macro:'dms'},
+				{sistema:'Graus', macro:'deg'},
+				{sistema:'Radianos', macro:'rad'}]);
+			
+			private var listaSistSurface:ArrayCollection = new ArrayCollection([{sistema:'Metros', macro:'m'},
+				{sistema:'Kilometros', macro:'km'},
+				{sistema:'Métrico', macro:'metric'}]);
+			
+			
+			/* override protected function configure():void
+			{
+				super.configure();
+			} */
+			
+			override public function set map(value:Map):void
+			{
+				super.map = value;
+				
+				this.active = false;
+								
+				if(this.map) //if not null
+				{
+					this.active = true;
+				}			
+				
+				if (this.measurePath)
+					this.measurePath.map = this.map;
+				if (this.measureAzimuth)
+					this.measureAzimuth.map = this.map;
+				if (this.measureSurface)
+					this.measureSurface.map = this.map;
+			}
+			
+			public function exitMeasureMode():void 
+			{
+				if (this.map) 
+				{
+					var evt:DrawingEvent = new DrawingEvent(DrawingEvent.CHANGE_ACTIVE_HANDLER);
+					evt.activeHandler = null;
+					
+					this.map.dispatchEvent(evt);
+				}
+			}
+			
+			/**
+			 * indicates if the control is currently active or not
+			 */
+			/* public function get active():Boolean {
+				return this._active;
+			} */
+			
+			/**
+			 * @private
+			 */
+			/* public function set active(value:Boolean):void {
+				
+				if(value)
+					this.activate();
+				else
+					this.desactivate();
+			} */
+			
+			/**
+			 * @inherit
+			 */
+			override public function activate():void 
+			{
+				super.activate();
+				//this._active = true;
+				
+				if(map)
+				{
+					SiteContainer.addEventListener(DragActivatedEvent.INFO_DRAG_ATIVADO, desativaBotoes);
+					SiteContainer.addEventListener(ClickActivatedEvent.INFO_CLICK_ATIVADO, desativaBotoes);
+					this.map.addEventListener(MeasureEvent.MEASURE_AVAILABLE, onMeasure);
+					this.map.addEventListener(MeasureEvent.MEASURE_UNAVAILABLE, onMeasure);
+					//this.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_HANDLER, onChangeActiveHandler);
+					//this.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_HANDLER, desativaBotoes);
+					this.map.addEventListener(ZoomBoxActivatedEvent.ZOOMBOX_SELECIONADO, desativaBotoes);
+					
+					//listeners para ativacao dos icones da camada de vetorizacao
+					this.map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, desativaBotoes);
+					this.map.addEventListener(FeatureEvent.FEATURE_SELECT, desativaBotoes);  
+				}
+			}
+			
+			/**
+			 * @inherit
+			 */
+			override public function desactivate():void 
+			{	
+				super.desactivate();
+				//this._active = false;
+				
+				if(map)
+				{
+					SiteContainer.removeEventListener(DragActivatedEvent.INFO_DRAG_ATIVADO, desativaBotoes);
+					SiteContainer.removeEventListener(ClickActivatedEvent.INFO_CLICK_ATIVADO, desativaBotoes);
+					this.map.removeEventListener(MeasureEvent.MEASURE_AVAILABLE,onMeasure);
+					this.map.removeEventListener(MeasureEvent.MEASURE_UNAVAILABLE,onMeasure);
+					//this.map.removeEventListener(DrawingEvent.CHANGE_ACTIVE_HANDLER, onChangeActiveHandler);
+					this.map.removeEventListener(ZoomBoxActivatedEvent.ZOOMBOX_SELECIONADO, desativaBotoes);
+					//this.map.removeEventListener(DrawingEvent.CHANGE_ACTIVE_HANDLER, desativaBotoes);
+					
+					this.map.removeEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, desativaBotoes);
+					this.map.removeEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, desativaBotoes);
+					this.map.removeEventListener(FeatureEvent.FEATURE_SELECT, desativaBotoes);
+				}
+			}
+			
+			private function onMeasure(event:MeasureEvent):void
+			{
+				if (event.type == MeasureEvent.MEASURE_AVAILABLE) 
+				{
+					if (event.tool.getUnits())
+					{
+						this._result = event.tool.getMeasure()+" "+event.tool.getUnits();
+					}
+					else
+					{
+						this._result = event.tool.getMeasure();
+						//Alert.show(this._result);
+					}
+					ultimaMedida = event.tool;
+					
+				} 
+				else if(event.type == MeasureEvent.MEASURE_UNAVAILABLE) 
+				{
+					this._result = "0";
+				}
+			}
+			
+			private function onChangeActiveHandler(event:DrawingEvent):void 
+			{
+				this._result = "0";
+			}
+			
+			public function desativaBotoes(event:Event=null):void
+			{
+				if ((measurePath) && (measurePath.active))
+				{
+					measurePath.onClick();
+				} 
+				if ((measureAzimuth) && (measureAzimuth.active))
+				{
+					measureAzimuth.onClick();
+				}
+				if ((measureSurface) && (measureSurface.active))
+				{
+					measureSurface.onClick();
+				}
+				
+				this._result = "0";
+				
+				comboSisMed.dataProvider = null;
+			}
+			
+			override public function onMapLanguageChange(event:I18NEvent):void
+			{
+				measurePath.toolTitle = "Medir distância";
+				measureAzimuth.toolTitle = "Medir distância angular";
+				measureSurface.toolTitle = "Medir área";
+				//exitButton.toolTip = _exitToolTip = Catalog.getLocalizationForKey('MeasureBar.exittooltip');
+			}
+			
+			/**
+			 * This function hide a component of the measure bar if it was display.
+			 *  Otherwise, it has no action
+			 * 
+			 * @param component Component to hide (constants available in the MeasureBar class)
+			 */
+			public function hideComponent(component:String):void
+			{
+				if(component==DISTANCEMEASURE)
+				{
+					if(this.measurebar.contains(this.measurePath))
+					{
+						if(this.measurePath.active)
+						{
+							this.measurePath.onClick();
+						}
+						this.measurebar.removeElement(this.measurePath);
+					}
+				}
+				if(component==AZIMUTHMEASURE)
+				{
+					if(!this.measurebar.contains(this.measureAzimuth))
+					{
+						this.measurebar.removeElement(this.measureAzimuth);
+					}
+				}
+				if(component==SURFACEMEASURE)
+				{
+					if(!this.measurebar.contains(this.measureSurface))
+					{
+						this.measurebar.removeElement(this.measureSurface);
+					}
+				}
+			}
+			
+			/**
+			 * This function display a component of the measure bar if it was hidden. Otherwise, it has no action
+			 * 
+			 * @param component Component to show (constants available in the MeasureBar class)
+			 */
+			public function showComponent(component:String):void
+			{
+				if(component == DISTANCEMEASURE)
+				{
+					if(!this.measurebar.contains(this.measurePath))
+					{
+						this.measurebar.addElement(this.measurePath);
+					}
+				}
+				if(component == AZIMUTHMEASURE)
+				{
+					if(!this.measurebar.contains(this.measureAzimuth))
+					{
+						this.measurebar.addElement(this.measureAzimuth);
+					}
+				}
+				if(component == SURFACEMEASURE)
+				{
+					if(!this.measurebar.contains(this.measureSurface))
+					{
+						this.measurebar.addElement(this.measureSurface);
+					}
+				}
+			}
+			
+			private function comboBoxChangeHandler(event:IndexChangeEvent):void
+			{
+				if (measurePath.active)
+				{
+					measurePath.displaySystem = event.target.selectedItem.macro;
+					
+					if (ultimaMedida)
+					{
+						ultimaDistancia = ultimaMedida as NewDistance;
+						ultimaDistancia.displaySystem = event.target.selectedItem.macro;
+						
+						if (ultimaDistancia.getUnits())
+						{
+							this._result = ultimaDistancia.getMeasure()+" "+ultimaDistancia.getUnits();
+						}
+						else
+						{
+							this._result = ultimaDistancia.getMeasure();
+						}
+					}
+				}
+				if (measureAzimuth.active)
+				{
+					measureAzimuth.displaySystem = event.target.selectedItem.macro;
+					
+					if (ultimaMedida)
+					{
+						ultimoAngulo = ultimaMedida as NewAzimuth;
+						ultimoAngulo.displaySystem = event.target.selectedItem.macro; 
+						
+						if (ultimoAngulo.getUnits())
+						{
+							this._result = ultimoAngulo.getMeasure()+" "+ultimoAngulo.getUnits();
+						}
+						else
+						{
+							this._result = ultimoAngulo.getMeasure();
+						}
+					}
+				}
+				if (measureSurface.active)
+				{
+					measureSurface.displaySystem = event.target.selectedItem.macro;
+					
+					if (ultimaMedida)
+					{
+						ultimaArea = ultimaMedida as Surface;
+						ultimaArea.displaySystem = event.target.selectedItem.macro; 
+						
+						if (ultimaArea.getUnits())
+						{
+							this._result = ultimaArea.getMeasure()+" "+ultimaArea.getUnits();
+						}
+						else
+						{
+							this._result = ultimaArea.getMeasure();
+						}
+					}
+				}
+			}
+			
+			protected function measurePath_clickHandler(event:MouseEvent):void
+			{
+				measureAzimuth.active = false;
+				measureSurface.active = false;
+				
+				if (measurePath.active)
+				{
+					comboSisMed.dataProvider = listaSistPath;
+					comboSisMed.labelField = "sistema";
+					comboSisMed.selectedIndex = 1;
+					//measurePath.displaySystem = "km";
+				}
+				else
+				{
+					comboSisMed.dataProvider = new ArrayCollection([]);
+				}
+				
+				ultimaMedida = null;
+			}
+			
+			protected function measureAzimuth_clickHandler(event:MouseEvent):void
+			{
+				measurePath.active = false;
+				measureSurface.active = false;
+				
+				if (measureAzimuth.active)
+				{
+					comboSisMed.dataProvider = listaSistAzimuth;
+					comboSisMed.labelField = "sistema";
+					comboSisMed.selectedIndex = 0;
+					//measureAzimuth.displaySystem = "dms";
+				}
+				else
+				{
+					comboSisMed.dataProvider = new ArrayCollection([]);
+				}
+				
+				ultimaMedida = null;
+			}
+			
+			protected function measureSurface_clickHandler(event:MouseEvent):void
+			{
+				measureAzimuth.active = false;
+				measurePath.active = false;
+				
+				if (measureSurface.active)
+				{
+					comboSisMed.dataProvider = listaSistSurface;
+					comboSisMed.labelField = "sistema";
+					comboSisMed.selectedIndex = 2;
+					//measureSurface.displaySystem = "metric";
+				}
+				else
+				{
+					comboSisMed.dataProvider = new ArrayCollection([]);
+				}
+				
+				ultimaMedida = null;
+			}
+			
+			override protected function closeWidget(event:MouseEvent):void
+			{
+				this.desactivate();
+				measurePath.active = false;
+				measureAzimuth.active = false;
+				measureSurface.active = false;
+				super.closeWidget(event);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Metadata>
+		<![CDATA[
+		
+		/** 
+		* @eventType org.openscales.core.events.DrawingEvent.CHANGE_ACTIVE_LAYER
+		*/ 
+		[Event(name="openscales.drawing.change_active_layer", type="org.openscales.core.events.LayerEvent")]
+		
+		]]>
+	</fx:Metadata>
+	
+	
+	<s:BorderContainer id="measurebar" styleName="widgetContentContainer" width="350" height="200">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" 
+							  paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10"/>
+		</s:layout>
+		
+		<s:BorderContainer width="100%" height="33%" top="0" styleName="estiloInvisibleContainer">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:HGroup width="33%" horizontalAlign="center" verticalAlign="middle">
+				<distancia:NewMeasurePath id="measurePath" map="{this.map}" 
+				 toolTip="Medir distância" displaySystem="km" click="measurePath_clickHandler(event)"/>
+			</s:HGroup>
+			
+			<s:HGroup width="33%" horizontalAlign="center" verticalAlign="middle">
+				<angulo:NewMeasureAzimuth id="measureAzimuth" map="{this.map}"
+				toolTip="Medir distância angular" displaySystem="dms" click="measureAzimuth_clickHandler(event)" />
+			</s:HGroup>
+			
+			<s:HGroup width="33%" horizontalAlign="center" verticalAlign="middle">
+				<area:NewMeasureSurface id="measureSurface" map="{this.map}" 
+				toolTip="Medir área" displaySystem="metric" click="measureSurface_clickHandler(event)" />
+			</s:HGroup>
+			
+		</s:BorderContainer>
+		
+		<s:BorderContainer width="100%" height="33%"  borderAlpha="0" backgroundAlpha="0">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" verticalAlign="middle"/>
+			</s:layout>
+
+			<s:TextInput id="lblResult" text="{this._result}" 
+						 editable="false" borderVisible="false"
+						 textAlign="center" width="100%" styleName="estiloTextInputInvisivel"/>	
+			
+		</s:BorderContainer>
+		
+		<s:BorderContainer width="100%" height="33%" bottom="0" backgroundAlpha="0" borderAlpha="0">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="left" verticalAlign="middle"/>
+			</s:layout>
+			
+			<s:Label text="Sistema de medidas" styleName="estiloLabel" width="50%" left="0"/>
+			
+			<s:DropDownList id="comboSisMed" right="0" width="50%" minWidth="170"
+							change="comboBoxChangeHandler(event)" styleName="estiloDropDownList" />
+			
+		</s:BorderContainer>
+		
+	</s:BorderContainer>
+	
+</solutions:BaseWidget>

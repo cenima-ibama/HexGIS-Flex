@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<videos>
+	<video nome="The Magic Swan Geese " 
+		 descricao="Animação russa de 1949."
+         url="dados/videos/Geese-Swans.flv" />
+         <video nome="Teste" 
+		 descricao="Teste"
+         url="dados/videos/barsandtone.flv" />
+         <video nome="Teste2" 
+		 descricao="Teste2"
+         url="dados/videos/20051210-w50s.flv" />         
+</videos> 

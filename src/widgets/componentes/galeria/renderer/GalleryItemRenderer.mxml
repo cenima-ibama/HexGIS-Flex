@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="false">
+
+	
+	<fx:Declarations>
+		<s:GlowFilter id="glow" color="#ffffff" alpha="1.0" quality="3" blurX="1" blurY="1"/>
+		
+		<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="500" />
+		
+		<s:Fade id="fadeOut" alphaFrom="1.0" alphaTo="0.0" duration="500" />
+
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Button;
+			import mx.core.FlexGlobals;
+			import mx.core.IFlexDisplayObject;
+			import mx.core.IVisualElement;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import solutions.MenuController;
+			
+			
+			private var img:Image;
+			
+			
+			protected function thumbnail_rollOverHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				thumbnail.alpha = 1.0;
+				thumbnail.filters = [glow];
+			}
+			
+			protected function thumbnail_rollOutHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				thumbnail.alpha = 0.8;
+				thumbnail.filters = [];
+			}
+			
+			protected function thumbnailClickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				img = new Image();
+				//img.height = 0.85*FlexGlobals.topLevelApplication.height;
+				//img.width = 0.8*_model.map.width;
+				img.maintainAspectRatio = true;
+				
+				img.addEventListener(Event.COMPLETE, image_complete);
+				//img.addEventListener(ResizeEvent.RESIZE, image_resize);
+				img.addEventListener(MouseEvent.CLICK, image_click);
+				
+				img.load(data.@grande);
+				//img.source = data.@grande;
+				
+				img.setStyle("addedEffect", fadeIn);
+				img.setStyle("removedEffect", fadeOut);
+				img.setStyle("modalTransparency",0.8);
+				img.setStyle("modalTransparencyColor","#000000");
+
+				PopUpManager.addPopUp(img as IFlexDisplayObject, FlexGlobals.topLevelApplication as DisplayObject, true);
+				//PopUpManager.centerPopUp(img);
+			}
+			
+			private function image_click(event:MouseEvent):void 
+			{
+				PopUpManager.removePopUp(img as Image);
+			}
+
+			private function image_complete(event:Event):void 
+			{
+				var aspect:Number;
+				var newHeight:Number;
+				var newWidth:Number;
+				
+				aspect = img.contentHeight/img.contentWidth;
+
+				if ((img.contentHeight > FlexGlobals.topLevelApplication.height) || 
+					(img.contentWidth > FlexGlobals.topLevelApplication.width))
+				{
+					newHeight =  0.98*FlexGlobals.topLevelApplication.height;
+					newWidth = newHeight/aspect;
+					
+					if (newWidth > FlexGlobals.topLevelApplication.width)
+					{
+						newWidth =  0.98*FlexGlobals.topLevelApplication.width;
+						newHeight = newWidth*aspect;
+					}
+					
+					img.height = newHeight;
+					img.width = newWidth; 
+				}
+				else
+				{
+					img.height = img.contentHeight;
+					img.width = img.contentWidth; 
+				}
+				
+				PopUpManager.centerPopUp(img as Image);
+			}
+			
+			
+		]]>
+	</fx:Script>
+	
+	
+	<mx:Image id="thumbnail" 
+			  buttonMode="true" useHandCursor="true"
+			  alpha="0.8" click="thumbnailClickHandler(event)"
+			  source="{data.@miniatura}" toolTip="{data.@titulo}" 
+			  rollOver="thumbnail_rollOverHandler(event)" rollOut="thumbnail_rollOutHandler(event)"/>
+	
+</s:ItemRenderer>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 initialize="init()"
+		 title="{widgetTitle}">
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.WidgetSkin;
+			
+			import mx.controls.Label;
+			import mx.core.IFlexDisplayObject;
+			import mx.managers.DragManager;
+			import mx.managers.PopUpManager;
+			
+			import spark.components.Group;
+			
+			
+			[Bindable]
+			private var widgetTitle:String = "";
+			
+			[Bindable]
+			public var videoSource:String;
+			
+			private var closeBtn:Label = new Label();
+
+			private static const WIDGET_OPENED:String = "widgetOpened";
+			
+			private static const WIDGET_CLOSED:String = "widgetClosed";
+
+			
+			private function init():void
+			{			
+				//closeBtn = new Label();
+				closeBtn.text = "X";
+				closeBtn.setStyle("fontWeight", "bold");
+				closeBtn.styleName = "closeBtnLabel";
+				closeBtn.toolTip="Fechar";
+				closeBtn.buttonMode = true;
+				closeBtn.useHandCursor = true;
+				//closeBtn.addEventListener(MouseEvent.ROLL_OVER, closeBtn_rollOver);
+				//closeBtn.addEventListener(MouseEvent.ROLL_OUT, closeBtn_rollOut);
+				closeBtn.addEventListener(MouseEvent.CLICK, closeWidget);			
+			}
+			
+			/* private function closeBtn_rollOver(event:MouseEvent):void
+			{
+				closeBtn.styleName = "closeBtnLabelOver";
+			}
+			
+			private function closeBtn_rollOut(event:MouseEvent):void
+			{
+				closeBtn.styleName = "closeBtnLabel";
+			} */
+
+			/**
+			 * Set the widget title. A widget titile can be configured in the config.xml.
+			 * 
+			 * @param value the title text.
+			 */
+			public function setTitle(value:String):void
+			{
+				widgetTitle = value;
+			}
+			
+			public function setVideoSource(value:String):void
+			{
+				videoSource = value;
+			}
+			
+			public function setCloseBtnVisibility(value:Boolean):void
+			{
+				if (this.closeBtn) this.closeBtn.visible = value;
+			}
+		
+			public function closeWidget(event:MouseEvent):void
+			{
+				//currentState = "closed";
+				//closeBtn.styleName = "closeBtnLabel";
+				PopUpManager.removePopUp(this);
+			}
+
+			//--------------------------------------
+			// Skin Parts
+			//--------------------------------------
+			
+			/**
+			 * The skin part that represents the title bar of the underlying Panel.
+			 *      NOTE: The default PanelSkin already has this, it's just not defined as a skinPart in the Panel class.
+			 * We want it so that we can capture dragging.
+			 */
+			[SkinPart(required="true")]
+			public var topGroup:Group;
+			
+			//--------------------------------------
+			// Overridden Methods
+			//--------------------------------------
+			
+			protected override function partAdded( partName:String, instance:Object ) : void
+			{
+				super.partAdded( partName, instance );
+				
+				if (instance == topGroup)
+				{
+					Group( instance ).addEventListener( MouseEvent.MOUSE_DOWN, topGroup_mouseDownHandler );
+					Group( instance ).addEventListener( MouseEvent.MOUSE_UP, topGroup_mouseUpHandler );
+					
+					Group(instance).addElement(closeBtn);
+					closeBtn.right = 0;
+					closeBtn.top = 5;
+					closeBtn.visible = true;
+				}
+			}
+			
+			protected override function partRemoved( partName:String, instance:Object ) : void
+			{
+				super.partRemoved( partName, instance );
+				
+				if (instance == topGroup)
+				{
+					Group( instance ).removeEventListener( MouseEvent.MOUSE_DOWN, topGroup_mouseDownHandler );
+					Group( instance ).removeEventListener( MouseEvent.MOUSE_UP, topGroup_mouseUpHandler );
+				}
+			}
+			
+			//--------------------------------------
+			// Event Handlers
+			//--------------------------------------
+			
+			protected function topGroup_mouseDownHandler( event:MouseEvent ):void
+			{
+				if ( !DragManager.isDragging )
+					startDrag();
+			}
+			
+			protected function topGroup_mouseUpHandler( event:MouseEvent ):void
+			{
+				stopDrag();
+			}
+			
+			override public function stylesInitialized():void 
+			{
+				super.stylesInitialized();
+				this.setStyle("skinClass", Class(WidgetSkin));
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<!--<s:states>
+		<s:State name="opened"/>
+		<s:State name="closed"/>
+	</s:states>
+	
+	<s:transitions>
+
+		<s:Transition id="transClose" fromState="*" toState="closed">
+			<s:Sequence id="seqClose">
+				<s:SetAction target="{this}" property="visible" value="false"/>
+			</s:Sequence>
+		</s:Transition>
+
+	</s:transitions>-->
+	
+	<fx:Metadata>
+		[Event(name="widgetClosed", type="flash.events.Event")]
+	</fx:Metadata>
+	
+</s:Panel>

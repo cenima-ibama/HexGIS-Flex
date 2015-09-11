@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--- 
+This ItemRenderer is use for displaying the layers result after a GetCapabilities on a service
+It manages doubleClick on an item to add a layer on the map
+-->
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+				xmlns:cm="ferramentas.camadas.*"
+				useHandCursor="true" buttonMode="true"
+				click="onClick(event)" rollOver="lblRollOver()" rollOut="lblRollOut(event)" 
+				autoDrawBackground="false" height="25" width="100%">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			
+			/**
+			 * The externalLayers owner
+			 */
+			public var externalLayers:AddLayersWidget;
+			
+			/**
+			 * The layer name in getCapabilities
+			 */
+			[Bindable]
+			public var layerName:String;
+			
+			/**
+			 * Add the layer selected on double click
+			 */
+			private function onClick(event:MouseEvent):void
+			{
+				externalLayers.addLayerOnMap(this.data);
+			}
+			
+			override public function set data(value:Object):void
+			{				
+				super.data = value;
+				this.layerName = this.data.getValue('Title');
+			}
+			
+			private function lblRollOver():void
+			{
+				cbCont.styleName = "estiloCBContRollOver";
+			}
+			
+			protected function lblRollOut(event:MouseEvent):void
+			{
+				cbCont.styleName = "estiloCBCont";
+			}
+			
+			
+		]]>
+	</fx:Script>
+
+	<s:BorderContainer styleName="estiloInvisibleContainer" width="100%" height="25">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"
+								gap="0" paddingBottom="0" paddingLeft="0" paddingRight="2" paddingTop="0"/>
+		</s:layout>
+		
+		<s:BorderContainer id="cbCont" styleName="estiloCBCont" width="100%" height="25">
+			<s:layout>
+				<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle" gap="0"/>
+			</s:layout>
+			<s:Rect width="10"/>
+			<s:Label text="{this.layerName}" width="100%"/>
+			<s:Rect width="10"/>
+		</s:BorderContainer>
+	</s:BorderContainer>
+	
+</s:ItemRenderer>

@@ -1,0 +1,145 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Controller.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ModelLocator</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptOperator">*</span>;
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">mx</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Application</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">solutions</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ToolsBase</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">Controller</span>
+    <span class="ActionScriptBracket/Brace">{</span>
+        <span class="ActionScriptASDoc">/**
+         * Controller constructor 
+         * 
+         */</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">Controller</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupNameArray</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Array</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_instance</span>:<span class="ActionScriptDefault_Text">Controller</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">null</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_model</span>:<span class="ActionScriptDefault_Text">ModelLocator</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        
+        <span class="ActionScriptASDoc">/**
+         * Get instance of Controller 
+         * @return 
+         * 
+         */</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">getInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">Controller</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_instance</span><span class="ActionScriptOperator">==</span><span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_instance</span><span class="ActionScriptOperator">=</span><span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Controller</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">_instance</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+
+                
+        <span class="ActionScriptASDoc">/**
+         * Load Pop Up 
+         * @param _type 
+         */</span>            
+         <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">loadPopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_type</span>:<span class="ActionScriptOperator">*</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">target</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">minimisedAllPopUps</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;            
+            <span class="ActionScriptComment">//Instantiate new pop up 
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">tool</span>:<span class="ActionScriptDefault_Text">ToolsBase</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">_type</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">Application</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">application</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">loadPopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_type</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span>;    
+            <span class="ActionScriptComment">//Store pop up in array
+</span>            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">LayersTool</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupArray</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span><span class="ActionScriptBracket/Brace">)</span>;
+               <span class="ActionScriptBracket/Brace">}</span>    
+        <span class="ActionScriptBracket/Brace">}</span> 
+
+        <span class="ActionScriptASDoc">/**
+         * Minimise Pop Ups
+         * @param _type 
+         */</span>            
+         <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">minimisedAllPopUps</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//Minimise all open windows
+</span>            <span class="ActionScriptReserved">for each</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">item</span>:<span class="ActionScriptOperator">*</span> <span class="ActionScriptReserved">in</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupArray</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openTool</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptReserved">null</span><span class="ActionScriptBracket/Brace">)</span>
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptOperator">!</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openTool</span> <span class="ActionScriptReserved">is</span> <span class="ActionScriptDefault_Text">LayersTool</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">item</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">minimizePanel</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openTool</span><span class="ActionScriptBracket/Brace">)</span>;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>                    
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Restore Pop Up 
+         * @param _type 
+         */</span>            
+         <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">restorePopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_popup</span>:<span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">Application</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">application</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">restorePopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_popup</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">}</span>     
+        
+        <span class="ActionScriptASDoc">/**
+         * Load Pop Up 
+         * @param _type 
+         */</span>            
+         <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">setOpenTool</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_popup</span>:<span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openTool</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_popup</span>;
+        <span class="ActionScriptBracket/Brace">}</span>         
+        
+        <span class="ActionScriptASDoc">/**
+         * Updates the model when the navigation changes 
+         */</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updateView</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">view</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptReserved">if</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">view</span> <span class="ActionScriptOperator">!=</span> <span class="ActionScriptString">"layers"</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">selectedView</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">view</span>;    
+            <span class="ActionScriptBracket/Brace">}</span>            
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Store the name of each open pop up 
+         **/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">updatePopupNameArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupNameArray</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">push</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptASDoc">/**
+         * Remove popup from array
+         **/</span>
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unloadArrayPopUp</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span>:<span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupArray</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">splice</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupArray</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">indexOf</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span> 1<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Remove popup name from array
+         **/</span>        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">unloadPopUpNameArray</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupNameArray</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">splice</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupNameArray</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">indexOf</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">target</span><span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptOperator">,</span> 1<span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        <span class="ActionScriptASDoc">/**
+         * Remove minimised item from VBox
+         **/</span> 
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">removeMinimisedItem</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span>:<span class="ActionScriptOperator">*</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptReserved">void</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">popupholder</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">removeChild</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">tool</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span>        
+    <span class="ActionScriptBracket/Brace">}</span>
+<span class="ActionScriptBracket/Brace">}</span>
+</pre></body>
+</html>

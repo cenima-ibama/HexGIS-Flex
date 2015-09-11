@@ -1,0 +1,2403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<solutions:BaseWidget  xmlns="*"
+					   xmlns:solutions="solutions.*"
+					   xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:os="http://openscales.org" 
+					   xmlns:desenhar="widgets.componentes.vetorizar.desenhar.*" 
+					   creationComplete="configure()">
+	
+	
+	<fx:Style source="assets/styles/estilo1.css"/>
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.NewVerticalScrollBarSkin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CollectionEvent;
+			import mx.events.ColorPickerEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.ObjectUtil;
+			
+			import org.openscales.core.basetypes.Resolution;
+			import org.openscales.core.basetypes.maps.HashMap;
+			import org.openscales.core.control.MousePosition;
+			import org.openscales.core.events.DrawingEvent;
+			import org.openscales.core.events.FeatureEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.feature.CustomMarker;
+			import org.openscales.core.feature.Feature;
+			import org.openscales.core.feature.LabelFeature;
+			import org.openscales.core.feature.LineStringFeature;
+			import org.openscales.core.feature.PointFeature;
+			import org.openscales.core.feature.PolygonFeature;
+			import org.openscales.core.layer.DrawingsLayer;
+			import org.openscales.core.layer.Layer;
+			import org.openscales.core.layer.VectorLayer;
+			import org.openscales.core.layer.ogc.WMS;
+			import org.openscales.core.request.XMLRequest;
+			import org.openscales.core.style.Rule;
+			import org.openscales.core.style.Style;
+			import org.openscales.core.style.fill.SolidFill;
+			import org.openscales.core.style.marker.WellKnownMarker;
+			import org.openscales.core.style.stroke.Stroke;
+			import org.openscales.core.style.symbolizer.LineSymbolizer;
+			import org.openscales.core.style.symbolizer.PointSymbolizer;
+			import org.openscales.core.style.symbolizer.PolygonSymbolizer;
+			import org.openscales.core.utils.Util;
+			import org.openscales.geometry.Geometry;
+			import org.openscales.geometry.LabelPoint;
+			import org.openscales.geometry.LineString;
+			import org.openscales.geometry.LinearRing;
+			import org.openscales.geometry.Point;
+			import org.openscales.geometry.Polygon;
+			import org.openscales.geometry.basetypes.Bounds;
+			import org.openscales.geometry.basetypes.Location;
+			import org.openscales.geometry.basetypes.Pixel;
+			import org.openscales.geometry.basetypes.Size;
+			import org.openscales.proj4as.Proj4as;
+			import org.openscales.proj4as.ProjPoint;
+			import org.openscales.proj4as.ProjProjection;
+			import org.osmf.events.TimeEvent;
+			
+			import solutions.SiteContainer;
+			import solutions.WidgetManager;
+			import solutions.event.AppEvent;
+			import solutions.utils.StyleUtils;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			import widgets.componentes.alerta.Alerta;
+			import widgets.componentes.graficos.RadioButtonItemObject;
+			import widgets.componentes.ibama.feature.IbamaLineStringFeature;
+			import widgets.componentes.ibama.feature.IbamaPointFeature;
+			import widgets.componentes.ibama.feature.IbamaPolygonFeature;
+			import widgets.componentes.informacoes.click.event.ClickActivatedEvent;
+			import widgets.componentes.informacoes.drag.WFSGetFeature;
+			import widgets.componentes.informacoes.drag.event.DragActivatedEvent;
+			import widgets.componentes.informacoes.drag.event.DrawnBoxEvent;
+			import widgets.componentes.informacoes.drag.event.GetFeatureEvent;
+			import widgets.componentes.informacoes.drag.reader.GMLReader;
+			import widgets.componentes.pontosLonLat.PontoLonLatObject;
+			import widgets.componentes.pontosLonLat.renderer.PontosLonLatRenderer;
+			import widgets.componentes.vetorizar.event.DisableLayerEvent;
+			import widgets.componentes.vetorizar.event.EnableLayerEvent;
+			import widgets.componentes.webService.DeleteFeatureObject;
+			import widgets.componentes.webService.UpdateWSLineObject;
+			import widgets.componentes.webService.UpdateWSPointObject;
+			import widgets.componentes.webService.UpdateWSPolygonObject;
+			import widgets.componentes.webService.WSLinesObject;
+			import widgets.componentes.webService.WSPointsObject;
+			import widgets.componentes.webService.WSPolygonsObject;
+			import widgets.componentes.zoomBox.ZoomBoxActivatedEvent;
+			
+			
+			[Bindable] private var camadasPossiveis:ArrayCollection;
+			private var _itemRenderer:Class = PontosLonLatRenderer;
+			[Bindable] private var _camadaDesenho:VectorLayer;
+			//[Bindable] private var _camadaBDOutros:VectorLayer;
+			private var _camadaDesenhoSelecionada:String;
+			private var _requestPon:XMLRequest;
+			private var _requestLin:XMLRequest;
+			private var _requestPol:XMLRequest;
+			[Bindable] private var _tipoGeo:String;
+			[Bindable] public var _lastFeatIndex:int;
+			[Bindable] private var _wayPoints:String;
+			public var _numWayPoints:Number = 0;
+			[Bindable] private var _objID:String;
+			[Bindable] private var _colorStroke:uint;
+			[Bindable] private var _widthStroke:Number;
+			[Bindable] private var _alphaStroke:Number;
+			[Bindable] public var _alphaStrokeLabel:String;
+			[Bindable] private var _linecapStroke:String;
+			[Bindable] private var _colorFill:uint;
+			[Bindable] private var _alphaFill:Number;
+			[Bindable] private var _alphaFillLabel:String;
+			[Bindable] private var _wellKnownName:String;
+			[Bindable] private var _widthPoint:Number;
+			[Bindable] private var _strokeTitle:String = "Borda";
+			[Bindable] private var _fillTitle:String = "Preenchimento";
+			[Bindable] private var _shapeTitle:String = "Forma";
+			[Bindable] private var _isPoint:Boolean;
+			[Bindable] private var _isLine:Boolean;
+			[Bindable] private var _isPolygon:Boolean;
+			[Bindable] private var _mode:String;
+			private var _camadaPoligonosDB:WMS;		
+			private var _camadaLinhasDB:WMS;
+			private var _camadaPontosDB:WMS;
+			[Bindable] private var _camadaNova:Boolean;
+			[Bindable] private var _camadaExistente:Boolean;
+			[Bindable] private var _loadFeaturesFromDB:Boolean;
+			[Bindable] private var _defaultDrawingsLayerName:String = "vetorizar";
+			[Bindable] private var _defaultOtherDrawingsLayerName:String = "vetorizar_outros";
+			[Bindable] private var _labelCarregarDB:String = "Carregar camadas do Banco de Dados";
+			[Bindable] private var _labelSelecionarCamada:String = "Selecione uma camada de vetorização abaixo:";
+			[Bindable] private var _labelCriarCamada:String = "Crie uma nova camada de vetorização:";
+			[Bindable] private var _tipCarregarDB:String = "Carregar pontos, linhas e polígonos";
+			[Bindable] private var _tipSelecionarCamada:String = "Selecionar uma camada já existente";
+			[Bindable] private var _tipCriarCamada:String = "Crie uma nova camada";
+			private var _arrayFeaturesDB:ArrayCollection;
+			private var _dbFeaturesOutros:Vector.<Feature>;
+			private var _dbFeaturesModificados:ArrayCollection;
+			private var _dbFeaturesExcluidos:ArrayCollection;
+			private var	_lastFeat:Feature;			
+			private var _salvandoNoBD:Boolean;
+			[Bindable] private var _featsEdited:Boolean;
+			[Bindable] private var _exibirOpcoesDB:Boolean = true;
+			[Bindable] private var _strokeGroupVisible:Boolean = true;
+			[Bindable] private var _fillGroupVisible:Boolean;
+			[Bindable] private var _shapeGroupVisible:Boolean;
+			[Bindable] private var _pointsLoaded:Boolean;
+			[Bindable] private var _linesLoaded:Boolean;
+			[Bindable] private var _polygonsLoaded:Boolean;
+			[Bindable] private var _wfsGetFeature:WFSGetFeature;
+			[Bindable] private var _dbError:Boolean;
+			
+			[Bindable]
+			private var _listaLinecaps:ArrayCollection = new ArrayCollection([
+				{caps:'round', alias:'arredondado'},
+				{caps:'square', alias:'quadrado'},
+				{caps:'none', alias:'nenhum'}
+			]);
+			
+			[Bindable]
+			private var _listaPointShapes:ArrayCollection = new ArrayCollection([
+				{marker:'square', alias:'quadrado'},
+				{marker:'circle', alias:'círculo'},
+				{marker:'triangle', alias:'triângulo'}
+			]);
+			
+			
+			override protected function configure():void
+			{
+				super.configure();
+				
+				addCamadasServico();
+				
+				if (this.configData.userData)
+				{
+					this._loadFeaturesFromDB = true;
+				}
+				
+				this._dbError = false;
+				
+				this.map.addEventListener(LayerEvent.LAYER_ADDED, addCamadasPossiveis);
+				this.map.addEventListener(LayerEvent.LAYER_REMOVED, removeCamadasPossiveis);
+				
+				SiteContainer.addEventListener(ClickActivatedEvent.INFO_CLICK_ATIVADO, desativaToolBar);
+				this.map.addEventListener(ZoomBoxActivatedEvent.ZOOMBOX_SELECIONADO, desativaToolBar);
+				this.map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaToolBar);
+				
+				this.map.addEventListener(FeatureEvent.FEATURE_INSERT, this.featureAdicionado);
+				this.map.addEventListener(FeatureEvent.FEATURE_EDITED_END, this.editaFeature);
+				this.map.addEventListener(FeatureEvent.FEATURE_DELETING, this.excluiFeature);	
+				
+				this.map.addEventListener(DrawingEvent.DRAW_HANDLER_ACTIVATED, desativaWFSGetFeature);
+				this.map.addEventListener(DrawingEvent.EDIT_HANDLER_ACTIVATED, desativaWFSGetFeature);
+				this.map.addEventListener(DrawingEvent.MOVE_HANDLER_ACTIVATED, desativaWFSGetFeature);
+				this.map.addEventListener(DrawingEvent.DELETE_HANDLER_ACTIVATED, desativaWFSGetFeature);
+				this.map.addEventListener(DrawingEvent.SELECT_HANDLER_ACTIVATED, desativaWFSGetFeature);
+				this.map.addEventListener(DrawingEvent.CHANGE_ACTIVE_LAYER, desativaWFSGetFeature);
+				this.map.addEventListener(FeatureEvent.FEATURE_SELECT, desativaWFSGetFeature);
+				
+				_wfsGetFeature = new WFSGetFeature(this.map, false);
+			}
+			
+			override protected function closeWidget(event:MouseEvent):void
+			{
+				this.resetarWidget();
+				super.closeWidget(event);
+			}
+			
+			private function addCamadasServico():void
+			{
+				this._camadaPontosDB = new WMS("Pontos_csr_db", "http://siscom.ibama.gov.br/geo-srv/csr/wms", "csr:ponto", null, "image/png");
+				
+				this._camadaLinhasDB = new WMS("Linhas_csr_db", "http://siscom.ibama.gov.br/geo-srv/csr/wms", "csr:linha", null, "image/png");
+				
+				this._camadaPoligonosDB = new WMS("Poligonos_csr_db", "http://siscom.ibama.gov.br/geo-srv/csr/wms", "csr:poligono", null, "image/png");
+				
+				/* _camadaBDOutros = new VectorLayer("VW_outros");
+				_camadaBDOutros.displayInLayerManager = false;
+				_camadaBDOutros.visible = false;
+				_camadaBDOutros.editable = false;
+				_camadaBDOutros.alpha = 0.5;
+				_camadaBDOutros.projection = this.map.projection;
+				this.map.addLayer(_camadaBDOutros, true); */
+			}
+			
+			private function addCamadasPossiveis(event:LayerEvent):void
+			{
+				var item:RadioButtonItemObject;
+				var tam:int = camadasPossiveis.length;
+				var i:int;
+				
+				if ((event.layer) && (event.layer is VectorLayer) && (event.layer.displayInLayerManager))
+				{
+					if (!camadasPossiveis)
+					{
+						camadasPossiveis = new ArrayCollection();
+					}
+					
+					item = new RadioButtonItemObject();
+					item.group = grupoCamadasPossiveis;
+					item.label = event.layer.identifier;
+					
+					camadasPossiveis.addItemAt(item, 0);
+					camadasPossiveis.refresh();
+				}
+			}
+			
+			
+			private function removeCamadasPossiveis(event:LayerEvent):void
+			{
+				var item:RadioButtonItemObject;
+				var i:int;
+				
+				var camPosAux:ArrayCollection = new ArrayCollection();
+				camPosAux.source = camadasPossiveis.source;
+				
+				for (i=0; i<camadasPossiveis.length; i++)
+				{
+					item = camadasPossiveis.getItemAt(i) as RadioButtonItemObject;
+					
+					if (item.label == event.layer.identifier)
+					{
+						camadasPossiveis.removeItemAt(i);
+						camadasPossiveis.refresh();
+					}
+				}
+				
+				if (this.currentState == "vetorState")
+				{
+					if (_camadaDesenho.identifier == event.layer.identifier)
+					{
+						resetarWidget();
+					}
+				}
+			} 
+			
+			protected function onListaCamadasCreationCompleteHandler(event:FlexEvent):void
+			{
+				lstCamadas.scroller.verticalScrollBar.setStyle("skinClass", NewVerticalScrollBarSkin);
+				lstCamadas.scroller.verticalScrollBar.setStyle("chromeColor", container.getStyle("backgroundColor"));
+				
+				var auxCamadas:Vector.<Layer>;
+				var tamAux:int;
+				var i:int;
+				var item:RadioButtonItemObject;
+				
+				camadasPossiveis = new ArrayCollection();
+				
+				if (map)
+				{
+					auxCamadas = map.layers;
+					tamAux = auxCamadas.length;
+					
+					for (i=0; i<tamAux; i++)
+					{
+						if ((auxCamadas[i] is VectorLayer) && (auxCamadas[i].displayInLayerManager))
+						{
+							item = new RadioButtonItemObject();
+							item.label = auxCamadas[i].identifier;
+							item.group = grupoCamadasPossiveis;
+							camadasPossiveis.addItemAt(item, 0);
+						}
+					}
+				}
+				camadasPossiveis.refresh();
+				lstCamadas.dataProvider = camadasPossiveis;
+			}
+			
+			protected function continuarClickHandler(event:MouseEvent):void
+			{
+				var alerta:Alerta = new Alerta();
+				
+				if (_camadaNova)
+				{
+					var nomeNovaCam:String = nomeNovaCamadaDesenho.text;
+					
+					if (nomeNovaCam.length > 0)
+					{
+						if (map.getLayerByIdentifier(nomeNovaCam))
+						{							
+							alerta.exibirErro("Já existe uma camada com este nome. Escolha outro nome para a camada.");
+						}
+						else
+						{
+							_camadaDesenho = new DrawingsLayer(nomeNovaCam);
+							
+							if (_camadaDesenho)
+							{
+								_camadaDesenho.displayedName = nomeNovaCam;
+								_camadaDesenho.projection = map.projection;
+								_camadaDesenho.maxExtent = map.maxExtent;
+								
+								map.addLayer(_camadaDesenho);
+								
+								this.currentState = "vetorState";
+								
+								ativarWFSGetFeature();
+								
+								_camadaDesenho.editable = true;
+								_camadaDesenho.visible = true;
+								
+								//_camadaBDOutros.visible = true;
+								
+								ativarBtn_clickHandler(event);
+								
+								setDefaultStyle();
+								habilitarEdicao();
+							}
+							else
+							{
+								alerta.exibirErro("Não foi possível criar a camada.");
+							}
+						}
+					}
+					else
+					{
+						alerta.exibirErro("Nome inválido.");
+					}
+				}
+				else if (_camadaExistente)
+				{	
+					if (_camadaDesenhoSelecionada)
+					{
+						_camadaDesenho = map.getLayerByIdentifier(this._camadaDesenhoSelecionada) as VectorLayer;
+						
+						if (_camadaDesenho)
+						{							
+							_camadaDesenho.editable = true;
+							_camadaDesenho.visible = true;
+							
+							this.currentState = "vetorState";
+							
+							ativarWFSGetFeature();
+							
+							_camadaDesenho.editable = true;
+							_camadaDesenho.visible = true;
+							
+							//_camadaBDOutros.visible = true;
+							
+							ativarBtn_clickHandler(event);							
+							
+							setDefaultStyle();
+							habilitarEdicao();
+						}
+						else
+						{
+							alerta.exibirErro("Não foi possível carregar a camada desejada.");
+						}
+					}
+					else
+					{
+						alerta.exibirErro("Selecione uma camada.");
+					}
+				}
+				else
+				{						
+					alerta.exibirErro("Selecione uma camada.");
+				}
+				
+			} 
+			
+			private function handleFeatureData(event:GetFeatureEvent):void
+			{
+				var results:Vector.<Feature> = event.data as Vector.<Feature>;
+				var feat:Feature;
+				var ptFeat:PointFeature;
+				var lineFeat:LineStringFeature;
+				var polFeat:PolygonFeature;
+				var alerta:Alerta = new Alerta();
+				
+				//this.removeFeaturesCamadaDesenho();
+				this.removeFeaturesDB();
+				this.resetFeaturesDB();
+								
+				if (results.length > 0)
+				{
+					for each (feat in results)
+					{
+						if (feat is PointFeature)
+						{
+							ptFeat = feat as PointFeature;
+							adicionaPonto(ptFeat);
+						}
+						else if (feat is LineStringFeature)
+						{
+							lineFeat = feat as LineStringFeature;
+							adicionaLinha(lineFeat);
+						}
+						else if (feat is PolygonFeature)
+						{
+							polFeat = feat as PolygonFeature;
+							adicionaPoligono(polFeat);
+						}
+						else
+						{
+							//Alert.show("none");
+						}
+					}
+				}
+				else
+				{
+					alerta.exibirErro("Nenhum dado recebido.");
+				}
+				
+			}
+			
+			private function zoomBoundingBox(event:DrawnBoxEvent):void 
+			{
+				if ((this.map) && (event.bounds))
+				{
+					this.map.zoomToExtent(event.bounds.reprojectTo(map.projection));
+					
+					event.sprite.graphics.clear();
+					
+					this.loadFeaturesFromDB();
+				}
+			}
+			
+			protected function resetarWidget(event:MouseEvent=null):void
+			{
+				desativaToolBar();
+				
+				removeFeaturesCamadaDesenho();
+				
+				resetFeaturesDB();
+				
+				if (_wfsGetFeature)
+				{
+					_wfsGetFeature.active = false;
+				}
+				
+				this._camadaDesenho = null;
+				
+				_salvandoNoBD = false;
+				
+				_lastFeat = null;
+				
+				this.currentState = "camadaState";
+			}
+			
+			public function desativaToolBar(event:Event=null):void
+			{
+				if (drawLabel) drawLabel.onChangeActiveHandler();
+				if (drawPoint) drawPoint.onChangeActiveHandler();
+				if (drawPath) drawPath.onChangeActiveHandler();
+				if (drawPolygon) drawPolygon.onChangeActiveHandler();
+				if (drawShape) drawShape.onChangeActiveHandler();
+				if (selectFeatures) selectFeatures.onChangeActiveHandler();
+				if (deleteFeatures) deleteFeatures.onChangeActiveHandler();
+				if (editFeatures) editFeatures.onChangeActiveHandler();
+				if (moveFeatures) moveFeatures.onChangeActiveHandler();
+			}
+			
+			private function desativaWFSGetFeature(event:Event=null):void
+			{
+				if (this._wfsGetFeature && this._wfsGetFeature.active)
+				{
+					ativarBtn_clickHandler();
+				}
+			}
+			
+			private function ativarWFSGetFeature():void
+			{
+				_wfsGetFeature.active = true;
+				
+				SiteContainer.addEventListener(DrawnBoxEvent.DRAWN, zoomBoundingBox);
+				SiteContainer.addEventListener(GetFeatureEvent.GET_FEATURE_DATA, handleFeatureData);
+			}
+			
+			private function desativarWFSGetFeature():void
+			{
+				_wfsGetFeature.active = false;
+				
+				SiteContainer.removeEventListener(DrawnBoxEvent.DRAWN, zoomBoundingBox);
+				SiteContainer.removeEventListener(GetFeatureEvent.GET_FEATURE_DATA, handleFeatureData);
+			}
+			
+			protected function SalvarFeatures(event:MouseEvent):void
+			{
+				desativaToolBar();
+				
+				if ((this._camadaDesenho) && (this._camadaDesenho.features.length > 0))
+				{
+					UpdateFeaturesFromDB();
+				}
+				else
+				{
+					resetarWidget();
+				}
+				
+			}
+			
+			private function UpdateFeaturesFromDB():void
+			{
+				var j:int;
+				var long:Number;
+				var lati:Number;
+				var lonLat:Location;
+				var firstLoc:Location;
+				
+				var line:LineString;
+				var point:org.openscales.geometry.Point;
+				
+				var pol:Polygon;
+				var linear:LinearRing;
+				
+				var entrada:Object;
+				
+				
+				if ((this._dbFeaturesModificados != null) && (this._dbFeaturesModificados.length > 0))
+				{
+					//Alert.show("update: "+this._dbFeaturesModificados.length.toString());
+					
+					this._lastFeat = this._dbFeaturesModificados.getItemAt(0) as Feature;
+					
+					if (this._lastFeat.attributes.hasOwnProperty("fid"))
+					{
+						this._objID = this._lastFeat.attributes["fid"] as String;							
+						
+						if (this._lastFeat is IbamaPointFeature)
+						{					
+							_tipoGeo = "pon";
+							
+							long =(this._lastFeat as IbamaPointFeature).point.x;
+							lati = (this._lastFeat as IbamaPointFeature).point.y;
+							
+							lonLat = new Location(long, lati, map.projection);
+							lonLat = lonLat.reprojectTo(new ProjProjection("EPSG:4326"));
+							
+							long = lonLat.lon;
+							lati = lonLat.lat;
+							
+							createWayPoints(long.toString() + " " + lati.toString());
+							
+							this._lastFeatIndex = this._camadaDesenho.features.indexOf(this._lastFeat);
+							
+							entrada = new UpdateWSPointObject(this._objID, this._wayPoints, this._lastFeat.attributes.x, this._lastFeat.attributes.y, this._tipoGeo, this._lastFeatIndex);
+							
+							this.widgetManager.updatePoint((entrada as UpdateWSPointObject), this.onResultUpdateWayPoints, this.onFaultSaveWayPoints);
+							
+						}
+						else if (this._lastFeat is IbamaLineStringFeature)
+						{
+							_tipoGeo = "lin";
+							_numWayPoints = 0;
+							
+							line = (this._lastFeat as IbamaLineStringFeature).lineString;
+							
+							for (j = 0; j < line.componentsLength; j++)
+							{
+								point = line.getPointAt(j);
+								
+								lonLat = new Location(point.x, point.y, map.projection);
+								lonLat = lonLat.reprojectTo(new ProjProjection("EPSG:4326"));
+								
+								createWayPointsFromLine(lonLat.lon.toString() + " " + lonLat.lat.toString());
+							}
+							
+							this._lastFeatIndex = this._camadaDesenho.features.indexOf(this._lastFeat);
+							
+							entrada = new UpdateWSLineObject(this._objID, this._wayPoints, this._lastFeat.attributes.comprimento, this._tipoGeo, this._lastFeatIndex);
+							
+							this.widgetManager.updateLine((entrada as UpdateWSLineObject), this.onResultUpdateWayPoints, this.onFaultSaveWayPoints);
+							
+						}
+						else if (this._lastFeat is IbamaPolygonFeature)
+						{
+							_tipoGeo = "pol";
+							_numWayPoints = 0;
+							
+							pol = (this._lastFeat as IbamaPolygonFeature).polygon;
+							
+							linear = (pol.componentByIndex(0) as LinearRing);
+							
+							point = linear.getPointAt(0);
+							firstLoc = new Location(point.x, point.y, map.projection);
+							firstLoc = firstLoc.reprojectTo(new ProjProjection("EPSG:4326"));
+							
+							for (j = 0; j < linear.componentsLength; j++)
+							{
+								point = linear.getPointAt(j);
+								
+								lonLat = new Location(point.x, point.y, map.projection);
+								lonLat = lonLat.reprojectTo(new ProjProjection("EPSG:4326"));
+								
+								createWayPointsFromLine(lonLat.lon.toString() + " " + lonLat.lat.toString());
+							}
+							createWayPointsFromLine(firstLoc.lon.toString() + " " + firstLoc.lat.toString());
+							
+							
+							this._lastFeatIndex = this._camadaDesenho.features.indexOf(this._lastFeat);
+							
+							entrada = new UpdateWSPolygonObject(this._objID, this._wayPoints, this._lastFeat.attributes.area_ha, this._tipoGeo, this._lastFeatIndex);
+							
+							this.widgetManager.updatePolygon((entrada as UpdateWSPolygonObject), this.onResultUpdateWayPoints, this.onFaultSaveWayPoints);
+						}						
+					}
+					else
+					{
+						//error sem object_id
+					}
+				}
+				else
+				{
+					DeleteFeaturesFromDB();
+				}
+			}
+			
+			
+			private function DeleteFeaturesFromDB():void
+			{
+				var j:int;
+				var long:Number;
+				var lati:Number;
+				var lonLat:Location;
+				var firstLoc:Location;
+				
+				var line:LineString;
+				var point:org.openscales.geometry.Point;
+				
+				var pol:Polygon;
+				var linear:LinearRing;
+				
+				var entrada:Object;
+				
+				
+				if ((this._dbFeaturesExcluidos != null)  && (this._dbFeaturesExcluidos.length > 0))
+				{
+					//Alert.show("delete: "+this._dbFeaturesExcluidos.length.toString());
+
+					this._lastFeat = this._dbFeaturesExcluidos.getItemAt(0) as Feature;
+					
+					this._lastFeatIndex = 0;
+					
+					if (this._lastFeat.attributes.hasOwnProperty("fid"))
+					{
+						this._objID = this._lastFeat.attributes["fid"] as String;							
+						
+						if (this._lastFeat is IbamaPointFeature)
+						{					
+							_tipoGeo = "pon";
+						}
+						else if (this._lastFeat is IbamaLineStringFeature)
+						{
+							_tipoGeo = "lin";
+						}
+						else if (this._lastFeat is IbamaPolygonFeature)
+						{
+							_tipoGeo = "pol";							
+						}
+						
+						entrada = new DeleteFeatureObject(this._objID, this._tipoGeo, this._lastFeatIndex);
+						
+						this.widgetManager.deleteFeature((entrada as DeleteFeatureObject), this.onResultDeleteWayPoints, this.onFaultSaveWayPoints);
+					}
+					else
+					{  
+						//error sem fid
+					}
+				}
+				else
+				{
+					removeFeaturesDB();
+					SalvarFeaturesCamadaComum();
+				}
+			}
+			
+			
+			private function SalvarFeaturesCamadaComum():void
+			{
+				var i:int;
+				var j:int;
+				var k:int;
+				var tam:int;
+				var long:Number;
+				var lati:Number;
+				var lonLat:Location;
+				var firstLoc:Location;
+				
+				var line:LineString;
+				var point:org.openscales.geometry.Point;
+				
+				var pol:Polygon;
+				var linear:LinearRing;
+				
+				var entrada:Object;
+				
+				
+				if ((this._camadaDesenho) && (this._camadaDesenho.features.length > 0))
+				{	
+					//Alert.show("created: "+this._camadaDesenho.features.length.toString());
+
+					this._lastFeat = this._camadaDesenho.features[0];
+										
+					if ((this._lastFeat is IbamaPointFeature) && (this._lastFeat.visible))
+					{				
+						_tipoGeo = "pon";
+						
+						long = (this._lastFeat as IbamaPointFeature).point.x;
+						lati = (this._lastFeat as IbamaPointFeature).point.y;
+						
+						lonLat = new Location(long, lati, map.projection);
+						lonLat = lonLat.reprojectTo(new ProjProjection("EPSG:4326"));
+						
+						long = lonLat.lon;
+						lati = lonLat.lat;
+						
+						createWayPoints(long.toString() + " " + lati.toString());
+						
+						this._lastFeatIndex = this._camadaDesenho.features.indexOf(this._lastFeat);
+						
+						entrada = new WSPointsObject(this._wayPoints, this._lastFeat.attributes, this._lastFeat.attributes.x, this._lastFeat.attributes.y, this._tipoGeo, this._lastFeatIndex);
+						
+						this.widgetManager.saveBD(entrada, this.onResultSaveWayPoints, this.onFaultSaveWayPoints);
+						
+					}
+					else if ((this._lastFeat is IbamaLineStringFeature) && (this._lastFeat.visible))
+					{
+						_tipoGeo = "lin";
+						_numWayPoints = 0;
+						
+						line = (this._lastFeat as IbamaLineStringFeature).lineString;
+						
+						for (j = 0; j < line.componentsLength; j++)
+						{
+							point = line.getPointAt(j);
+							
+							lonLat = new Location(point.x, point.y, map.projection);
+							lonLat = lonLat.reprojectTo(new ProjProjection("EPSG:4326"));
+							createWayPointsFromLine(lonLat.lon.toString() + " " + lonLat.lat.toString());
+						}
+						
+						this._lastFeatIndex = this._camadaDesenho.features.indexOf(this._lastFeat);
+						
+						entrada = new WSLinesObject(this._wayPoints, this._lastFeat.attributes, this._lastFeat.attributes.comprimento, this._tipoGeo, this._lastFeatIndex);
+						
+						this.widgetManager.saveBD(entrada, this.onResultSaveWayPoints, this.onFaultSaveWayPoints);
+						
+					}
+					else if ((this._lastFeat is IbamaPolygonFeature) && (this._lastFeat.visible))
+					{
+						_tipoGeo = "pol";
+						_numWayPoints = 0;
+						
+						pol = (this._lastFeat as IbamaPolygonFeature).polygon;
+						
+						linear = (pol.componentByIndex(0) as LinearRing);
+						
+						point = linear.getPointAt(0);
+						firstLoc = new Location(point.x, point.y, map.projection);
+						firstLoc = firstLoc.reprojectTo(new ProjProjection("EPSG:4326"));
+						
+						for (j = 0; j < linear.componentsLength; j++)
+						{
+							point = linear.getPointAt(j);
+							
+							lonLat = new Location(point.x, point.y, map.projection);
+							lonLat = lonLat.reprojectTo(new ProjProjection("EPSG:4326"));
+							
+							createWayPointsFromLine(lonLat.lon.toString() + " " + lonLat.lat.toString());
+						}
+						createWayPointsFromLine(firstLoc.lon.toString() + " " + firstLoc.lat.toString());
+						
+						this._lastFeatIndex = this._camadaDesenho.features.indexOf(this._lastFeat);
+						
+						entrada = new WSPolygonsObject(this._wayPoints, this._lastFeat.attributes, this._lastFeat.attributes.area_ha, this._tipoGeo, this._lastFeatIndex);
+						
+						this.widgetManager.saveBD(entrada, this.onResultSaveWayPoints, this.onFaultSaveWayPoints);
+					}
+				}
+				else
+				{
+					sucessoSalvarBD();
+				}
+			}
+			
+			public function createWayPoints(s:String):void
+			{
+				_wayPoints = s;	
+			}
+			
+			public function createWayPointsFromLine(s:String):void
+			{
+				if (_numWayPoints == 0)
+				{
+					_wayPoints = s;	
+				}
+				else if (_numWayPoints > 0)
+				{
+					_wayPoints = _wayPoints + " , " + s;
+				}
+				
+				_numWayPoints++;
+			}
+			
+			private function prepareRequest(l:Layer):String
+			{
+				var req:String;
+				
+				req = (l as WMS).url + "?service=WFS&version=1.0.0&request=GetFeature&outputformat=gml3&typeName=" + (l as WMS).layers;
+				
+				return (req);
+			}
+			
+			private function loadFeaturesFromDB():void
+			{				
+				var aux:Array = new Array();
+				
+				if (loadPointsDB_checkBox.selected)
+				{
+					aux.push(_camadaPontosDB);
+				}
+				
+				if (loadLinesDB_checkBox.selected)
+				{
+					aux.push(_camadaLinhasDB);
+				}
+				
+				if (loadPolygonsDB_checkBox.selected)
+				{
+					aux.push(_camadaPoligonosDB);
+				}
+				
+				_wfsGetFeature.layersNames = aux;
+			}
+			
+			private function carregaPontosDB():void
+			{	
+				if (loadPointsDB_checkBox.selected)
+				{
+					carregaPontos();
+				}
+			}
+			
+			private function carregaLinhasDB():void
+			{	
+				if (loadLinesDB_checkBox.selected)
+				{
+					carregaLinhas();
+				}
+			}
+			
+			private function carregaPoligonosDB():void
+			{
+				if (loadPolygonsDB_checkBox.selected)
+				{
+					carregaPoligonos();
+				}
+			}
+			
+			private function handleDBLoadOptions():void
+			{	
+				var i:int;
+				
+				if (this._pointsLoaded)
+				{
+					if (loadPointsDB_checkBox.selected)
+					{
+						for (i = 0; i < _camadaDesenho.features.length; i++)
+						{
+							if (_camadaDesenho.features[i] is PointFeature)
+							{
+								_camadaDesenho.features[i].visible = true;
+							}
+						}
+					}
+					else
+					{
+						for (i = 0; i < _camadaDesenho.features.length; i++)
+						{
+							if (_camadaDesenho.features[i] is PointFeature)
+							{
+								_camadaDesenho.features[i].visible = false;
+							}
+						}
+					}
+				}
+				else
+				{
+					if (loadPointsDB_checkBox.selected)
+					{
+						carregaPontosDB();
+					}
+				}
+				
+				if (this._linesLoaded)
+				{
+					if (loadLinesDB_checkBox.selected)
+					{
+						for (i = 0; i < _camadaDesenho.features.length; i++)
+						{
+							if (_camadaDesenho.features[i] is LineStringFeature)
+							{
+								_camadaDesenho.features[i].visible = true;
+							}
+						}
+					}
+					else
+					{
+						for (i = 0; i < _camadaDesenho.features.length; i++)
+						{
+							if (_camadaDesenho.features[i] is LineStringFeature)
+							{
+								_camadaDesenho.features[i].visible = false;
+							}
+						}
+					}
+				}
+				else
+				{
+					if (loadLinesDB_checkBox.selected)
+					{
+						carregaLinhasDB();
+					}
+				}
+				
+				if (this._polygonsLoaded)
+				{
+					if (loadPolygonsDB_checkBox.selected)
+					{
+						for (i = 0; i < _camadaDesenho.features.length; i++)
+						{
+							if (_camadaDesenho.features[i] is PolygonFeature)
+							{
+								_camadaDesenho.features[i].visible = true;
+							}
+						}
+					}
+					else
+					{
+						for (i = 0; i < _camadaDesenho.features.length; i++)
+						{
+							if (_camadaDesenho.features[i] is PolygonFeature)
+							{
+								_camadaDesenho.features[i].visible = false;
+							}
+						}
+					}
+				}
+				else
+				{
+					if (loadPolygonsDB_checkBox.selected)
+					{
+						carregaPoligonosDB();
+					}
+				}
+			}
+			
+			private function removeFeaturesDB():void
+			{
+				var i:int;
+				
+				if ((this._arrayFeaturesDB) && (this._arrayFeaturesDB.length > 0))
+				{
+					this._salvandoNoBD = true;
+					
+					for (i = 0; i < this._arrayFeaturesDB.length; i++)
+					{
+						this._camadaDesenho.removeFeature(this._arrayFeaturesDB.getItemAt(i) as Feature);
+					}
+				}
+				
+				/* if ((this._camadaBDOutros) && (this._camadaBDOutros.features.length > 0))
+				{
+					this._camadaBDOutros.removeFeatures(this._camadaBDOutros.features);
+				} */
+				if ((this._dbFeaturesOutros) && (this._dbFeaturesOutros.length > 0))
+				{
+					this._camadaDesenho.removeFeatures(this._dbFeaturesOutros);
+					this._dbFeaturesOutros = null;
+				}
+			}
+			
+			private function removeFeaturesCamadaDesenho():void
+			{
+				var f:Feature;
+				
+				removeFeaturesDB();
+				
+				if (this._camadaDesenho)
+				{
+					for (var i:int = 0; i < this._camadaDesenho.features.length; i++)
+					{
+						f = this._camadaDesenho.features[i];
+						
+						if (f is IbamaPointFeature)
+						{
+							(f as IbamaPointFeature).editing = false;
+						}
+						else if (f is IbamaLineStringFeature)
+						{
+							(f as IbamaLineStringFeature).editing = false;
+						}
+						else if (f is IbamaPolygonFeature)
+						{
+							(f as IbamaPolygonFeature).editing = false;
+						}
+					}
+					
+					this._camadaDesenho.visible = false;
+				}
+			}
+			
+			private function resetFeaturesDB():void
+			{
+				_arrayFeaturesDB = null;
+				_dbFeaturesModificados = null;					
+				_dbFeaturesExcluidos = null;
+				
+				_pointsLoaded = false;
+				_linesLoaded = false;
+				_polygonsLoaded = false;
+			}
+			
+			private function carregaPontos():void
+			{
+				if (_wfsGetFeature)
+				{
+					_wfsGetFeature.layerName = _camadaPontosDB.identifier;
+				}
+			}
+			
+			private function adicionaPonto(ptFeat:PointFeature):void 
+			{
+				var local:Location;
+				
+				var newPointFeat:PointFeature;
+				var newPoint:org.openscales.geometry.Point;
+				
+				local = new Location(ptFeat.point.x, ptFeat.point.y, new ProjProjection("EPSG:4326"));
+				local = local.reprojectTo(this.map.projection);
+				
+				newPoint = new org.openscales.geometry.Point(local.lon, local.lat);
+				newPoint.projection = this.map.projection;
+	
+				if (this.configData.userData)
+				{
+					newPointFeat = new IbamaPointFeature(newPoint, null, StyleUtils.getDefaultPointStyle());
+					newPointFeat.name = ptFeat.name;
+					//newPointFeat.attributes.fid = ptFeat.name.split(".")[1];
+					newPointFeat.attributes = ptFeat.attributes;
+					
+					(newPointFeat as IbamaPointFeature).login_user = ptFeat.attributes.cpf;
+					//(newPointFeat as IbamaPointFeature).login_user = this.configData.userData.cpf;
+					
+					if (ptFeat.attributes.hasOwnProperty("cpf") && (ptFeat.attributes.cpf == this.configData.userData.cpf))
+					{					
+						(newPointFeat as IbamaPointFeature).editing = true;
+						(newPointFeat as IbamaPointFeature).logged = true;
+						
+						if (this._arrayFeaturesDB == null)
+						{
+							this._arrayFeaturesDB = new ArrayCollection();
+						}
+						this._arrayFeaturesDB.addItem(newPointFeat);					
+					}
+					else
+					{
+						newPointFeat.style = StyleUtils.getOthersPointStyle();
+						
+						if (this._dbFeaturesOutros == null)
+						{
+							this._dbFeaturesOutros = new Vector.<Feature>();
+						}
+						this._dbFeaturesOutros.push(newPointFeat);			
+					}
+					
+					_camadaDesenho.addFeature(newPointFeat);
+					newPointFeat.draw();
+					_camadaDesenho.redraw(true);
+					
+					_pointsLoaded = true;
+				}
+				else
+				{
+					
+				}
+				
+			}
+			
+			private function carregaLinhas():void
+			{
+				if (_wfsGetFeature)
+				{
+					_wfsGetFeature.layerName = _camadaLinhasDB.identifier;
+				}
+			}
+			
+			private function adicionaLinha(lineFeat:LineStringFeature):void 
+			{
+				var i:int;
+				
+				var point:org.openscales.geometry.Point;
+				var newLineFeat:LineStringFeature;
+				var newLine:LineString;
+				
+				var local:Location;
+				
+				newLine = null;
+				
+				for (i = 0; i < lineFeat.lineString.componentsLength; i++)
+				{
+					point = lineFeat.lineString.getPointAt(i);
+					
+					local = new Location(point.x, point.y, new ProjProjection("EPSG:4326"));
+					local = local.reprojectTo(map.projection);
+					
+					if (newLine == null)
+					{
+						newLine = new LineString(new <Number>[local.x, local.y]);
+						newLine.projection = this.map.projection;
+					} 
+					else
+					{
+						newLine.addPoint(local.x, local.y);
+					}
+				}
+				
+				if (this.configData.userData)
+				{
+					newLineFeat = new IbamaLineStringFeature(newLine, null, StyleUtils.getDefaultLineStyle());
+					newLineFeat.name = lineFeat.name;
+					//newLineFeat.attributes.fid = lineFeat.name.split(".")[1];
+					newLineFeat.attributes = lineFeat.attributes;
+					
+					(newLineFeat as IbamaLineStringFeature).login_user = lineFeat.attributes.cpf;
+					//(newLineFeat as IbamaLineStringFeature).login_user = this.configData.userData.cpf;
+					
+					if (lineFeat.attributes.hasOwnProperty("cpf") && (lineFeat.attributes.cpf == this.configData.userData.cpf))
+					{ 					
+						(newLineFeat as IbamaLineStringFeature).editing = true;
+						(newLineFeat as IbamaLineStringFeature).logged = true;
+						
+						if (this._arrayFeaturesDB == null)
+						{
+							this._arrayFeaturesDB = new ArrayCollection();
+						}
+						this._arrayFeaturesDB.addItem(newLineFeat);					
+					}
+					else
+					{
+						newLineFeat.style = StyleUtils.getOthersLineStyle();
+						
+						if (this._dbFeaturesOutros == null)
+						{
+							this._dbFeaturesOutros = new Vector.<Feature>();
+						}
+						this._dbFeaturesOutros.push(newLineFeat);	
+					}
+					
+					_camadaDesenho.addFeature(newLineFeat);
+					newLineFeat.draw();
+					_camadaDesenho.redraw(true);
+					
+					_linesLoaded = true;
+				}
+				else
+				{
+					
+				}
+				
+			}
+			
+			private function carregaPoligonos():void
+			{
+				if (_wfsGetFeature)
+				{
+					_wfsGetFeature.layerName = _camadaPoligonosDB.identifier;
+				}
+			}
+			
+			private function adicionaPoligono(polFeat:PolygonFeature):void 
+			{
+				var i:int;
+				var point:org.openscales.geometry.Point;
+				var lRing:LinearRing;
+				var newLRing:LinearRing;
+				var newPolygon:Polygon;
+				var newPolFeat:PolygonFeature;
+				
+				var local:Location;
+				
+				newLRing = null;
+				
+				lRing = (polFeat.polygon.componentByIndex(0) as LinearRing);
+				
+				for (i = 0; i < lRing.componentsLength; i++)
+				{
+					point = lRing.getPointAt(i);
+					
+					local = new Location(point.x, point.y, new ProjProjection("EPSG:4326"));
+					local = local.reprojectTo(map.projection);
+					
+					if (newLRing == null)
+					{
+						newLRing = new LinearRing(new <Number>[local.x, local.y]);
+						newLRing.projection = this.map.projection;
+					}
+					else
+					{
+						newLRing.addPoint(local.x, local.y);
+					}
+				}
+				
+				newPolygon = new Polygon(new <Geometry>[newLRing]);
+				newPolygon.projection = this.map.projection;
+
+				if (this.configData.userData)
+				{
+					newPolFeat = new IbamaPolygonFeature(newPolygon, null, StyleUtils.getDefaultPolygonStyle(), true);
+					newPolFeat.name = polFeat.name;
+					newPolFeat.attributes.fid = polFeat.name.split(".")[1];
+					newPolFeat.attributes = polFeat.attributes;
+					
+					(newPolFeat as IbamaPolygonFeature).login_user = polFeat.attributes.cpf;
+					//(newPolFeat as IbamaPolygonFeature).login_user = this.configData.userData.cpf;
+					
+					if ((polFeat.attributes.hasOwnProperty("cpf")) && (polFeat.attributes.cpf == this.configData.userData.cpf))
+					{					
+						(newPolFeat as IbamaPolygonFeature).editing = true;
+						(newPolFeat as IbamaPolygonFeature).logged = true;
+						
+						if (this._arrayFeaturesDB == null)
+						{
+							this._arrayFeaturesDB = new ArrayCollection();
+						}
+						this._arrayFeaturesDB.addItem(newPolFeat);					
+					}
+					else
+					{
+						newPolFeat.style = StyleUtils.getOthersPolygonStyle();
+						
+						if (this._dbFeaturesOutros == null)
+						{
+							this._dbFeaturesOutros = new Vector.<Feature>();
+						}
+						this._dbFeaturesOutros.push(newPolFeat);
+					}
+					
+					_camadaDesenho.addFeature(newPolFeat);
+					newPolFeat.draw();
+					_camadaDesenho.redraw(true);
+					
+					_polygonsLoaded = true;
+				}
+				else
+				{
+					
+				}
+			}
+			
+			private function featureAdicionado(event:FeatureEvent):void
+			{
+				var f:Feature;
+				
+				if ((this._camadaDesenho) && (event.feature.layer == this._camadaDesenho))
+				{
+					f = event.feature;
+					
+					if (f is IbamaPointFeature)
+					{
+						(f as IbamaPointFeature).editing = true;
+						(f as IbamaPointFeature).logged = true;
+					}
+					else if (f is IbamaLineStringFeature)
+					{
+						(f as IbamaLineStringFeature).editing = true;
+						(f as IbamaLineStringFeature).logged = true;
+					}
+					else if (f is IbamaPolygonFeature)
+					{
+						(f as IbamaPolygonFeature).editing = true;
+						(f as IbamaPolygonFeature).logged = true;
+					}
+					else
+					{
+						convertFeature(f);
+						_featsEdited = true;
+					}					
+				}
+			}
+			
+			public function editaFeature(event:FeatureEvent):void
+			{		
+				var featModificado:Feature;
+				
+				if (!this._dbFeaturesModificados)
+				{
+					this._dbFeaturesModificados = new ArrayCollection();
+				}
+				
+				if ((this._camadaDesenho) && (event.feature.layer == this._camadaDesenho) && 
+					(this._arrayFeaturesDB) && (this._arrayFeaturesDB.getItemIndex(event.feature) > -1))
+				{
+					featModificado = event.feature;
+					featModificado.attributes = event.feature.attributes;
+					
+					if (this._dbFeaturesModificados.getItemIndex(featModificado) == -1)
+					{
+						this._dbFeaturesModificados.addItem(featModificado);
+						_featsEdited = true;
+					}					
+				}
+			}
+			
+			public function excluiFeature(event:FeatureEvent):void
+			{	
+				var index:int;
+				var featExcluido:Feature;
+				
+				if (!this._dbFeaturesExcluidos)
+				{
+					this._dbFeaturesExcluidos = new ArrayCollection();
+				}
+				
+				if ((this._camadaDesenho) && 
+					(event.feature) && (event.feature.layer) &&
+					(event.feature.layer == this._camadaDesenho) && 
+					(this._arrayFeaturesDB) &&
+					(this._arrayFeaturesDB.getItemIndex(event.feature) > -1))
+				{
+					featExcluido = event.feature;					
+					
+					if ((this._dbFeaturesModificados) &&
+						((index = this._dbFeaturesModificados.getItemIndex(featExcluido)) > -1))
+					{
+						this._dbFeaturesModificados.removeItemAt(index);
+					}
+					
+					if ((!this._salvandoNoBD) && (this._dbFeaturesExcluidos.getItemIndex(featExcluido) == -1))
+					{
+						this._dbFeaturesExcluidos.addItem(featExcluido);
+						_featsEdited = true;
+					}
+				}
+			}
+			
+			private function setDefaultStyle():void
+			{
+				this.colorStroke = 0xff6600;
+				this.widthStroke = 3;
+				this.alphaStroke = 0.75;
+				this.linecapStroke = "round";
+				this.colorFill = 0xff3300;
+				this.alphaFill = 0.5;
+				this.wellKnownName = "circle";
+				this.widthPoint = 7;
+				
+				strokeColorPicker.selectedColor = this.colorStroke;
+				strokeTextInput.text = this.widthStroke.toString();
+				strokeOpacitySlider.value = this.alphaStroke * 100;
+				strokeDropDownList.selectedIndex = 0;
+				
+				fillColorPicker.selectedColor = this.colorFill;
+				fillOpacitySlider.value = this.alphaFill * 100;
+				
+				pointDropDownList.selectedIndex = 1;
+				pointTextInput.text = this.widthPoint.toString();
+			}
+			
+			public function getPointStyle():Style
+			{
+				var fill:SolidFill = new SolidFill(this.colorFill, this.alphaFill);
+				var stroke:Stroke = new Stroke(this.colorStroke, this.widthStroke, this.alphaStroke, this.linecapStroke);
+				var mark:WellKnownMarker = new WellKnownMarker(this.wellKnownName, fill, stroke, this.widthPoint, 1);
+				
+				var rule:Rule = new Rule();
+				rule.symbolizers.push(new PointSymbolizer(mark));
+				
+				var style:Style = new Style();
+				style.name = "New point style";
+				style.rules.push(rule);
+				
+				return style;
+			}
+			
+			public function getLineStyle():Style
+			{
+				var stroke:Stroke = new Stroke(this.colorStroke, 4, this.alphaStroke, this.linecapStroke);
+
+				var rule:Rule = new Rule();
+				rule.symbolizers.push(new LineSymbolizer(stroke));
+				
+				var style:Style = new Style();
+				style.name = "New line style";
+				style.rules.push(rule);
+				
+				return style;
+			}
+			
+			public function getPolygonStyle():Style
+			{
+				var fill:SolidFill = new SolidFill(this.colorFill, this.alphaFill);
+				var stroke:Stroke = new Stroke(this.colorStroke, this.widthStroke, this.alphaStroke, this.linecapStroke);
+				
+				var ps:PolygonSymbolizer = new PolygonSymbolizer(fill, stroke);
+				
+				var rule:Rule = new Rule();
+				rule.symbolizers.push(ps);
+				
+				var style:Style = new Style();
+				style.rules.push(rule);
+				style.name = "New polygon style";
+				
+				return style;
+			}
+			
+			public function get isPoint():Boolean
+			{
+				return this._isPoint;
+			}
+			
+			public function set isPoint(value:Boolean):void
+			{
+				if (this.isPoint != value)
+				{
+					this._isPoint = value;
+					
+					_strokeTitle = "Borda";
+					
+				}
+			}
+			
+			public function get isLine():Boolean
+			{
+				return this._isLine;
+			}
+			
+			public function set isLine(value:Boolean):void
+			{
+				if (this.isLine != value)
+				{
+					this._isLine = value;
+					
+					_strokeTitle = "Linha";
+					
+				}
+			}
+			
+			public function get isPolygon():Boolean
+			{
+				return this._isPolygon;
+			}
+			
+			public function set isPolygon(value:Boolean):void
+			{
+				if (this.isPolygon != value)
+				{
+					this._isPolygon = value;
+					
+					_strokeTitle = "Borda";
+				}
+				
+			}
+			
+			public function get mode():String
+			{
+				return this._mode;
+			}
+			public function set mode(value:String):void
+			{
+				this._mode = value;
+				
+				isPoint = false;
+				isLine = false;
+				isPolygon = false;
+				
+				switch (this._mode)
+				{
+					case "point": isPoint = true; break;
+					case "line": isLine = true; break;
+					case "polygon": isPolygon = true; break;
+					default: break;
+				}
+			}
+			
+			public function get colorStroke():uint
+			{
+				return this._colorStroke;
+			}
+			public function set colorStroke(value:uint):void
+			{
+				this._colorStroke = value;
+			}
+			
+			public function get widthStroke():Number
+			{
+				return this._widthStroke;
+			}
+			public function set widthStroke(value:Number):void
+			{
+				this._widthStroke = value;
+			}
+			
+			public function get alphaStroke():Number
+			{
+				return this._alphaStroke;
+			}
+			public function set alphaStroke(value:Number):void
+			{
+				this._alphaStroke = value;
+				this._alphaStrokeLabel = Math.round(this._alphaStroke * 100)+" %";
+			}
+			
+			public function get linecapStroke():String
+			{
+				return this._linecapStroke;
+			}
+			public function set linecapStroke(value:String):void
+			{
+				this._linecapStroke = value;
+			}
+			
+			public function get colorFill():uint
+			{
+				return this._colorFill;
+			}
+			public function set colorFill(value:uint):void
+			{
+				this._colorFill = value;
+			}
+			
+			public function get alphaFill():Number
+			{
+				return this._alphaFill;
+			}
+			public function set alphaFill(value:Number):void
+			{
+				this._alphaFill = value;
+				this._alphaFillLabel = Math.round(this._alphaFill * 100)+" %";
+			}
+			
+			public function get wellKnownName():String
+			{
+				return this._wellKnownName;
+			}
+			public function set wellKnownName(value:String):void
+			{
+				this._wellKnownName = value;
+			}
+			
+			public function get widthPoint():Number
+			{
+				return this._widthPoint;
+			}
+			public function set widthPoint(value:Number):void
+			{
+				this._widthPoint = value;
+			}
+			
+			protected function strokeColorPickerChangeHandler(event:ColorPickerEvent):void
+			{
+				this.colorStroke = event.color;
+			}
+			
+			protected function strokeWidthChangeHandler(event:TextOperationEvent):void
+			{
+				this.widthStroke = Number(strokeTextInput.text);
+			}
+			
+			protected function strokeOpacityChangeHandler(event:Event):void
+			{
+				this.alphaStroke = strokeOpacitySlider.value/100;
+			}
+			
+			protected function strokeLinecapChangeHandler(event:IndexChangeEvent):void
+			{
+				this.linecapStroke = _listaLinecaps.getItemAt(strokeDropDownList.selectedIndex).caps;
+			}
+			
+			protected function fillColorPickerChangeHandler(event:ColorPickerEvent):void
+			{
+				this.colorFill = event.color;
+			}
+			
+			protected function fillOpacityChangeHandler(event:Event):void
+			{
+				this.alphaFill = fillOpacitySlider.value/100;
+			}
+			
+			protected function pointShapeChangeHandler(event:IndexChangeEvent):void
+			{
+				this.wellKnownName = _listaPointShapes.getItemAt(pointDropDownList.selectedIndex).marker;
+			}
+			
+			protected function pointWidthChangeHandler(event:TextOperationEvent):void
+			{
+				this.widthPoint = Number(pointTextInput.text);
+			}
+			
+			
+			public function onFaultSaveWayPoints(event:FaultEvent):void
+			{
+				//Alert.show("Erro: "+event.fault.toString());
+				this.falhaSalvarBD();
+			}
+			
+			public function onResultSaveWayPoints(event:ResultEvent):void
+			{
+				var xml:XML = new XML(event.result.toString());				
+				
+				this._salvandoNoBD = true;
+				
+				if (String(xml..mensagem).toUpperCase() == "OK")
+				{
+					this._camadaDesenho.removeFeature(this._camadaDesenho.features[xml..index]);
+					
+					SalvarFeaturesCamadaComum();
+				}
+				else
+				{
+					//Alert.show("Erro: "+event.result.toString());
+					this.falhaSalvarBD();
+				}
+			}
+			
+			public function onResultUpdateWayPoints(event:ResultEvent):void
+			{								
+				var xml:XML = new XML(event.result.toString());				
+				
+				if (String(xml..mensagem).toUpperCase() == "OK")
+				{
+					this._salvandoNoBD = true;
+					
+					this._camadaDesenho.removeFeature(this._camadaDesenho.features[xml..index]);
+					
+					UpdateFeaturesFromDB();
+				}
+				else
+				{
+					this.falhaSalvarBD();
+				}
+			}
+			
+			public function onResultDeleteWayPoints(event:ResultEvent):void
+			{
+				var index:int;
+				var xml:XML = new XML(event.result.toString());	
+				
+				if (String(xml..mensagem).toUpperCase() == "OK")
+				{
+					this._dbFeaturesExcluidos.removeItemAt(0);
+					DeleteFeaturesFromDB();
+				}
+				else
+				{
+					this.falhaSalvarBD();
+				}
+			}
+			
+			private function sucessoSalvarBD():void
+			{
+				var alerta:Alerta = new Alerta();
+				alerta.exibirOK("Alterações salvas com sucesso!");
+				
+				resetarWidget();
+			}
+			
+			private function falhaSalvarBD():void
+			{
+				var alerta:Alerta = new Alerta();
+				alerta.exibirErro("Não foi possível realizar as alterações no banco de dados.\nTente novamente mais tarde.");
+				
+				this._dbError = true;
+			}
+			
+			private function get strokeGroupVisible():Boolean
+			{
+				return this._strokeGroupVisible;
+			}
+			private function set strokeGroupVisible(value:Boolean):void
+			{
+				this._strokeGroupVisible = value;
+			}
+			
+			private function get fillGroupVisible():Boolean
+			{
+				return this._fillGroupVisible;
+			}
+			private function set fillGroupVisible(value:Boolean):void
+			{
+				this._fillGroupVisible = value;
+			}
+			
+			private function get shapeGroupVisible():Boolean
+			{
+				return this._shapeGroupVisible;
+			}
+			private function set shapeGroupVisible(value:Boolean):void
+			{
+				this._shapeGroupVisible = value;
+			}
+			
+			protected function strokeGroup_clickHandler(event:MouseEvent):void
+			{
+				this.fillGroupVisible = false;
+				this.shapeGroupVisible = false;
+				this.strokeGroupVisible = true;
+			}
+			
+			protected function fillGroup_clickHandler(event:MouseEvent):void
+			{
+				this.shapeGroupVisible = false;
+				this.strokeGroupVisible = false;
+				this.fillGroupVisible = true;
+			}
+			
+			protected function shapeGroup_clickHandler(event:MouseEvent):void
+			{
+				this.fillGroupVisible = false;
+				this.strokeGroupVisible = false;
+				this.shapeGroupVisible = true;
+			}
+			
+			private function pressionaEnter(event:KeyboardEvent):void
+			{
+				if (event.charCode == 13)
+				{
+					continueBtn.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+				}
+			}
+			
+			protected function buttonArrow_clickHandler(event:MouseEvent):void
+			{
+				_exibirOpcoesDB = !_exibirOpcoesDB;
+			}
+			
+			protected function grupoCamadasPossiveis_changeHandler(event:Event):void
+			{
+				_camadaDesenhoSelecionada = grupoCamadasPossiveis.selectedValue as String;
+				slcRadioBtn.selected = true;
+				slcRadioBtn_changeHandler(event);
+			}
+			
+			protected function changeDBOptions(event:Event):void
+			{
+				dbCheckBox.selected = (loadPointsDB_checkBox.selected || loadLinesDB_checkBox.selected || loadPolygonsDB_checkBox.selected);
+			}
+			
+			protected function nomeNovaCamadaDesenho_changeHandler(event:TextOperationEvent):void
+			{
+				nvcRadioBtn.selected = true;
+				nvcRadioBtn_changeHandler(event);
+			}
+			
+			protected function nvcRadioBtn_changeHandler(event:Event):void
+			{
+				_camadaExistente = false;
+				_camadaNova = nvcRadioBtn.selected;
+			}
+			
+			protected function slcRadioBtn_changeHandler(event:Event):void
+			{
+				_camadaNova = false;
+				_camadaExistente = slcRadioBtn.selected;
+			}
+			
+			protected function dbCheckBox_changeHandler(event:Event):void
+			{
+				_loadFeaturesFromDB = dbCheckBox.selected;
+			}
+			
+			
+			protected function ativarBtn_clickHandler(event:MouseEvent=null):void
+			{
+				desativaToolBar();
+				
+				if (this._wfsGetFeature.active)
+				{
+					desativarWFSGetFeature();
+					ativarGetFeatBtn.label = "Ativar Seleção";
+				}
+				else
+				{
+					ativarWFSGetFeature();
+					ativarGetFeatBtn.label = "Desativar Seleção";
+				}				
+			}
+			
+			private function habilitarEdicao():void
+			{
+				var f:Feature;
+				
+				for each (f in this._camadaDesenho.features)
+				{
+					//f = this._camadaDesenho.features[i];
+					if (f is IbamaPointFeature)
+					{
+						(f as IbamaPointFeature).editing = true;
+					}
+					else if (f is IbamaLineStringFeature)
+					{
+						(f as IbamaLineStringFeature).editing = true;
+					}
+					else if (f is IbamaPolygonFeature)
+					{
+						(f as IbamaPolygonFeature).editing = true;
+					}
+					else
+					{
+						convertFeature(f);
+					}
+				}
+			}
+			
+			private function convertFeature(f:Feature):void
+			{
+				var newPointFeat:IbamaPointFeature;
+				var newLineFeat:IbamaLineStringFeature;
+				var newPolFeat:IbamaPolygonFeature;
+				
+				if ((f is PointFeature) && (this.configData.userData))
+				{
+					newPointFeat = new IbamaPointFeature(f.geometry as org.openscales.geometry.Point, null, f.style);
+					newPointFeat.name = f.name;
+					newPointFeat.attributes = f.attributes;
+					
+					(newPointFeat as IbamaPointFeature).login_user = this.configData.userData.cpf;
+					(newPointFeat as IbamaPointFeature).editing = true;
+					(newPointFeat as IbamaPointFeature).logged = true;
+					
+					this._salvandoNoBD = true;
+					this._camadaDesenho.removeFeature(f);
+					this._salvandoNoBD = false;
+					
+					_camadaDesenho.addFeature(newPointFeat);
+					newPointFeat.draw();
+					_camadaDesenho.redraw(true);
+					
+				}
+				else if ((f is LineStringFeature) && (this.configData.userData))
+				{
+					newLineFeat = new IbamaLineStringFeature(f.geometry as LineString, null, f.style);
+					newLineFeat.name = f.name;
+					newLineFeat.attributes = f.attributes;
+					
+					(newLineFeat as IbamaLineStringFeature).login_user = this.configData.userData.cpf;
+					(newLineFeat as IbamaLineStringFeature).editing = true;
+					(newLineFeat as IbamaLineStringFeature).logged = true;
+					
+					this._salvandoNoBD = true;
+					this._camadaDesenho.removeFeature(f);
+					this._salvandoNoBD = false;
+					
+					_camadaDesenho.addFeature(newLineFeat);
+					newLineFeat.draw();
+					_camadaDesenho.redraw(true);
+					
+				}
+				else if ((f is PolygonFeature) && (this.configData.userData))
+				{
+					newPolFeat = new IbamaPolygonFeature(f.geometry as Polygon, null, f.style);
+					newPolFeat.name = f.name;
+					newPolFeat.attributes = f.attributes;
+					
+					(newPolFeat as IbamaPolygonFeature).login_user = this.configData.userData.cpf;
+					(newPolFeat as IbamaPolygonFeature).editing = true;
+					(newPolFeat as IbamaPolygonFeature).logged = true;
+					
+					this._salvandoNoBD = true;
+					this._camadaDesenho.removeFeature(f);
+					this._salvandoNoBD = false;
+					
+					_camadaDesenho.addFeature(newPolFeat);
+					newPolFeat.draw();
+					_camadaDesenho.redraw(true);
+					
+				}
+				/* else if (f is IbamaPointFeature)
+				{
+					if ((f as IbamaPointFeature).login_user == )
+					{
+						
+					}
+				} */
+			}
+			
+			protected function cpfSearch_clickHandler(event:MouseEvent):void
+			{
+				var f:Feature;
+				
+				//if (this._camadaBDOutros)
+				if (this._dbFeaturesOutros)
+				{
+					//for (var i:int = 0; i < this._camadaBDOutros.features.length; i++)
+					for (var i:int = 0; i < this._dbFeaturesOutros.length; i++)
+					{
+						//f = this._camadaBDOutros.features[i];
+						f = this._dbFeaturesOutros[i];
+						
+						if (f.attributes.hasOwnProperty("cpf"))
+						{
+							if (f.attributes.cpf == featsCPF_textInput.text)
+							{
+								if (f is PointFeature)
+								{
+									f.style = StyleUtils.getSelectedPointStyle();
+								}
+								else if (f is LineStringFeature)
+								{
+									f.style = StyleUtils.getSelectedLineStyle();
+								}
+								else if (f is PolygonFeature)
+								{
+									f.style = StyleUtils.getSelectedPolygonStyle();
+								}
+							}
+							else
+							{
+								if (f is PointFeature)
+								{
+									f.style = StyleUtils.getOthersPointStyle();
+								}
+								else if (f is LineStringFeature)
+								{
+									f.style = StyleUtils.getOthersLineStyle();
+								}
+								else if (f is PolygonFeature)
+								{
+									f.style = StyleUtils.getOthersPolygonStyle();
+								}
+							}
+						}
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		
+		<s:Fade id="fadeIn" alphaFrom="0.0" alphaTo="1.0" duration="500" />
+		
+		<s:Fade id="fadeOut" alphaFrom="1.0" alphaTo="0.0" duration="500" />
+		
+		<s:RadioButtonGroup id="grupoCamadasPossiveis" change="grupoCamadasPossiveis_changeHandler(event)"/>
+		
+		<s:RadioButtonGroup id="grupoTipoCamada"/>
+		<!-- change="grupoCamadaDefault_changeHandler(event)"-->
+		
+	</fx:Declarations>
+	
+	
+	<solutions:states>
+		<s:State name="camadaState"/>
+		<s:State name="vetorState"/>
+		<s:State name="maximized"/>
+		<s:State name="minimized"/>
+		<s:State name="opened"/>
+		<s:State name="closed"/>
+	</solutions:states>
+	
+	
+	<s:BorderContainer id="container" styleName="widgetContentContainer" width="350" height="430">
+		<s:layout>
+			<s:VerticalLayout verticalAlign="middle" horizontalAlign="center" gap="0"
+							  paddingLeft="5" paddingTop="5" paddingBottom="10" paddingRight="5"/>
+		</s:layout>
+		
+		<s:Group id="camada" includeIn="camadaState" width="100%" height="100%" keyDown="pressionaEnter(event)" >
+			
+			<s:VGroup gap="0" width="100%" height="100%" verticalAlign="bottom" horizontalAlign="center">
+				
+				<!-- height="13%"-->
+				<s:VGroup id="camadaDBGroup" width="100%" 
+						  gap="0" verticalAlign="middle" horizontalAlign="center"
+						  paddingBottom="3" paddingLeft="5" paddingRight="5" paddingTop="7"
+						  includeInLayout="{(this.configData.userData)}" visible="{(this.configData.userData)}">
+					
+					<s:BorderContainer width="100%" styleName="estiloInvisibleContainer">
+						<s:layout>
+							<s:HorizontalLayout gap="5" verticalAlign="top" horizontalAlign="center"/>
+						</s:layout>
+						<s:CheckBox id="dbCheckBox" selected="true"
+									change="dbCheckBox_changeHandler(event)"
+									label="{_labelCarregarDB}" toolTip="{_tipCarregarDB}" 
+									styleName="estiloLabel" width="100%"/>
+						
+						<s:Button skinClass="assets.skins.ArrowDownBtnSkin" 
+								  styleName="estiloWidgetContentButton"
+								  width="20" height="15" click="buttonArrow_clickHandler(event)"/>
+					</s:BorderContainer>
+					
+					<s:VGroup id="opcoesDBGrp" width="100%" gap="3"
+							  styleName="estiloInvisibleContainer"
+							  verticalAlign="top" horizontalAlign="left" paddingLeft="20"
+							  includeInLayout="{_exibirOpcoesDB}" visible="{_exibirOpcoesDB}">
+						
+						<s:CheckBox id="loadPointsDB_checkBox" selected="true" label="Pontos" styleName="estiloLabel" change="changeDBOptions(event)"/>
+						<s:CheckBox id="loadLinesDB_checkBox" selected="true" label="Linhas" styleName="estiloLabel" change="changeDBOptions(event)"/>
+						<s:CheckBox id="loadPolygonsDB_checkBox" selected="true" label="Polígonos" styleName="estiloLabel" change="changeDBOptions(event)"/>
+						
+					</s:VGroup>
+					
+				</s:VGroup>
+				
+				<s:HGroup width="100%" bottom="0" left="0" right="0" height="5%"
+						  paddingLeft="5" verticalAlign="middle" horizontalAlign="left"
+						  includeInLayout="{(this.configData.userData)}" visible="{(this.configData.userData)}">
+					
+					<s:Line width="100%">
+						<s:stroke>
+							<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+				
+				<s:VGroup id="lstCamadasContainer" height="45%" width="100%"
+						  gap="5" verticalAlign="top" horizontalAlign="center"
+						  paddingBottom="7" paddingLeft="5" paddingRight="5" paddingTop="7">
+					
+					
+					<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="left" paddingBottom="7">
+						<s:RadioButton 	id="slcRadioBtn" change="slcRadioBtn_changeHandler(event)"
+										label="{_labelSelecionarCamada}" 
+										toolTip="{_tipSelecionarCamada}" styleName="estiloLabel"
+										group="{grupoTipoCamada}" width="100%"/>
+					</s:HGroup>
+					
+					<s:List id="lstCamadas"
+							width="100%" height="100%" 
+							maxHeight="240" styleName="estiloInvisibleContainer" 
+							itemRenderer="widgets.componentes.pontosLonLat.renderer.ListaCamadaPossiveisItemRenderer"
+							creationComplete="onListaCamadasCreationCompleteHandler(event)">
+						<s:layout>
+							<s:VerticalLayout horizontalAlign="center" gap="2"/>
+						</s:layout>
+					</s:List>
+					
+				</s:VGroup>
+				
+				<s:HGroup width="100%" bottom="0" left="0" right="0" height="5%"
+						  paddingLeft="5" verticalAlign="middle" horizontalAlign="left">
+					<s:Line width="100%">
+						<s:stroke>
+							<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+				
+				
+				<s:VGroup id="novaCamadaContainer" width="100%" height="22%"
+						  gap="10" verticalAlign="middle" horizontalAlign="center" 
+						  paddingBottom="7" paddingLeft="5" paddingRight="5" paddingTop="7">
+					
+					<s:RadioButton 	id="nvcRadioBtn"
+									change="nvcRadioBtn_changeHandler(event)"
+									label="{_labelCriarCamada}" 
+									toolTip="{_tipCriarCamada}" styleName="estiloLabel"
+									group="{grupoTipoCamada}" width="100%"/>
+					
+					<s:HGroup width="100%" verticalAlign="middle" horizontalAlign="center" paddingLeft="20" paddingRight="0">
+						<s:Label text="Nome" width="15%" textAlign="left" styleName="estiloLabel"/>
+						
+						<s:TextInput id="nomeNovaCamadaDesenho" styleName="estiloTextInput" width="85%" change="nomeNovaCamadaDesenho_changeHandler(event)"/>
+					</s:HGroup>
+				</s:VGroup>
+				
+				<s:HGroup width="100%" bottom="0" left="0" right="0" height="10%"
+						  paddingRight="5" verticalAlign="bottom" horizontalAlign="right">
+					<s:Button  id="continueBtn" label="Continuar" bottom="0" width="100"
+							   click="continuarClickHandler(event)" styleName="estiloWidgetContentMainButton" />
+				</s:HGroup>
+				
+			</s:VGroup>
+		</s:Group>
+		
+		
+		<s:VGroup id="vetor" width="100%" height="100%" 
+				  paddingLeft="5" paddingRight="5" 
+				  verticalAlign="top" horizontalAlign="center"
+				  gap="15" includeIn="vetorState">
+			
+			<s:VGroup width="100%" height="30%">
+				
+				<s:HGroup width="100%" height="5%" verticalAlign="middle" horizontalAlign="left" paddingBottom="7" paddingTop="5">
+					<s:Label text="Ferramentas" styleName="estiloLabel"/>
+					
+					<s:Line width="90%">
+						<s:stroke>
+							<s:SolidColorStroke color="{container.getStyle('backgroundColor')}" weight="1" caps="square"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+				
+				<s:VGroup width="100%" height="20%" verticalAlign="top" horizontalAlign="center">
+					
+					<s:Group height="50%" width="100%">		
+						<s:layout>
+							<s:HorizontalLayout gap="50" horizontalAlign="center" verticalAlign="middle" />
+						</s:layout>
+						
+						<desenhar:NewDrawLabel id="drawLabel" map="{this.map}" 
+											   target="{_camadaDesenho as VectorLayer}" 
+											   toolTip="Adicionar um label"/>
+						<desenhar:NewDrawPoint id="drawPoint" map="{this.map}" widget="{this}"
+											   target="{_camadaDesenho as VectorLayer}" toolTip="Adicionar um ponto" />
+						<desenhar:NewDrawPath id="drawPath" map="{this.map}" widget="{this}"
+											  target="{_camadaDesenho as VectorLayer}" toolTip="Desenhar uma reta" />
+						<desenhar:NewDrawPolygon id="drawPolygon" map="{this.map}" widget="{this}"
+												 target="{_camadaDesenho as VectorLayer}" toolTip="Desenhar um polígono" />
+						<desenhar:NewDrawShape id="drawShape" map="{this.map}" widget="{this}"
+											   target="{_camadaDesenho as VectorLayer}" toolTip="Desenhar uma forma" />
+					</s:Group>
+					
+					<s:Group height="50%" width="100%" >
+						<s:layout>
+							<s:HorizontalLayout gap="50" horizontalAlign="center" verticalAlign="middle" />
+						</s:layout>
+						
+						<desenhar:NewSelectFeatures id="selectFeatures" toolTip="Selecionar" map="{this.map}" target="{_camadaDesenho as VectorLayer}"/>
+						<desenhar:NewDeleteFeatures id="deleteFeatures" map="{this.map}" target="{_camadaDesenho as VectorLayer}" toolTip="Excluir" />
+						<desenhar:NewEditFeatures id="editFeatures" map="{this.map}" target="{_camadaDesenho as VectorLayer}" toolTip="Editar" />
+						<desenhar:NewMoveFeatures id="moveFeatures" map="{this.map}" target="{_camadaDesenho as VectorLayer}" toolTip="Mover" />
+						<!--<atributos:NewManageAttributes id="manageAttributes" map="{this.map}" target="{_camadaDesenho as VectorLayer}" toolTip="Gerenciar atributos" />-->
+						<desenhar:NewExportFeature id="exportFeature" map="{this.map}" layer="{_camadaDesenho as VectorLayer}"/>
+					</s:Group>
+					
+				</s:VGroup>
+			</s:VGroup>
+			
+			
+			<s:VGroup width="100%" height="55%">
+				
+				<s:HGroup width="100%" height="5%" verticalAlign="middle" horizontalAlign="left" paddingBottom="7">
+					<s:Label text="Estilos" styleName="estiloLabel"/>
+					
+					<s:Line width="90%">
+						<s:stroke>
+							<s:SolidColorStroke alpha="1.0" color="{container.getStyle('backgroundColor')}" weight="1" caps="round"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="10%" verticalAlign="top" horizontalAlign="center" gap="5">
+					<s:HGroup width="33%" horizontalAlign="left">
+						<s:Button id="strokeLabel" label="{_strokeTitle}" 
+								  click="strokeGroup_clickHandler(event)" width="100%"
+								  styleName="estiloWidgetContentButton"/>
+						<!--skinClass="assets.skins.TabButtonSkin"-->
+					</s:HGroup>
+					
+					<s:HGroup width="33%" horizontalAlign="center">
+						<s:Button id="fillLabel" label="{_fillTitle}" 
+								  styleName="estiloWidgetContentButton" width="100%"
+								  click="fillGroup_clickHandler(event)"/>
+					</s:HGroup>
+					
+					<s:HGroup width="33%" horizontalAlign="right">
+						<s:Button id="shapeLabel" label="{_shapeTitle}" 
+								  styleName="estiloWidgetContentButton" width="100%"
+								  click="shapeGroup_clickHandler(event)"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:BorderContainer width="100%" height="110" styleName="estiloStylingContainer" 
+								   borderColor="{container.getStyle('backgroundColor')}">
+					<s:layout>
+						<s:HorizontalLayout verticalAlign="middle" horizontalAlign="center"/>
+					</s:layout>
+					
+					<s:VGroup id="strokeGroup" width="100%"
+							  horizontalAlign="left" paddingLeft="20" 
+							  includeInLayout="{_strokeGroupVisible}" visible="{_strokeGroupVisible}"
+							  enabled="{_isPoint || _isPolygon || _isLine}">
+						
+						<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left">
+							<s:Label text="Cor:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup width="50%" horizontalAlign="left" verticalAlign="middle">
+								<s:Graphic>
+									<mx:ColorPicker id="strokeColorPicker" height="20" width="20" change="strokeColorPickerChangeHandler(event)"/>
+								</s:Graphic>
+							</s:HGroup>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left">
+							<s:Label text="Comprimento:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup horizontalAlign="left" width="50%" verticalAlign="bottom" gap="10">
+								<s:TextInput id="strokeTextInput" height="20" width="100" 
+											 change="strokeWidthChangeHandler(event)" restrict="0-9" 
+											 maxChars="3" styleName="estiloTextInput" textAlign="center"/>
+								
+								<s:Label text="px" styleName="estiloLabel"/>
+							</s:HGroup>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left">
+							<s:Label text="Opacidade:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup width="50%" horizontalAlign="left" verticalAlign="middle">
+								<s:HSlider id="strokeOpacitySlider"
+										   height="11" width="100" minimum="0" maximum="100" 
+										   snapInterval="1"
+										   change="strokeOpacityChangeHandler(event)"
+										   showDataTip="false"
+										   value="{this._alphaStroke * 100}" />
+								
+								<s:Label id="strokeOpacityLabel" text="{this._alphaStrokeLabel}" styleName="estiloLabel"/>
+							</s:HGroup>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" height="20" 
+								  enabled="{_isLine}"
+								  verticalAlign="bottom" horizontalAlign="left" >
+							<s:Label text="Bordas:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup width="50%" horizontalAlign="left" verticalAlign="middle">
+								<s:DropDownList id="strokeDropDownList" 
+												styleName="estiloDropDownList" change="strokeLinecapChangeHandler(event)"
+												labelField="alias" dataProvider="{_listaLinecaps}"/>
+							</s:HGroup>
+						</s:HGroup>
+						
+					</s:VGroup>
+					
+					<s:VGroup id="fillGroup" width="100%"
+							  horizontalAlign="left" paddingLeft="20" 
+							  includeInLayout="{_fillGroupVisible}" visible="{_fillGroupVisible}"
+							  enabled="{_isPoint || _isPolygon}">
+						
+						<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left">
+							<s:Label text="Cor:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup width="50%" horizontalAlign="left" verticalAlign="middle">
+								<s:Graphic>
+									<mx:ColorPicker id="fillColorPicker" width="20" height="20" 
+													change="fillColorPickerChangeHandler(event)"/>
+								</s:Graphic>
+							</s:HGroup>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left">
+							<s:Label text="Opacidade:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup width="50%" horizontalAlign="left" verticalAlign="middle">
+								<s:HSlider id="fillOpacitySlider"
+										   height="11" width="100" minimum="0" maximum="100" 
+										   snapInterval="1"
+										   change="fillOpacityChangeHandler(event)"
+										   showDataTip="false"
+										   value="{this._alphaFill * 100}" />
+								
+								<s:Label id="fillOpacityLabel" text="{this._alphaFillLabel}" styleName="estiloLabel"/>
+							</s:HGroup>
+						</s:HGroup>
+					</s:VGroup>
+					
+					<s:VGroup id="shapeGroup" width="100%"
+							  horizontalAlign="left" paddingLeft="20" 
+							  includeInLayout="{_shapeGroupVisible}" visible="{_shapeGroupVisible}"
+							  enabled="{_isPoint}">
+						
+						<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left">
+							<s:Label text="Tipo:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup width="50%" horizontalAlign="left" verticalAlign="middle">
+								<s:DropDownList id="pointDropDownList" styleName="estiloDropDownList" 
+												labelField="alias" dataProvider="{_listaPointShapes}" 
+												change="pointShapeChangeHandler(event)"/>
+							</s:HGroup>
+						</s:HGroup>
+						
+						<s:HGroup width="100%" height="20" verticalAlign="bottom" horizontalAlign="left">
+							<s:Label text="Tamanho:" width="50%" styleName="estiloLabel"/>
+							
+							<s:HGroup horizontalAlign="left" width="50%" verticalAlign="bottom" gap="10">
+								<s:TextInput id="pointTextInput" height="20" width="100" 
+											 change="pointWidthChangeHandler(event)" restrict="0-9"
+											 maxChars="3" styleName="estiloTextInput" textAlign="center"/>
+								
+								<s:Label text="px" styleName="estiloLabel"/>
+							</s:HGroup>
+						</s:HGroup>
+						
+					</s:VGroup>
+					
+				</s:BorderContainer>
+				
+			</s:VGroup>	
+			
+			
+			<s:VGroup width="100%" height="10%">
+				
+				<s:HGroup width="100%" height="5%" verticalAlign="middle" horizontalAlign="left" paddingTop="7">
+					<s:Label text="Controle" styleName="estiloLabel"/>
+					
+					<s:Line width="90%">
+						<s:stroke>
+							<s:SolidColorStroke alpha="1.0" color="{container.getStyle('backgroundColor')}" weight="1" caps="round"/>
+						</s:stroke>
+					</s:Line>
+				</s:HGroup>
+								
+				<s:HGroup width="100%" height="30" verticalAlign="middle" visible="{(this.configData.userData)}" >
+					<s:Label text="Selecionar itens do CPF" width="50%" styleName="estiloLabel"/>
+					
+					<s:HGroup width="50%" gap="5">
+						<s:TextInput id="featsCPF_textInput" width="85%" styleName="estiloTextInput" textAlign="center" restrict="0-9" maxChars="11"/>
+						<s:Button label="OK" styleName="estiloWidgetContentButton" 
+								  width="40" click="cpfSearch_clickHandler(event)" toolTip="Buscar"/>
+					</s:HGroup>
+				</s:HGroup>
+				
+				<s:HGroup width="100%" height="30" verticalAlign="middle">
+					<s:VGroup width="50%" height="5%"
+							  horizontalAlign="left" verticalAlign="middle"
+							  visible="{_loadFeaturesFromDB}" includeInLayout="{_loadFeaturesFromDB}">
+						<!--<s:Label text="Ativar seleção:" styleName="estiloLabel"/>-->
+						<s:Button id="ativarGetFeatBtn"
+								  width="135" height="20" 
+								  click="ativarBtn_clickHandler(event)" styleName="estiloWidgetContentButton"/>
+					</s:VGroup>
+					
+					<s:VGroup width="50%" height="5%"
+							  horizontalAlign="right" verticalAlign="middle">
+						<!--<s:Label text="Opacidade da camada:" styleName="estiloLabel"/>-->
+						<os:ChangeLayerOpacity id="layerControlOpacity"
+											   layer="{_camadaDesenho as VectorLayer}" toolTip="Alterar a opacidade desta camada" />
+					</s:VGroup>
+				</s:HGroup>
+				
+			</s:VGroup>
+			
+			<s:HGroup width="100%" height="5%" paddingTop="5" gap="0"
+					  verticalAlign="bottom" horizontalAlign="center">
+				
+				<s:HGroup width="50%" verticalAlign="bottom" horizontalAlign="left">
+					<s:Button label="Voltar" width="100"
+							  click="resetarWidget(event)"
+							  styleName="estiloWidgetContentMainButton" />
+				</s:HGroup>
+				<s:HGroup width="50%" verticalAlign="bottom" horizontalAlign="right">
+					<s:Button label="Salvar" width="100"
+							  click="SalvarFeatures(event)"
+							  styleName="estiloWidgetContentMainButton"
+							  visible="{(this.configData.userData)}" 
+							  includeInLayout="{(this.configData.userData)}"/>
+				</s:HGroup>
+			</s:HGroup>
+			
+		</s:VGroup>
+		
+	</s:BorderContainer>
+	
+</solutions:BaseWidget>

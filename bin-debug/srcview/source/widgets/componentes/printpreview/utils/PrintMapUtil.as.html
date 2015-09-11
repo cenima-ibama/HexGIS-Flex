@@ -1,0 +1,138 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>PrintMapUtil.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span>
+<span class="ActionScriptBracket/Brace">{</span>
+    <span class="ActionScriptComment">/* import com.esri.ags.Graphic;
+    import com.esri.ags.Map;
+    import com.esri.ags.geometry.Extent;
+    import com.esri.ags.geometry.MapPoint; */</span>
+    
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">widgets</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">componentes</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">printpreview</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">utils</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">ModelLocator</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">display</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Bitmap</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">display</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">BitmapData</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Point</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">flash</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">geom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Rectangle</span>;
+    <span class="ActionScriptReserved">import</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">openscales</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">core</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">Map</span>;
+    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">PrintMapUtil</span>
+    <span class="ActionScriptBracket/Brace">{</span>    
+        <span class="ActionScriptBracket/Brace">[</span><span class="ActionScriptMetadata">Bindable</span><span class="ActionScriptBracket/Brace">]</span><span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">_model</span>:<span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ModelLocator</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">getInstance</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptReserved">private</span> <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">map</span>:<span class="ActionScriptDefault_Text">Map</span>;
+        
+        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">PrintMapUtil</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">//map = Map(ObjectUtil.copy(_model.map));
+</span>            <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">mapclone</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">map</span>;
+        <span class="ActionScriptBracket/Brace">}</span>
+        
+        <span class="ActionScriptComment">// Draw the maps print extent ractangle as a graphic on the map, based on
+</span>        <span class="ActionScriptComment">// an image controls width and height
+</span>        <span class="ActionScriptComment">/*         public static function trimmedExtent(map:Map, containerWidth:Number, containerHeight:Number):Graphic
+        {
+        var rectangle:Rectangle = clipRectangle(map, containerWidth, containerHeight);
+        var minMapPoint:MapPoint = map.toMap(new Point(rectangle.x,rectangle.y));
+        var maxMapPoint:MapPoint = map.toMap(new Point(rectangle.x + rectangle.width,
+        rectangle.y + rectangle.height));
+        var extent:Extent = new Extent(minMapPoint.x,minMapPoint.y,maxMapPoint.x,maxMapPoint.y)
+        
+        return new Graphic(extent);
+        } // end trimmedExtent */</span>
+        
+        <span class="ActionScriptComment">// Get the maps print extent image as a BitMap. Used for the source of an image control.
+</span>        <span class="ActionScriptComment">// Image controls width and height are paramaters of this function.
+</span>        <span class="ActionScriptReserved">public</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">trimmedMap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bm</span>:<span class="ActionScriptDefault_Text">Bitmap</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">containerWidth</span>:<span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">containerHeight</span>:<span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">Bitmap</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">rectangle</span>:<span class="ActionScriptDefault_Text">Rectangle</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">clipRectangle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bm</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">containerWidth</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">containerHeight</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">//get the map as bitmapdata so the part we want can be copied and clipped
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">myBitmapData</span>:<span class="ActionScriptDefault_Text">BitmapData</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">BitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span><span class="ActionScriptBracket/Brace">)</span>;
+            <span class="ActionScriptDefault_Text">myBitmapData</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">draw</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bm</span><span class="ActionScriptOperator">,</span><span class="ActionScriptReserved">null</span><span class="ActionScriptOperator">,</span><span class="ActionScriptReserved">null</span><span class="ActionScriptOperator">,</span><span class="ActionScriptReserved">null</span><span class="ActionScriptOperator">,</span><span class="ActionScriptDefault_Text">rectangle</span><span class="ActionScriptOperator">,</span><span class="ActionScriptReserved">true</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptComment">// create a new cropped image to fit the map print area
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">newBitmapData</span>:<span class="ActionScriptDefault_Text">BitmapData</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">BitmapData</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">rectangle</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">rectangle</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptDefault_Text">newBitmapData</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">copyPixels</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">myBitmapData</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">rectangle</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Point</span><span class="ActionScriptBracket/Brace">(</span>0<span class="ActionScriptOperator">,</span> 0<span class="ActionScriptBracket/Brace">)</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Bitmap</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">newBitmapData</span><span class="ActionScriptBracket/Brace">)</span>;
+        <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptComment">// end trimmedMap
+</span>        
+        <span class="ActionScriptComment">// Get the print Extent Rectangle based on a container's width and height
+</span>        <span class="ActionScriptReserved">private</span> <span class="ActionScriptfunction">function</span> <span class="ActionScriptDefault_Text">clipRectangle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">bm</span>:<span class="ActionScriptDefault_Text">Bitmap</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">containerWidth</span>:<span class="ActionScriptDefault_Text">Number</span><span class="ActionScriptOperator">,</span> <span class="ActionScriptDefault_Text">containerHeight</span>:<span class="ActionScriptDefault_Text">Number</span> <span class="ActionScriptBracket/Brace">)</span>:<span class="ActionScriptDefault_Text">Rectangle</span>
+        <span class="ActionScriptBracket/Brace">{</span>
+            <span class="ActionScriptComment">// check if the container is portrait or Landscape
+</span>            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">orientation</span>:<span class="ActionScriptDefault_Text">String</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">"PORTRAIT"</span>;
+            <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">containerWidth</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">containerHeight</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptDefault_Text">orientation</span><span class="ActionScriptOperator">=</span><span class="ActionScriptString">"LANDSCAPE"</span>;
+            <span class="ActionScriptBracket/Brace">}</span>
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ratioWidth</span>:<span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ratioHeight</span>:<span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">clipRect</span>:<span class="ActionScriptDefault_Text">Rectangle</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptReserved">new</span> <span class="ActionScriptDefault_Text">Rectangle</span><span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptBracket/Brace">)</span>;
+            
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">ratio</span>:<span class="ActionScriptDefault_Text">Number</span>;
+            <span class="ActionScriptvar">var</span> <span class="ActionScriptDefault_Text">mapRatio</span>:<span class="ActionScriptDefault_Text">Number</span>;
+            
+            <span class="ActionScriptReserved">switch</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">orientation</span><span class="ActionScriptBracket/Brace">)</span>
+            <span class="ActionScriptBracket/Brace">{</span>
+                <span class="ActionScriptReserved">case</span> <span class="ActionScriptString">"PORTRAIT"</span>:
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">ratio</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">containerWidth</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">containerHeight</span>;
+                    <span class="ActionScriptDefault_Text">mapRatio</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span>;
+                    <span class="ActionScriptComment">//check the maps width and height to get the cropped size
+</span>                    <span class="ActionScriptComment">//if (map.width &gt; map.height)
+</span>                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mapRatio</span> <span class="ActionScriptOperator">&gt;</span> <span class="ActionScriptDefault_Text">ratio</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">ratioHeight</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span>;
+                        <span class="ActionScriptDefault_Text">ratioWidth</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">ratio</span>;
+                        <span class="ActionScriptComment">//centre the clip rectangle
+</span>                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">ratioWidth</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">/</span> 2;
+                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> 0;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptReserved">else</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">ratioWidth</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span>;
+                        <span class="ActionScriptDefault_Text">ratioHeight</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">ratio</span> ;
+                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> 0;
+                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">ratioHeight</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">/</span> 2;
+                    <span class="ActionScriptBracket/Brace">}</span> 
+                    <span class="ActionScriptReserved">break</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+                <span class="ActionScriptReserved">case</span> <span class="ActionScriptString">"LANDSCAPE"</span>:
+                <span class="ActionScriptBracket/Brace">{</span>
+                    <span class="ActionScriptDefault_Text">ratio</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">containerHeight</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">containerWidth</span>;
+                    <span class="ActionScriptDefault_Text">mapRatio</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span>;
+                    <span class="ActionScriptComment">//check the maps width and height to get the ratio
+</span>                    <span class="ActionScriptReserved">if</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">mapRatio</span> <span class="ActionScriptOperator">&lt;</span> <span class="ActionScriptDefault_Text">ratio</span><span class="ActionScriptBracket/Brace">)</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">ratioHeight</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span>;
+                        <span class="ActionScriptDefault_Text">ratioWidth</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">/</span> <span class="ActionScriptDefault_Text">ratio</span>;
+                        <span class="ActionScriptComment">//centre the clip rectangle
+</span>                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">ratioWidth</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">/</span> 2;
+                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> 0;
+                    <span class="ActionScriptBracket/Brace">}</span>
+                    <span class="ActionScriptReserved">else</span>
+                    <span class="ActionScriptBracket/Brace">{</span>
+                        <span class="ActionScriptDefault_Text">ratioWidth</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span>;
+                        <span class="ActionScriptDefault_Text">ratioHeight</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span> <span class="ActionScriptOperator">*</span> <span class="ActionScriptDefault_Text">ratio</span>;
+                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">x</span> <span class="ActionScriptOperator">=</span> 0;
+                        <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">y</span> <span class="ActionScriptOperator">=</span> <span class="ActionScriptBracket/Brace">(</span><span class="ActionScriptDefault_Text">_model</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">map</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span> <span class="ActionScriptOperator">-</span> <span class="ActionScriptDefault_Text">ratioHeight</span><span class="ActionScriptBracket/Brace">)</span> <span class="ActionScriptOperator">/</span> 2;
+                    <span class="ActionScriptBracket/Brace">}</span> 
+                    <span class="ActionScriptReserved">break</span>;
+                <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptBracket/Brace">}</span>
+            <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">width</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ratioWidth</span>;
+            <span class="ActionScriptDefault_Text">clipRect</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">height</span><span class="ActionScriptOperator">=</span><span class="ActionScriptDefault_Text">ratioHeight</span>;
+            
+            <span class="ActionScriptReserved">return</span> <span class="ActionScriptDefault_Text">clipRect</span>;
+        <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptComment">// end clipRectangle
+</span>    <span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptComment">// end class PrintMapUtil
+</span>    
+<span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptComment">// end package</span></pre></body>
+</html>

@@ -1,0 +1,110 @@
+<!-- saved from url=(0014)about:internet -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>ShpType.as</title>
+<link rel="stylesheet" type="text/css" href="../../../../SourceStyles.css"/>
+</head>
+
+<body><pre><span class="ActionScriptComment">/* ************************************************************************ */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/*  SHP (ESRI ShapeFile Reader)                                                */</span>
+<span class="ActionScriptComment">/*  Copyright (c)2007 Edwin van Rijkom                                        */</span>
+<span class="ActionScriptComment">/*  http://www.vanrijkom.org                                                */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* This library is free software; you can redistribute it and/or            */</span>
+<span class="ActionScriptComment">/* modify it under the terms of the GNU Lesser General Public                */</span>
+<span class="ActionScriptComment">/* License as published by the Free Software Foundation; either                */</span>
+<span class="ActionScriptComment">/* version 2.1 of the License, or (at your option) any later version.        */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* This library is distributed in the hope that it will be useful,            */</span>
+<span class="ActionScriptComment">/* but WITHOUT ANY WARRANTY; without even the implied warranty of            */</span>
+<span class="ActionScriptComment">/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU        */</span>
+<span class="ActionScriptComment">/* Lesser General Public License or the LICENSE file for more details.        */</span>
+<span class="ActionScriptComment">/*                                                                            */</span>
+<span class="ActionScriptComment">/* ************************************************************************ */</span>
+
+<span class="ActionScriptpackage">package</span> <span class="ActionScriptDefault_Text">org</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">vanrijkom</span><span class="ActionScriptOperator">.</span><span class="ActionScriptDefault_Text">shp</span>
+<span class="ActionScriptBracket/Brace">{</span>
+
+<span class="ActionScriptASDoc">/**
+ * The ShpType class is a place holder for the ESRI Shapefile defined
+ * shape types.
+ * @author Edwin van Rijkom
+ * 
+ */</span>    
+<span class="ActionScriptReserved">public</span> <span class="ActionScriptclass">class</span> <span class="ActionScriptDefault_Text">ShpType</span>
+<span class="ActionScriptBracket/Brace">{</span>    
+    <span class="ActionScriptASDoc">/**
+     * Unknow Shape Type (for internal use) 
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_UNKNOWN</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> -1;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile Null Shape shape type.
+     */</span>    
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_NULL</span>            : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 0;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile Point Shape shape type.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POINT</span>            : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 1;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile PolyLine Shape shape type.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POLYLINE</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 3;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile Polygon Shape shape type.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POLYGON</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 5;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile Multipoint Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_MULTIPOINT</span>    : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 8;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile PointZ Shape shape type.
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POINTZ</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 11;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile PolylineZ Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POLYLINEZ</span>     : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 13;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile PolygonZ Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POLYGONZ</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 15;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile MultipointZ Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_MULTIPOINTZ</span>    : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 18;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile PointM Shape shape type
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POINTM</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 21;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile PolyLineM Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POLYLINEM</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 23;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile PolygonM Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_POLYGONM</span>        : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 25;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile MultiPointM Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_MULTIPOINTM</span>    : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 28;
+    <span class="ActionScriptASDoc">/**
+     * ESRI Shapefile MultiPatch Shape shape type
+     * (currently unsupported).
+     */</span>
+    <span class="ActionScriptReserved">public</span> <span class="ActionScriptReserved">static</span> <span class="ActionScriptReserved">const</span> <span class="ActionScriptDefault_Text">SHAPE_MULTIPATCH</span>    : <span class="ActionScriptDefault_Text">int</span> <span class="ActionScriptOperator">=</span> 31;
+<span class="ActionScriptBracket/Brace">}</span>
+
+<span class="ActionScriptBracket/Brace">}</span> <span class="ActionScriptComment">// package</span></pre></body>
+</html>

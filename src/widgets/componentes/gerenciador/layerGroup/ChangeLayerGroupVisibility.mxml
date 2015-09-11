@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns="org.openscales.fx.control.layer.*"
+		 xmlns:os="org.openscales.fx.control.*" 
+		 >
+	
+	<fx:Script>
+		<![CDATA[
+			import org.openscales.core.events.I18NEvent;
+			import org.openscales.core.events.LayerEvent;
+			import org.openscales.core.events.MapEvent;
+			import org.openscales.core.i18n.Catalog;
+			import org.openscales.core.layer.Layer;
+			
+			import widgets.componentes.layerGroup.LayerGroup;
+			
+			/**
+			 * Tooltip^for change visibility button
+			 */
+			[Bindable]
+			public var tooltipChangeVisibility:String =  Catalog.getLocalizationForKey('layercontrol.changevisibility');
+			
+			private var _layerGroup:LayerGroup;
+			
+			
+			public function get layerGroup():LayerGroup
+			{
+				return _layerGroup;
+			}
+			
+			/**
+			 * @inherit
+			 * Set the first value of the checkbox
+			 */
+			public function set layerGroup(value:LayerGroup):void
+			{
+				if(value)
+				{
+					this._layerGroup = value;
+
+					this.layerGroupSwitcherCheckBox.selected = this._layerGroup.visible;					
+				}
+			}
+					
+			/**
+			 * @inherit
+			 */
+			public function onMapLanguageChange(event:I18NEvent):void 
+			{
+				this.tooltipChangeVisibility = Catalog.getLocalizationForKey('layercontrol.changevisibility');	
+			}
+			
+			/**
+			 * Change the layer visibility
+			 * @param event Change event
+			 */
+			public function changeLayerGroupVisibility(event:MouseEvent):void
+			{
+				if (layerGroupSwitcherCheckBox.selected)
+				{
+					this._layerGroup.visible = true;
+				}
+				else
+				{
+					this._layerGroup.visible = false;
+				}
+			} 
+		]]>
+	</fx:Script>
+	
+	
+	<s:CheckBox id="layerGroupSwitcherCheckBox" 
+				click="changeLayerGroupVisibility(event)" toolTip="{this.tooltipChangeVisibility}" />
+</s:Group>
